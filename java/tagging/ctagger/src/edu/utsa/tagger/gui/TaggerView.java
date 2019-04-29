@@ -7,6 +7,8 @@ import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.MouseInfo;
 import java.awt.Point;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.MouseAdapter;
@@ -32,6 +34,7 @@ import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
@@ -60,6 +63,7 @@ import edu.utsa.tagger.guisupport.VerticalSplitLayout;
 import edu.utsa.tagger.guisupport.XButton;
 import edu.utsa.tagger.guisupport.XScrollTextBox;
 import edu.utsa.tagger.guisupport.XTextBox;
+import edu.utsa.tagger.guisupport.ConstraintContainer.Unit;
 
 /**
  * This class represents the main Tagger GUI view.
@@ -330,6 +334,7 @@ public class TaggerView extends ConstraintContainer {
 	private XButton proceed = createMenuButton("proceed");
 	private XButton redo = new HistoryButton("redo", false);
 	private XButton save = createMenuButton("save");
+	private JScrollPane searchResultsScrollPane;
 	private JPanel searchResults = new JPanel() {
 		@Override
 		protected void paintComponent(Graphics g) {
@@ -728,14 +733,20 @@ public class TaggerView extends ConstraintContainer {
 
 			@Override
 			public void focusLost(FocusEvent e) {
-				searchResults.setVisible(false);
+				searchResultsScrollPane.setVisible(false);
 			}
 		});
 
 		searchResults.setBackground(Color.WHITE);
 		searchResults.setBorder(new DropShadowBorder());
-		searchResults.setLayout(new ListLayout(1, 1, 0, 1));
-
+		searchResults.setLayout(new ListLayout(0, 0, 0, 0));
+		searchResultsScrollPane = new JScrollPane(searchResults);
+		searchResultsScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		searchResultsScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		searchResultsScrollPane.getVerticalScrollBar().setUnitIncrement(20);
+		searchResultsScrollPane.getHorizontalScrollBar().setUnitIncrement(20);
+		searchResultsScrollPane.setVisible(false);
+		
 		JLayeredPane splitContainer = new JLayeredPane();
 		VerticalSplitLayout splitLayout = new VerticalSplitLayout(splitContainer, splitPaneLeft, splitPaneRight, 400);
 		splitContainer.setLayout(splitLayout);
@@ -768,9 +779,9 @@ public class TaggerView extends ConstraintContainer {
 
 		splitPaneRight.add(tagsTitle, new Constraint("top:0 height:50 left:5 width:100"));
 		splitPaneRight.add(searchTags, new Constraint("top:12 height:26 left:90 right:100"));
-		splitPaneRight.add(searchResults, new Constraint("top:40 height:0 left:90 right:0"));
+		splitPaneRight.add(searchResultsScrollPane, new Constraint("top:40 bottom:1 left:90 right:0"));
 		splitPaneRight.add(addTag, new Constraint("top:12 height:26 right:0 width:80"));
-		splitPaneRight.setLayer(searchResults, 1);
+		splitPaneRight.setLayer(searchResultsScrollPane, 1);
 		splitPaneRight.add(collapseAll, new Constraint("top:52 height:30 left:85 width:100"));
 		splitPaneRight.add(expandAll, new Constraint("top:52 height:30 left:215 width:100"));
 		splitPaneRight.add(collapseLabel, new Constraint("top:50 height:30 left:315 width:115"));
@@ -1666,16 +1677,17 @@ public class TaggerView extends ConstraintContainer {
 		searchResults.removeAll();
 		Set<GuiTagModel> tagModels = tagger.getSearchTags(searchTags.getJTextArea().getText());
 		if (tagModels == null || tagModels.isEmpty()) {
-			searchResults.setVisible(false);
+			searchResultsScrollPane.setVisible(false);
 			return;
 		}
 		for (GuiTagModel tag : tagModels) {
 			searchResults.add(tag.getTagSearchView());
 		}
 		searchResults.revalidate();
-		splitPaneRight.setTopHeight(searchResults, 40.0, Unit.PX,
+		splitPaneRight.setTopHeight(searchResultsScrollPane, 40.0, Unit.PX,
 				searchResults.getPreferredSize().getHeight() / ConstraintLayout.scale, Unit.PX);
-		searchResults.setVisible(true);
+		splitPaneRight.setTopBottom(searchResultsScrollPane,40.0, Unit.PX, 1.0, Unit.PX);
+		searchResultsScrollPane.setVisible(true);
 	}
 
 	/**
@@ -1684,7 +1696,7 @@ public class TaggerView extends ConstraintContainer {
 	 */
 	public void updateTags() {
 		tagger.updateTagHighlights(true);
-		searchResults.setVisible(false);
+		searchResultsScrollPane.setVisible(false);
 		tagsPanel.removeAll();
 		String lastVisibleTagPath = null;
 		for (AbstractTagModel tagModel : tagger.getTagSet()) {
