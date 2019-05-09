@@ -7,6 +7,7 @@ import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.MouseInfo;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.FocusEvent;
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.swing.Action;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
@@ -737,6 +739,17 @@ public class TaggerView extends ConstraintContainer {
 			}
 		});
 
+		
+//		Action pressedDownSearchResults = new AbstractAction() {
+//			public void actionPerformed(ActionEvent e) {
+//				
+//			}
+//		}
+//		searchResults.getInputMap().put(KeyStroke.getKeyStroke("F2"),
+//                "doSomething");
+//		searchResults.getActionMap().put("doSome"
+//				+ "thing",
+//				pressedDownSearchResults);
 		searchResults.setBackground(Color.WHITE);
 		searchResults.setBorder(new DropShadowBorder());
 		searchResults.setLayout(new ListLayout(0, 0, 0, 0));
