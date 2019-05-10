@@ -361,7 +361,7 @@ public class TaggerView extends ConstraintContainer {
 	private Tagger tagger;
 
 	private JPanel tagsPanel = new JPanel();
-	private JPanel eventsPanel = new JPanel();
+	private JLayeredPane eventsPanel = new JLayeredPane();
 	private boolean startOver;
 	private boolean fMapLoaded;
 	private String fMapPath;
@@ -684,6 +684,7 @@ public class TaggerView extends ConstraintContainer {
 		zoomPercent.setForeground(FontsAndColors.GREY_DARK);
 
 		eventsScrollPane.setLayout(new ScrollLayout(eventsScrollPane, eventsPanel));
+		eventsPanel.setOpaque(true);
 		eventsPanel.setBackground(Color.WHITE);
 		tagsPanel.setBackground(Color.WHITE);
 		tagsScrollLayout = new ScrollLayout(tagsScrollPane, tagsPanel);
@@ -1645,6 +1646,9 @@ public class TaggerView extends ConstraintContainer {
 					}
 				}
 			}
+			Constraint constraint = new Constraint("top:" + top + " height:26 left:30 right:0"); //Constraint for SearchView
+			eventsPanel.add(new SearchView(eventsPanel,tagger,constraint),constraint);
+			top += 27;
 		}
 		eventsPanel.validate();
 		eventsPanel.repaint();
