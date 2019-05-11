@@ -18,6 +18,7 @@ import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -196,6 +197,7 @@ public class SearchView extends JTextArea{
 			public void keyPressed(KeyEvent event) {
 				if (isFocusOwner()) { // if search textfield is focus owner
 					TagSearchView searchResult = null;
+					JScrollBar vertical = searchResultsScrollPane.getVerticalScrollBar();
 					switch (event.getKeyCode()) {
 						case KeyEvent.VK_DOWN:
 							if (focusedResult > -1) { 
@@ -203,12 +205,14 @@ public class SearchView extends JTextArea{
 								searchResult.setHover(false);
 							}
 							if (focusedResult == searchResults.getComponentCount()-1)
-								focusedResult = 0;
+								focusedResult = searchResults.getComponentCount()-1;
 							else
 								focusedResult++;
 							searchResult = ((TagSearchView)searchResults.getComponent(focusedResult));  // new component
 							searchResult.setHover(true);
 							
+							if (focusedResult > 0)
+								vertical.setValue(vertical.getValue()+vertical.getUnitIncrement());
 							searchResults.repaint();
 							break;
 						case KeyEvent.VK_UP:
@@ -217,9 +221,11 @@ public class SearchView extends JTextArea{
 								searchResult.setHover(false);
 							}
 							if (focusedResult <= 0) // first key press or reach beginning
-								focusedResult = searchResults.getComponentCount()-1;
-							else
+								focusedResult = 0;
+							else {
+								vertical.setValue(vertical.getValue()-vertical.getUnitIncrement());
 								focusedResult--;
+							}
 							searchResult = ((TagSearchView)searchResults.getComponent(focusedResult));  // new component
 							searchResult.setHover(true);
 							
@@ -229,13 +235,11 @@ public class SearchView extends JTextArea{
 							if (focusedResult > -1 && focusedResult < searchResults.getComponentCount()) {
 								searchResult = (TagSearchView)searchResults.getComponent(focusedResult);
 								searchResult.setPressed(true);
-								
+//								appView.updateEventsPanel();
 								appView.selectedGroups.clear();
-								appView.selectedGroups.add(taggedEvent.getEventGroupId());
-								appView.updateEventsPanel();
-								appView.scrollToEvent(taggedEvent); // doesn't really work --> Fix later
-								
+								appView.selectedGroups.add(taggedEvent.getEventGroupId());								
 								searchResult.getModel().requestToggleTag();
+								appView.scrollToEvent(taggedEvent); // doesn't really work --> Fix later
 							}
 							break;
 					}
