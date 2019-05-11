@@ -4,12 +4,18 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.event.ActionEvent;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Set;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.ActionMap;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -19,6 +25,7 @@ import javax.swing.KeyStroke;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import edu.utsa.tagger.TaggedEvent;
 import edu.utsa.tagger.Tagger;
 import edu.utsa.tagger.guisupport.Constraint;
 import edu.utsa.tagger.guisupport.ConstraintContainer;
@@ -39,8 +46,10 @@ import edu.utsa.tagger.guisupport.ConstraintContainer.Unit;
 public class SearchView extends JTextArea{
 	/* Fields */
 	private JLayeredPane container;
-	private Tagger tagger;
+	private TaggedEvent taggedEvent; // Event associated with this search 
 	private Constraint constraint;
+	private TaggerView appView;
+	private Tagger tagger;
 	
 	private JPanel searchResults = new JPanel() {
 		@Override
@@ -55,14 +64,35 @@ public class SearchView extends JTextArea{
 	
 	private JScrollPane searchResultsScrollPane; // searchResults is put in a scrollable panel
 	
-	/* Constructor */
-	public SearchView(JLayeredPane container, Tagger tagger, Constraint constraint) {
+	private int focusedResult = -1;
+	
+	
+	/**
+	 *  Constructor
+	 */
+	public SearchView(TaggerView appView, JLayeredPane container, TaggedEvent taggedEvent, Tagger tagger, Constraint constraint) {
 		super("search for tags ...");
+		this.appView = appView;
 		this.container = container;
+		this.taggedEvent = taggedEvent;
 		this.tagger = tagger;
 		this.constraint = constraint;
 		
 		/* Initialize GUI component */
+		init();
+		
+		/* Action listener */
+		setActionListener();
+		
+		/* Set up key bindings */
+		setKeyListener();
+
+	}
+	
+	/**
+	 * Initialize GUI component
+	 */
+	private void init() {
 		this.getDocument().putProperty("filterNewlines", Boolean.TRUE);
 //		this.getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "doNothing");
 //		this.getInputMap().put(KeyStroke.getKeyStroke("TAB"), "doNothing");
@@ -74,7 +104,7 @@ public class SearchView extends JTextArea{
 		
 		searchResultsScrollPane = new JScrollPane(searchResults);
 		searchResultsScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-		searchResultsScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		searchResultsScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		searchResultsScrollPane.getVerticalScrollBar().setUnitIncrement(20);
 		searchResultsScrollPane.getHorizontalScrollBar().setUnitIncrement(20);
 		searchResultsScrollPane.setVisible(false);
@@ -85,8 +115,12 @@ public class SearchView extends JTextArea{
 		// We take in the constraint created for the search textfield to add in the search result below the search text
 		this.container.add(searchResultsScrollPane,new Constraint("top:" + (Math.round(this.constraint.getTop())+27) + " height:300 left:" +
 							Math.round(this.constraint.getLeft()) + " right:0"));
-		
-		/* Action listener */
+	}
+	
+	/**
+	 * Set action listener
+	 */
+	private void setActionListener() {
 		this.getDocument().addDocumentListener(new DocumentListener() {
 			@Override
 			public void changedUpdate(DocumentEvent e) {
@@ -113,9 +147,7 @@ public class SearchView extends JTextArea{
 				searchResultsScrollPane.setVisible(false);
 			}
 		});
-
 	}
-	
 
 	/* Action methods */
 	/**
@@ -124,6 +156,7 @@ public class SearchView extends JTextArea{
 	 */
 	private void updateSearch() {
 		searchResults.removeAll();
+		focusedResult = -1;
 		Set<GuiTagModel> tagModels = tagger.getSearchTags(getText());
 		if (tagModels == null || tagModels.isEmpty()) {
 			searchResultsScrollPane.setVisible(false);
@@ -133,6 +166,7 @@ public class SearchView extends JTextArea{
 			searchResults.add(tag.getTagSearchView());
 		}
 		searchResults.revalidate();
+		searchResults.repaint();
 		searchResultsScrollPane.setVisible(true);
 	}
 
@@ -145,5 +179,76 @@ public class SearchView extends JTextArea{
 	
 	private void selectAllText() {
 		this.selectAll();
+	}
+
+
+	/**
+	 * Set key binding for components
+	 */
+	private void setKeyListener() {
+		KeyListener keyListener = new KeyListener() {
+			@Override
+			public void keyTyped(KeyEvent event) {
+				
+			}
+
+			@Override
+			public void keyPressed(KeyEvent event) {
+				if (isFocusOwner()) { // if search textfield is focus owner
+					TagSearchView searchResult = null;
+					switch (event.getKeyCode()) {
+						case KeyEvent.VK_DOWN:
+							if (focusedResult > -1) { 
+								searchResult = ((TagSearchView)searchResults.getComponent(focusedResult));  // old component
+								searchResult.setHover(false);
+							}
+							if (focusedResult == searchResults.getComponentCount()-1)
+								focusedResult = 0;
+							else
+								focusedResult++;
+							searchResult = ((TagSearchView)searchResults.getComponent(focusedResult));  // new component
+							searchResult.setHover(true);
+							
+							searchResults.repaint();
+							break;
+						case KeyEvent.VK_UP:
+							if (focusedResult > -1) {
+								searchResult = ((TagSearchView)searchResults.getComponent(focusedResult));  // old component
+								searchResult.setHover(false);
+							}
+							if (focusedResult <= 0) // first key press or reach beginning
+								focusedResult = searchResults.getComponentCount()-1;
+							else
+								focusedResult--;
+							searchResult = ((TagSearchView)searchResults.getComponent(focusedResult));  // new component
+							searchResult.setHover(true);
+							
+							searchResults.repaint();
+							break;
+						case KeyEvent.VK_ENTER:
+							if (focusedResult > -1 && focusedResult < searchResults.getComponentCount()) {
+								searchResult = (TagSearchView)searchResults.getComponent(focusedResult);
+								searchResult.setPressed(true);
+								
+								appView.selectedGroups.clear();
+								appView.selectedGroups.add(taggedEvent.getEventGroupId());
+								appView.updateEventsPanel();
+								appView.scrollToEvent(taggedEvent); // doesn't really work --> Fix later
+								
+								searchResult.getModel().requestToggleTag();
+							}
+							break;
+					}
+				}
+			}
+
+			@Override
+			public void keyReleased(KeyEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+		};
+		addKeyListener(keyListener);
+		searchResults.addKeyListener(keyListener);
 	}
 }

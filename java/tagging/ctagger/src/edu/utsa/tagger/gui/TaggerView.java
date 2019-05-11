@@ -1647,7 +1647,7 @@ public class TaggerView extends ConstraintContainer {
 				}
 			}
 			Constraint constraint = new Constraint("top:" + top + " height:26 left:30 right:0"); //Constraint for SearchView
-			eventsPanel.add(new SearchView(eventsPanel,tagger,constraint),constraint);
+			eventsPanel.add(new SearchView(this,eventsPanel,taggedEvent, tagger,constraint),constraint);
 			top += 27;
 		}
 		eventsPanel.validate();

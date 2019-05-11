@@ -55,7 +55,28 @@ public class TagSearchView extends JComponent implements MouseListener {
 			}
 		});
 	}
-
+	
+	/* Getters and Setters */
+	public boolean getHover() {
+		return hover;
+	}
+	
+	public boolean getPressed() {
+		return pressed;
+	}
+	
+	public GuiTagModel getModel() {
+		return model;
+	}
+	public void setHover(boolean hover) {
+		this.hover = hover;
+	}
+	
+	public void setPressed(boolean pressed) {
+		this.pressed = pressed;
+	}
+	
+	
 	@Override
 	public Dimension getPreferredSize() {
 		return new Dimension(0, (int) (FontsAndColors.contentFont.getSize2D() * 1.5));
