@@ -191,7 +191,7 @@ public class GuiTagModel extends AbstractTagModel {
 				appView.showAncestorDialog(message);
 			}
 		}
-		// appView.updateTags();
+		appView.updateTags();
 		appView.updateEventsPanel();
 	}
 

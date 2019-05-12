@@ -1160,7 +1160,7 @@ public class TaggerView extends ConstraintContainer {
 		ScrollLayout layout = (ScrollLayout) eventsScrollPane.getLayout();
 		updateNotification(null, null);
 		EventView eventView = event.getEventView();
-		int y = Math.max(0, eventView.getY() - offset);
+		int y = Math.max(0, eventView.getY() + offset);
 		layout.scrollTo(y);
 		eventView.highlight();
 	}
@@ -1176,6 +1176,7 @@ public class TaggerView extends ConstraintContainer {
 		ScrollLayout layout = (ScrollLayout) eventsScrollPane.getLayout();
 		updateNotification(null, null);
 		int y = Math.max(0, event.getEventView().getY() + offset);
+
 		layout.scrollTo(y);
 	}
 
@@ -1187,7 +1188,7 @@ public class TaggerView extends ConstraintContainer {
 	 */
 	public void scrollToEventTag(GuiTagModel tag) {
 		if (selectedGroups.size() > 0) {
-			int offset = 100;
+			int offset = 0;
 			int lastSelectedGroup = Collections.max(selectedGroups);
 			ScrollLayout layout = (ScrollLayout) eventsScrollPane.getLayout();
 			updateNotification(null, null);
@@ -1556,6 +1557,7 @@ public class TaggerView extends ConstraintContainer {
 	 * the Tagger.
 	 */
 	public void updateEventsPanel() {
+		
 		pruneSelectedGroups();
 		eventsPanel.removeAll();
 		int top = 0;
@@ -1647,7 +1649,9 @@ public class TaggerView extends ConstraintContainer {
 				}
 			}
 			Constraint constraint = new Constraint("top:" + top + " height:26 left:30 right:0"); //Constraint for SearchView
-			eventsPanel.add(new SearchView(this,eventsPanel,taggedEvent, tagger,constraint),constraint);
+			SearchView searchView = new SearchView(this,eventsPanel,taggedEvent, tagger,constraint);
+			taggedEvent.setSearchView(searchView);
+			eventsPanel.add(searchView,constraint);
 			top += 27;
 		}
 		eventsPanel.validate();

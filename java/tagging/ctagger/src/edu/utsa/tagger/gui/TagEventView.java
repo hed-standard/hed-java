@@ -233,4 +233,10 @@ public class TagEventView extends JComponent implements MouseListener {
 		});
 	}
 
+	/**
+	 * Getter GuiTagModel
+	 */
+	public GuiTagModel getModel() {
+		return model;
+	}
 }

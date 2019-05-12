@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
@@ -11,7 +12,9 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
+import java.util.Collections;
 import java.util.Set;
+import java.util.TreeMap;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -26,8 +29,10 @@ import javax.swing.KeyStroke;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import edu.utsa.tagger.AbstractTagModel;
 import edu.utsa.tagger.TaggedEvent;
 import edu.utsa.tagger.Tagger;
+import edu.utsa.tagger.TaggerSet;
 import edu.utsa.tagger.guisupport.Constraint;
 import edu.utsa.tagger.guisupport.ConstraintContainer;
 import edu.utsa.tagger.guisupport.ConstraintLayout;
@@ -235,11 +240,21 @@ public class SearchView extends JTextArea{
 							if (focusedResult > -1 && focusedResult < searchResults.getComponentCount()) {
 								searchResult = (TagSearchView)searchResults.getComponent(focusedResult);
 								searchResult.setPressed(true);
-//								appView.updateEventsPanel();
 								appView.selectedGroups.clear();
-								appView.selectedGroups.add(taggedEvent.getEventGroupId());								
+								appView.selectedGroups.add(taggedEvent.getEventGroupId());	
 								searchResult.getModel().requestToggleTag();
-								appView.scrollToEvent(taggedEvent); // doesn't really work --> Fix later
+								// eventsPanel was refreshed, this.taggedEvent has been removed. There's only one taggedevent toggled on
+								TaggedEvent tgevt = tagger.getTaggedEventFromGroupId(Collections.max(appView.selectedGroups));
+//								TaggerSet<AbstractTagModel> tags = tgevt.getTagGroups().get(tgevt.getEventGroupId());
+//								appView.scrollToEventTag((GuiTagModel)tags.first());
+								try {
+									if (!tgevt.getSearchView().requestFocusInWindow()) 
+										throw new Exception("Unable to request focus for search field");
+								}
+								catch (Exception e) {
+									System.err.println(e.getMessage());
+									System.err.println(e.getStackTrace());
+								}
 							}
 							break;
 					}
