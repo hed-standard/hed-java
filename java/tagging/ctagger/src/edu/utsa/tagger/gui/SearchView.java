@@ -38,6 +38,7 @@ import edu.utsa.tagger.guisupport.ConstraintContainer;
 import edu.utsa.tagger.guisupport.ConstraintLayout;
 import edu.utsa.tagger.guisupport.DropShadowBorder;
 import edu.utsa.tagger.guisupport.ListLayout;
+import edu.utsa.tagger.guisupport.ScrollLayout;
 import edu.utsa.tagger.guisupport.XScrollTextBox;
 import edu.utsa.tagger.guisupport.XTextBox;
 import edu.utsa.tagger.guisupport.ConstraintContainer.Unit;
@@ -52,6 +53,7 @@ import edu.utsa.tagger.guisupport.ConstraintContainer.Unit;
 public class SearchView extends JTextArea{
 	/* Fields */
 	private JLayeredPane container;
+	private JScrollPane cont_container;
 	private TaggedEvent taggedEvent; // Event associated with this search 
 	private Constraint constraint;
 	private TaggerView appView;
@@ -76,9 +78,10 @@ public class SearchView extends JTextArea{
 	/**
 	 *  Constructor
 	 */
-	public SearchView(TaggerView appView, JLayeredPane container, TaggedEvent taggedEvent, Tagger tagger, Constraint constraint) {
+	public SearchView(TaggerView appView,JScrollPane cont_cont, JLayeredPane container, TaggedEvent taggedEvent, Tagger tagger, Constraint constraint) {
 		super("search for tags ...");
 		this.appView = appView;
+		this.cont_container = cont_cont;
 		this.container = container;
 		this.taggedEvent = taggedEvent;
 		this.tagger = tagger;
@@ -239,22 +242,7 @@ public class SearchView extends JTextArea{
 						case KeyEvent.VK_ENTER:
 							if (focusedResult > -1 && focusedResult < searchResults.getComponentCount()) {
 								searchResult = (TagSearchView)searchResults.getComponent(focusedResult);
-								searchResult.setPressed(true);
-								appView.selectedGroups.clear();
-								appView.selectedGroups.add(taggedEvent.getEventGroupId());	
-								searchResult.getModel().requestToggleTag();
-								// eventsPanel was refreshed, this.taggedEvent has been removed. There's only one taggedevent toggled on
-								TaggedEvent tgevt = tagger.getTaggedEventFromGroupId(Collections.max(appView.selectedGroups));
-//								TaggerSet<AbstractTagModel> tags = tgevt.getTagGroups().get(tgevt.getEventGroupId());
-//								appView.scrollToEventTag((GuiTagModel)tags.first());
-								try {
-									if (!tgevt.getSearchView().requestFocusInWindow()) 
-										throw new Exception("Unable to request focus for search field");
-								}
-								catch (Exception e) {
-									System.err.println(e.getMessage());
-									System.err.println(e.getStackTrace());
-								}
+								appView.enteredSearchTag(taggedEvent,searchResult);
 							}
 							break;
 					}
@@ -269,5 +257,10 @@ public class SearchView extends JTextArea{
 		};
 		addKeyListener(keyListener);
 		searchResults.addKeyListener(keyListener);
+	}
+	
+	/* Getters and Setters */
+	public Constraint getConstraint() {
+		return constraint;
 	}
 }

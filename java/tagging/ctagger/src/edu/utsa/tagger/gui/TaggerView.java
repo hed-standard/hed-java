@@ -39,6 +39,8 @@ import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
@@ -303,7 +305,7 @@ public class TaggerView extends ConstraintContainer {
 		}
 	};
 
-	private JLayeredPane eventsScrollPane = new JLayeredPane();
+	private JScrollPane eventsScrollPane;
 	private JLabel eventsTitle = new JLabel("Events") {
 		@Override
 		public Font getFont() {
@@ -683,9 +685,14 @@ public class TaggerView extends ConstraintContainer {
 		zoomPercent.setFont(FontsAndColors.contentFont);
 		zoomPercent.setForeground(FontsAndColors.GREY_DARK);
 
-		eventsScrollPane.setLayout(new ScrollLayout(eventsScrollPane, eventsPanel));
 		eventsPanel.setOpaque(true);
 		eventsPanel.setBackground(Color.WHITE);
+		eventsScrollPane = new JScrollPane(eventsPanel);
+		eventsScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		eventsScrollPane.setBorder(null);
+		eventsScrollPane.getVerticalScrollBar().setUnitIncrement(20);
+		eventsScrollPane.setBackground(Color.gray);
+		eventsScrollPane.setOpaque(false);
 		tagsPanel.setBackground(Color.WHITE);
 		tagsScrollLayout = new ScrollLayout(tagsScrollPane, tagsPanel);
 		tagsScrollPane.setLayout(tagsScrollLayout);
@@ -1156,12 +1163,15 @@ public class TaggerView extends ConstraintContainer {
 	 *            The event that is scrolled to.
 	 */
 	public void scrollToEvent(TaggedEvent event) {
-		int offset = 100;
-		ScrollLayout layout = (ScrollLayout) eventsScrollPane.getLayout();
 		updateNotification(null, null);
 		EventView eventView = event.getEventView();
-		int y = Math.max(0, eventView.getY() + offset);
-		layout.scrollTo(y);
+		int y = Math.max(0, eventView.getY());
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				eventsScrollPane.getVerticalScrollBar().setValue(y);
+			}
+		});
 		eventView.highlight();
 	}
 
@@ -1173,11 +1183,9 @@ public class TaggerView extends ConstraintContainer {
 	 */
 	public void scrollToEventGroup(TaggedEvent event) {
 		int offset = event.getEventView().getHeight() + event.findNumberOfTagsInEvents() * 27;
-		ScrollLayout layout = (ScrollLayout) eventsScrollPane.getLayout();
 		updateNotification(null, null);
 		int y = Math.max(0, event.getEventView().getY() + offset);
-
-		layout.scrollTo(y);
+		eventsScrollPane.getVerticalScrollBar().setValue(y);
 	}
 
 	/**
@@ -1190,7 +1198,6 @@ public class TaggerView extends ConstraintContainer {
 		if (selectedGroups.size() > 0) {
 			int offset = 0;
 			int lastSelectedGroup = Collections.max(selectedGroups);
-			ScrollLayout layout = (ScrollLayout) eventsScrollPane.getLayout();
 			updateNotification(null, null);
 			TaggedEvent event = tagger.getTaggedEventFromGroupId(lastSelectedGroup);
 			if (event.isRRTagDescendant(tag)) {
@@ -1199,7 +1206,7 @@ public class TaggerView extends ConstraintContainer {
 				TagEventView tagEgtView = rrTagView.getTagEgtViewByKey(tag);
 				if (rrTagView != null) {
 					int y = Math.max(0, rrTagView.getY() - offset);
-					layout.scrollTo(y);
+					eventsScrollPane.getVerticalScrollBar().setValue(y);
 					if (tagEgtView != null)
 						tagEgtView.highlight();
 				}
@@ -1208,7 +1215,7 @@ public class TaggerView extends ConstraintContainer {
 				TagEventView tagEgtView = groupView.getTagEgtViewByKey(tag);
 				if (groupView != null) {
 					int y = Math.max(0, groupView.getY() - offset);
-					layout.scrollTo(y);
+					eventsScrollPane.getVerticalScrollBar().setValue(y);
 					if (tagEgtView != null)
 						tagEgtView.highlight();
 				}
@@ -1216,7 +1223,7 @@ public class TaggerView extends ConstraintContainer {
 				TagEventView tagEgtView = event.getTagEgtViewByKey(tag);
 				if (tagEgtView != null) {
 					int y = Math.max(0, tagEgtView.getY() - offset);
-					layout.scrollTo(y);
+					eventsScrollPane.getVerticalScrollBar().setValue(y);
 					tagEgtView.highlight();
 				}
 			}
@@ -1233,18 +1240,17 @@ public class TaggerView extends ConstraintContainer {
 		while (selectedGroupsIterator.hasNext()) {
 			lastSelectedGroup = selectedGroupsIterator.next().intValue();
 		}
-		ScrollLayout layout = (ScrollLayout) eventsScrollPane.getLayout();
 		updateNotification(null, null);
 		TaggedEvent event = tagger.getTaggedEventFromGroupId(lastSelectedGroup);
 		if (event.getEventGroupId() != lastSelectedGroup) {
 			GroupView groupView = event.getGroupViewByKey(lastSelectedGroup);
 			int y = Math.max(0, groupView.getY() - offset);
-			layout.scrollTo(y);
+			eventsScrollPane.getVerticalScrollBar().setValue(y);
 			groupView.highlight();
 		} else {
 			EventView groupView = event.getEventView();
 			int y = Math.max(0, groupView.getY() - offset);
-			layout.scrollTo(y);
+			eventsScrollPane.getVerticalScrollBar().setValue(y);
 			groupView.highlight();
 		}
 
@@ -1260,11 +1266,10 @@ public class TaggerView extends ConstraintContainer {
 	 */
 	public void scrollToNewGroup(TaggedEvent event, int groupId) {
 		int offset = event.getEventView().getHeight() + event.findNumberOfTagsInEvents() * 27;
-		ScrollLayout layout = (ScrollLayout) eventsScrollPane.getLayout();
 		updateNotification(null, null);
 		GroupView groupView = event.getGroupViewByKey(Integer.valueOf(groupId));
 		int y = Math.max(0, groupView.getY() - offset);
-		layout.scrollTo(y);
+		eventsScrollPane.getVerticalScrollBar().setValue(y);
 		groupView.highlight();
 	}
 
@@ -1310,8 +1315,7 @@ public class TaggerView extends ConstraintContainer {
 			if (event == null) {
 				showTaggerMessageDialog(MessageConstants.ADD_EVENT_ERROR, "Okay", null, null);
 			} else {
-				ScrollLayout eventScrollLayout = (ScrollLayout) eventsScrollPane.getLayout();
-				eventScrollLayout.scrollTo(event.getEventView().getCurrentPosition());
+				eventsScrollPane.getVerticalScrollBar().setValue(event.getEventView().getCurrentPosition());
 			}
 		}
 	}
@@ -1649,7 +1653,7 @@ public class TaggerView extends ConstraintContainer {
 				}
 			}
 			Constraint constraint = new Constraint("top:" + top + " height:26 left:30 right:0"); //Constraint for SearchView
-			SearchView searchView = new SearchView(this,eventsPanel,taggedEvent, tagger,constraint);
+			SearchView searchView = new SearchView(this,eventsScrollPane,eventsPanel,taggedEvent, tagger,constraint);
 			taggedEvent.setSearchView(searchView);
 			eventsPanel.add(searchView,constraint);
 			top += 27;
@@ -1660,6 +1664,22 @@ public class TaggerView extends ConstraintContainer {
 		eventsScrollPane.repaint();
 		validate();
 		repaint();
+	}
+	
+	/**
+	 * Action after user hit Enter key to select searched tag
+	 * Add tag to the event. Scroll to the event and continue 
+	 * putting search text field in focus
+	 * @param tgevt	the event containing searched tag
+	 * @param tag	the tag to include in the event
+	 */
+	public void enteredSearchTag(TaggedEvent tgevt, TagSearchView tag) {
+		selectedGroups.clear();
+		selectedGroups.add(tgevt.getEventGroupId());	
+		tag.getModel().requestToggleTag();
+		tgevt = tagger.getTaggedEventFromGroupId(Collections.max(selectedGroups));
+		tgevt.getSearchView().requestFocusInWindow();
+		scrollToEvent(tgevt);
 	}
 
 	/**
