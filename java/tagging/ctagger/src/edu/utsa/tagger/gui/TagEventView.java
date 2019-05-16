@@ -78,7 +78,7 @@ public class TagEventView extends JComponent implements MouseListener {
 		} else if (SwingUtilities.isRightMouseButton(e)) {
 			Map<String, ContextMenuAction> map = new LinkedHashMap<String, ContextMenuAction>();
 			TaggedEvent taggedEvent = tagger.getEventByGroupId(groupId);
-			if (taggedEvent.getEventGroupId() != groupId) {
+			if (taggedEvent.getEventGroupId() != groupId) { // if select tag of 
 				map.put("add ~ before", new ContextMenuAction() {
 					@Override
 					public void doAction() {
@@ -107,6 +107,7 @@ public class TagEventView extends JComponent implements MouseListener {
 			map.put("remove", new ContextMenuAction() {
 				@Override
 				public void doAction() {
+					// if label tag, turn into edit mode
 					if ("Event/Label/".equals(model.getParentPath())) {
 						TaggerSet<TaggedEvent> taggedEvents = tagger.getEgtSet();
 						for (TaggedEvent taggedEvent : taggedEvents) {
@@ -121,6 +122,19 @@ public class TagEventView extends JComponent implements MouseListener {
 						tagger.unassociate(model, groupIds);
 					}
 					appView.updateEventsPanel();
+				}
+			});
+			map.put("remove all", new ContextMenuAction() {
+				@Override
+				public void doAction() {
+					Set<Integer> groupIds = appView.selectedGroups;
+					tagger.unassociate(model,groupIds);
+					appView.updateEventsPanel();
+				}
+			});
+			map.put("copy to", new ContextMenuAction() {
+				public void doAction() {
+					
 				}
 			});
 			appView.showContextMenu(map);
