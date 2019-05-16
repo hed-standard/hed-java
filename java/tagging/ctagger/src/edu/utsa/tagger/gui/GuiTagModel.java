@@ -155,7 +155,7 @@ public class GuiTagModel extends AbstractTagModel {
 	}
 
 	/**
-	 * Attempts to toggle this tag with the groups with the groups currently
+	 * Attempts to toggle this tag with the groups currently
 	 * selected for tagging.
 	 */
 	public void requestToggleTag() {
@@ -191,7 +191,7 @@ public class GuiTagModel extends AbstractTagModel {
 				appView.showAncestorDialog(message);
 			}
 		}
-		// appView.updateTags();
+		appView.updateTags();
 		appView.updateEventsPanel();
 	}
 
