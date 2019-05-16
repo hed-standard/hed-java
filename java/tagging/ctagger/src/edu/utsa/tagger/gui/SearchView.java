@@ -242,7 +242,13 @@ public class SearchView extends JTextArea{
 						case KeyEvent.VK_ENTER:
 							if (focusedResult > -1 && focusedResult < searchResults.getComponentCount()) {
 								searchResult = (TagSearchView)searchResults.getComponent(focusedResult);
-								appView.enteredSearchTag(taggedEvent,searchResult);
+								GuiTagModel model = searchResult.getModel();
+								if (model.takesValue()) {
+									TagValueInputDialog dialog = new TagValueInputDialog(tagger,appView,model,taggedEvent);
+									dialog.setVisible(true);
+								}
+								else
+									appView.enteredSearchTag(taggedEvent,model);
 							}
 							break;
 					}

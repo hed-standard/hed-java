@@ -1561,7 +1561,6 @@ public class TaggerView extends ConstraintContainer {
 	 * the Tagger.
 	 */
 	public void updateEventsPanel() {
-		
 		pruneSelectedGroups();
 		eventsPanel.removeAll();
 		int top = 0;
@@ -1671,12 +1670,12 @@ public class TaggerView extends ConstraintContainer {
 	 * Add tag to the event. Scroll to the event and continue 
 	 * putting search text field in focus
 	 * @param tgevt	the event containing searched tag
-	 * @param tag	the tag to include in the event
+	 * @param tagModel	the tag to include in the event
 	 */
-	public void enteredSearchTag(TaggedEvent tgevt, TagSearchView tag) {
+	public void enteredSearchTag(TaggedEvent tgevt, GuiTagModel tagModel) {
 		selectedGroups.clear();
 		selectedGroups.add(tgevt.getEventGroupId());	
-		tag.getModel().requestToggleTag();
+		tagModel.requestToggleTag();
 		tgevt = tagger.getTaggedEventFromGroupId(Collections.max(selectedGroups));
 		tgevt.getSearchView().requestFocusInWindow();
 		scrollToEvent(tgevt);
@@ -1784,5 +1783,13 @@ public class TaggerView extends ConstraintContainer {
 			return false;
 		}
 		return true;
+	}
+	
+	/**
+	 * To create instance of TagValueInputDialog
+	 * @return
+	 */
+	public JFrame getFrame() {
+		return frame;
 	}
 }
