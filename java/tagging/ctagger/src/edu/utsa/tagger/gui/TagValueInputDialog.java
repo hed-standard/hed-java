@@ -170,13 +170,14 @@ PropertyChangeListener{
             } 
             else { //user closed dialog or clicked cancel
                 typedText = null;
-                finished();
+                setVisible(false);
+                dispose();
             }
         }
     }
 		
 	
-	/** This method clears the dialog and hides it. */
+	/** Add tag to event, clears the dialog and hides it. */
     public void finished() {
     	guiTagModel.setPath(guiTagModel.getParentPath() + "/" + typedText);
     	appView.enteredSearchTag(tgevt, guiTagModel);

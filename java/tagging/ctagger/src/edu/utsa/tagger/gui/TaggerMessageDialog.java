@@ -78,7 +78,7 @@ public class TaggerMessageDialog extends JDialog {
 		super(frame, true);
 
 		bgPanel.setLayout(new ConstraintLayout());
-		bgPanel.setBackground(Color.white);
+		bgPanel.setBackground(FontsAndColors.BLUE_MEDIUM);
 		bgPanel.setPreferredSize(new Dimension(400, 200));
 		messageLabel = new JLabel(message, JLabel.CENTER);
 		messageLabel.setFont(FontsAndColors.contentFont);

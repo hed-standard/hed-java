@@ -688,45 +688,45 @@ public class TaggerView extends ConstraintContainer {
 		zoomPercent.setForeground(FontsAndColors.GREY_DARK);
 
 		eventsPanel.setOpaque(true);
-		eventsPanel.setBackground(Color.WHITE);
+		eventsPanel.setBackground(FontsAndColors.BLUE_LIGHT);
 		eventsScrollPane = new JScrollPane(eventsPanel);
 		eventsScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		eventsScrollPane.setBorder(null);
 		eventsScrollPane.getVerticalScrollBar().setUnitIncrement(20);
 		eventsScrollPane.setBackground(Color.gray);
 		eventsScrollPane.setOpaque(false);
-		tagsPanel.setBackground(Color.WHITE);
+		tagsPanel.setBackground(FontsAndColors.BLUE_LIGHT);
 		tagsScrollLayout = new ScrollLayout(tagsScrollPane, tagsPanel);
 		tagsScrollPane.setLayout(tagsScrollLayout);
 
-		eventsTitle.setForeground(FontsAndColors.GREY_VERY_VERY_DARK);
-		tagsTitle.setForeground(FontsAndColors.GREY_VERY_VERY_DARK);
+		eventsTitle.setForeground(FontsAndColors.BLUE_DARK);
+		tagsTitle.setForeground(FontsAndColors.BLUE_DARK);
 
 		addEvent.setNormalBackground(FontsAndColors.TRANSPARENT);
-		addEvent.setNormalForeground(FontsAndColors.GREY_MEDIUM);
-		addEvent.setHoverBackground(FontsAndColors.TRANSPARENT);
-		addEvent.setHoverForeground(Color.BLACK);
+		addEvent.setNormalForeground(FontsAndColors.BLUE_DARK);
+		addEvent.setHoverBackground(FontsAndColors.BLUE_LIGHT);
+		addEvent.setHoverForeground(FontsAndColors.BLUE_DARK);
 		addEvent.setPressedBackground(FontsAndColors.TRANSPARENT);
 		addEvent.setPressedForeground(FontsAndColors.GREY_MEDIUM);
 
 		deselectAll.setNormalBackground(FontsAndColors.TRANSPARENT);
-		deselectAll.setNormalForeground(FontsAndColors.GREY_MEDIUM);
-		deselectAll.setHoverBackground(FontsAndColors.TRANSPARENT);
-		deselectAll.setHoverForeground(Color.BLACK);
+		deselectAll.setNormalForeground(FontsAndColors.BLUE_DARK);
+		deselectAll.setHoverBackground(FontsAndColors.BLUE_LIGHT);
+		deselectAll.setHoverForeground(FontsAndColors.BLUE_DARK);
 		deselectAll.setPressedBackground(FontsAndColors.TRANSPARENT);
 		deselectAll.setPressedForeground(FontsAndColors.GREY_MEDIUM);
 
 		addGroup.setNormalBackground(FontsAndColors.TRANSPARENT);
-		addGroup.setNormalForeground(FontsAndColors.GREY_MEDIUM);
-		addGroup.setHoverBackground(FontsAndColors.TRANSPARENT);
-		addGroup.setHoverForeground(Color.BLACK);
+		addGroup.setNormalForeground(FontsAndColors.BLUE_DARK);
+		addGroup.setHoverBackground(FontsAndColors.BLUE_LIGHT);
+		addGroup.setHoverForeground(FontsAndColors.BLUE_DARK);
 		addGroup.setPressedBackground(FontsAndColors.TRANSPARENT);
 		addGroup.setPressedForeground(FontsAndColors.GREY_MEDIUM);
 
 		addTag.setNormalBackground(FontsAndColors.TRANSPARENT);
-		addTag.setNormalForeground(FontsAndColors.GREY_MEDIUM);
-		addTag.setHoverBackground(FontsAndColors.TRANSPARENT);
-		addTag.setHoverForeground(Color.BLACK);
+		addTag.setNormalForeground(FontsAndColors.BLUE_DARK);
+		addTag.setHoverBackground(FontsAndColors.BLUE_LIGHT);
+		addTag.setHoverForeground(FontsAndColors.BLUE_DARK);
 		addTag.setPressedBackground(FontsAndColors.TRANSPARENT);
 		addTag.setPressedForeground(FontsAndColors.GREY_MEDIUM);
 
@@ -773,19 +773,19 @@ public class TaggerView extends ConstraintContainer {
 		splitContainer.setLayout(splitLayout);
 
 		collapseLabel.setBackground(FontsAndColors.TRANSPARENT);
-		collapseLabel.setForeground(FontsAndColors.GREY_MEDIUM);
+		collapseLabel.setForeground(FontsAndColors.BLUE_DARK);
 
 		collapseAll.setNormalBackground(FontsAndColors.TRANSPARENT);
-		collapseAll.setNormalForeground(FontsAndColors.GREY_MEDIUM);
-		collapseAll.setHoverBackground(FontsAndColors.TRANSPARENT);
-		collapseAll.setHoverForeground(Color.BLACK);
+		collapseAll.setNormalForeground(FontsAndColors.BLUE_DARK);
+		collapseAll.setHoverBackground(FontsAndColors.BLUE_LIGHT);
+		collapseAll.setHoverForeground(FontsAndColors.BLUE_DARK);
 		collapseAll.setPressedBackground(FontsAndColors.TRANSPARENT);
 		collapseAll.setPressedForeground(FontsAndColors.GREY_MEDIUM);
 
 		expandAll.setNormalBackground(FontsAndColors.TRANSPARENT);
-		expandAll.setNormalForeground(FontsAndColors.GREY_MEDIUM);
-		expandAll.setHoverBackground(FontsAndColors.TRANSPARENT);
-		expandAll.setHoverForeground(Color.BLACK);
+		expandAll.setNormalForeground(FontsAndColors.BLUE_DARK);
+		expandAll.setHoverBackground(FontsAndColors.BLUE_LIGHT);
+		expandAll.setHoverForeground(FontsAndColors.BLUE_DARK);
 		expandAll.setPressedBackground(FontsAndColors.TRANSPARENT);
 		expandAll.setPressedForeground(FontsAndColors.GREY_MEDIUM);
 
@@ -1198,7 +1198,12 @@ public class TaggerView extends ConstraintContainer {
 		int offset = event.getEventView().getHeight() + event.findNumberOfTagsInEvents() * 27;
 		updateNotification(null, null);
 		int y = Math.max(0, event.getEventView().getY() + offset);
-		eventsScrollPane.getVerticalScrollBar().setValue(y);
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				eventsScrollPane.getVerticalScrollBar().setValue(y);
+			}
+		});
 	}
 
 	/**
@@ -1219,7 +1224,12 @@ public class TaggerView extends ConstraintContainer {
 				TagEventView tagEgtView = rrTagView.getTagEgtViewByKey(tag);
 				if (rrTagView != null) {
 					int y = Math.max(0, rrTagView.getY() - offset);
-					eventsScrollPane.getVerticalScrollBar().setValue(y);
+					SwingUtilities.invokeLater(new Runnable() {
+						@Override
+						public void run() {
+							eventsScrollPane.getVerticalScrollBar().setValue(y);
+						}
+					});
 					if (tagEgtView != null)
 						tagEgtView.highlight();
 				}
@@ -1228,7 +1238,12 @@ public class TaggerView extends ConstraintContainer {
 				TagEventView tagEgtView = groupView.getTagEgtViewByKey(tag);
 				if (groupView != null) {
 					int y = Math.max(0, groupView.getY() - offset);
-					eventsScrollPane.getVerticalScrollBar().setValue(y);
+					SwingUtilities.invokeLater(new Runnable() {
+						@Override
+						public void run() {
+							eventsScrollPane.getVerticalScrollBar().setValue(y);
+						}
+					});
 					if (tagEgtView != null)
 						tagEgtView.highlight();
 				}
@@ -1236,7 +1251,12 @@ public class TaggerView extends ConstraintContainer {
 				TagEventView tagEgtView = event.getTagEgtViewByKey(tag);
 				if (tagEgtView != null) {
 					int y = Math.max(0, tagEgtView.getY() - offset);
-					eventsScrollPane.getVerticalScrollBar().setValue(y);
+					SwingUtilities.invokeLater(new Runnable() {
+						@Override
+						public void run() {
+							eventsScrollPane.getVerticalScrollBar().setValue(y);
+						}
+					});
 					tagEgtView.highlight();
 				}
 			}
@@ -1258,12 +1278,22 @@ public class TaggerView extends ConstraintContainer {
 		if (event.getEventGroupId() != lastSelectedGroup) {
 			GroupView groupView = event.getGroupViewByKey(lastSelectedGroup);
 			int y = Math.max(0, groupView.getY() - offset);
-			eventsScrollPane.getVerticalScrollBar().setValue(y);
+			SwingUtilities.invokeLater(new Runnable() {
+				@Override
+				public void run() {
+					eventsScrollPane.getVerticalScrollBar().setValue(y);
+				}
+			});
 			groupView.highlight();
 		} else {
 			EventView groupView = event.getEventView();
 			int y = Math.max(0, groupView.getY() - offset);
-			eventsScrollPane.getVerticalScrollBar().setValue(y);
+			SwingUtilities.invokeLater(new Runnable() {
+				@Override
+				public void run() {
+					eventsScrollPane.getVerticalScrollBar().setValue(y);
+				}
+			});
 			groupView.highlight();
 		}
 
@@ -1282,7 +1312,12 @@ public class TaggerView extends ConstraintContainer {
 		updateNotification(null, null);
 		GroupView groupView = event.getGroupViewByKey(Integer.valueOf(groupId));
 		int y = Math.max(0, groupView.getY() - offset);
-		eventsScrollPane.getVerticalScrollBar().setValue(y);
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				eventsScrollPane.getVerticalScrollBar().setValue(y);
+			}
+		});
 		groupView.highlight();
 	}
 
@@ -1311,7 +1346,13 @@ public class TaggerView extends ConstraintContainer {
 		expandToLevel(gtm.getDepth());
 		TagView tagView = gtm.getTagView();
 		int y = Math.max(0, tagView.getY() - offset);
-		layout.scrollTo(y);
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				layout.scrollTo(y);
+			}
+		});
+		
 		tagView.highlight();
 	}
 
@@ -1676,6 +1717,13 @@ public class TaggerView extends ConstraintContainer {
 		eventsScrollPane.repaint();
 		validate();
 		repaint();
+		
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				eventsScrollPane.getVerticalScrollBar().setValue(0);
+			}
+		});
 	}
 	
 	/**

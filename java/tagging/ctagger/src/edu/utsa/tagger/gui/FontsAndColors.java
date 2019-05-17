@@ -32,9 +32,9 @@ public abstract class FontsAndColors {
 	public static final Color GREY_VERY_VERY_DARK = new Color(90, 90, 90);
 
 	public static final Color BLUE_VERY_LIGHT = new Color(230, 230, 255);
-	public static final Color BLUE_LIGHT = new Color(225, 225, 255);
-	public static final Color BLUE_MEDIUM = new Color(205, 205, 255);
-	public static final Color BLUE_DARK = new Color(100, 100, 255);
+	public static final Color BLUE_LIGHT = new Color(.93f, .96f,1f);
+	public static final Color BLUE_MEDIUM = new Color(.66f, .76f, 1f);
+	public static final Color BLUE_DARK = new Color(0f, 0f, 0.4f);
 
 	public static final Color GREEN_VERY_LIGHT = new Color(235, 255, 235);
 	public static final Color GREEN_LIGHT = new Color(225, 255, 225);
@@ -53,17 +53,19 @@ public abstract class FontsAndColors {
 	public static final Color ORANGE_MEDIUM = new Color(243, 141, 91);
 	public static final Color ORANGE_LIGHT = new Color(250, 198, 168);
 
-	public static final Color APP_BG = Color.WHITE;
+	public static final Color APP_BG = new Color(.66f, .76f, 1f);
 	public static final Color GROUP_SELECTED = GREY_VERY_LIGHT;
 
 	public static final Color MENU_BG = TRANSPARENT;
 
 	public static final Color MENU_NORMAL_BG = TRANSPARENT;
-	public static final Color MENU_NORMAL_FG = GREY_MEDIUM;
-	public static final Color MENU_HOVER_BG = TRANSPARENT;
-	public static final Color MENU_HOVER_FG = GREY_DARK;
+	public static final Color MENU_NORMAL_FG = BLUE_DARK;
+	public static final Color MENU_HOVER_BG = BLUE_LIGHT;
+	public static final Color MENU_HOVER_FG = BLUE_DARK;
 	public static final Color MENU_PRESSED_BG = TRANSPARENT;
 	public static final Color MENU_PRESSED_FG = GREY_MEDIUM;
+	
+	public static final Color POPUP_BG = BLUE_MEDIUM;
 
 	public static final Color COLLAPSER_NORMAL_FG = Color.BLACK;
 	public static final Color COLLAPSER_HOVER_FG = GREY_DARK;
@@ -79,7 +81,7 @@ public abstract class FontsAndColors {
 	public static final Color EVENTS_BG = new Color(0x4096EE);
 
 	public static final Color TAGS_BG = TRANSPARENT;
-	public static final Color TAGS_FG = GREY_DARK;
+	public static final Color TAGS_FG = BLUE_DARK;
 
 	public static final Color SEARCH_RESULTS_LIST_BG = Color.WHITE;
 
@@ -93,8 +95,8 @@ public abstract class FontsAndColors {
 	public static final Color BUTTON_HOVER_BG = BLUE_LIGHT;
 	public static final Color BUTTON_PRESSED_BG = BLUE_DARK;
 
-	public static final Color TAG_BG_NORMAL = Color.WHITE;
-	public static final Color TAG_FG_NORMAL = Color.BLACK;
+	public static final Color TAG_BG_NORMAL = BLUE_LIGHT;
+	public static final Color TAG_FG_NORMAL = BLUE_DARK;
 	public static final Color TAG_FG_HOVER = BLUE_DARK;
 	public static final Color TAG_FG_PRESSED = GREY_DARK;
 	public static final Color TAG_BG_SEMISELECTED = BLUE_VERY_LIGHT;
@@ -115,23 +117,23 @@ public abstract class FontsAndColors {
 	public static final Color EDITTAG_BG = LIGHT_YELLOW;
 	public static final Color EDITTAG_BORDER = new Color(215, 215, 50);
 
-	public static final Color EVENT_BG_NORMAL = GREY_LIGHT;
+	public static final Color EVENT_BG_NORMAL = BLUE_DARK;
 	public static final Color EVENT_FG_NORMAL = GREY_DARK;
-	public static final Color EVENT_BG_HOVER = GREY_LIGHT;
+	public static final Color EVENT_BG_HOVER = BLUE_LIGHT;
 	public static final Color EVENT_FG_HOVER = BLUE_DARK;
 	public static final Color EVENT_BG_PRESSED = GREY_LIGHT;
 	public static final Color EVENT_FG_PRESSED = GREY_DARK;
 	public static final Color EVENT_BG_SELECTED = SOFT_BLUE;
-	public static final Color EVENT_FG_SELECTED = GREY_VERY_LIGHT;
+	public static final Color EVENT_FG_SELECTED = BLUE_LIGHT;
 	public static final Color EVENT_INFO_BACKGROUND = Color.white;
-	public static final Color EVENT_TAG_REQUIRED = RED_MEDIUM;
-	public static final Color EVENT_TAG_RECOMMENDED = ORANGE_MEDIUM;
-	public static final Color EVENT_SELECTED = GREY_MEDIUM;
+	public static final Color EVENT_TAG_REQUIRED = BLUE_DARK;
+	public static final Color EVENT_TAG_RECOMMENDED = BLUE_DARK;
+	public static final Color EVENT_SELECTED = BLUE_LIGHT;
 
 	public static final Color EVENTTAG_BG_NORMAL = TRANSPARENT;
-	public static final Color EVENTTAG_FG_NORMAL = GREY_DARK;
-	public static final Color EVENTTAG_BG_HOVER = TRANSPARENT;
-	public static final Color EVENTTAG_FG_HOVER = BLUE_DARK;
+	public static final Color EVENTTAG_FG_NORMAL = BLUE_DARK;
+	public static final Color EVENTTAG_BG_HOVER = BLUE_MEDIUM;
+	public static final Color EVENTTAG_FG_HOVER = BLUE_MEDIUM;
 	public static final Color EVENTTAG_BG_PRESSED = GREY_VERY_VERY_LIGHT;
 	public static final Color EVENTTAG_FG_PRESSED = GREY_DARK;
 	public static final Color EVENTTAG_FG_MISSING_NORMAL = RED_MEDIUM;

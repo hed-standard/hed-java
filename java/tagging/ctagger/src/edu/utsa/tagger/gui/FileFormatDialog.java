@@ -68,7 +68,7 @@ public class FileFormatDialog extends JDialog {
 		super(frame, true);
 
 		bgPanel.setLayout(new ConstraintLayout());
-		bgPanel.setBackground(Color.white);
+		bgPanel.setBackground(FontsAndColors.POPUP_BG);
 		bgPanel.setPreferredSize(new Dimension(750, 250));
 		int top = 0;
 		label = new JLabel(message, JLabel.CENTER);

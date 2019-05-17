@@ -134,6 +134,7 @@ public class TagEventView extends JComponent implements MouseListener {
 			});
 			map.put("copy to", new ContextMenuAction() {
 				public void doAction() {
+					CopyToDialog dialog = new CopyToDialog(tagger,appView,model);
 					
 				}
 			});
