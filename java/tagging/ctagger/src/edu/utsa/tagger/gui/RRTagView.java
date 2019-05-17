@@ -21,6 +21,7 @@ import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
@@ -321,6 +322,16 @@ public class RRTagView extends JComponent {
 		if (save.isEnabled()) {
 			AbstractTagModel newTag = getNewValue();
 			if (takesValueTag != null) {
+				// Check if description has comma
+				if ("Event/Description".equals(newTag.getParentPath())) {
+					if (newTag.getName().indexOf(',') != -1) {
+						JOptionPane.showMessageDialog(appView.getFrame(), "Description should not contain commas.", "Input error",
+							    JOptionPane.ERROR_MESSAGE);
+						inAddValue = true;
+						refreshView();
+						return;
+					}
+				}
 				updateTakesValueTag(newTag);
 			} else if (newTag != null) {
 				updateValue(newTag);

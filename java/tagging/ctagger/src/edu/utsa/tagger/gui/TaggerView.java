@@ -781,7 +781,7 @@ public class TaggerView extends ConstraintContainer {
 		collapseAll.setHoverForeground(FontsAndColors.BLUE_DARK);
 		collapseAll.setPressedBackground(FontsAndColors.TRANSPARENT);
 		collapseAll.setPressedForeground(FontsAndColors.GREY_MEDIUM);
-
+		
 		expandAll.setNormalBackground(FontsAndColors.TRANSPARENT);
 		expandAll.setNormalForeground(FontsAndColors.BLUE_DARK);
 		expandAll.setHoverBackground(FontsAndColors.BLUE_LIGHT);
