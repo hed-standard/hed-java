@@ -154,6 +154,7 @@ public class TagEventEditView extends ConstraintContainer {
 			}
 			tagModel.setInEdit(false);
 			appView.updateEventsPanel();
+			appView.scrollToEvent(taggedEvent);
 		}
 	}
 

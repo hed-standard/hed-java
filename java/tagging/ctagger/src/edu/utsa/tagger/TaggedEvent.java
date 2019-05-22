@@ -12,7 +12,7 @@ import edu.utsa.tagger.gui.EventView;
 import edu.utsa.tagger.gui.GroupView;
 import edu.utsa.tagger.gui.GuiEventModel;
 import edu.utsa.tagger.gui.RRTagView;
-import edu.utsa.tagger.gui.SearchView;
+import edu.utsa.tagger.gui.SearchTagsView;
 import edu.utsa.tagger.gui.TagEventView;
 
 /**
@@ -35,7 +35,7 @@ public class TaggedEvent implements Comparable<TaggedEvent> {
 	private HashMap<AbstractTagModel, TagEventView> tagEgtViews;
 	private HashMap<AbstractTagModel, RRTagView> rrTagViews;
 	private EventEditView eventEditView;
-	private SearchView searchView; // View containing search textfield and search result panel/scroll bar
+	private SearchTagsView searchView; // View containing search textfield and search result panel/scroll bar
 
 	public TaggedEvent(GuiEventModel guiEventModel, Tagger tagger) {
 		this.guiEventModel = guiEventModel;
@@ -405,7 +405,7 @@ public class TaggedEvent implements Comparable<TaggedEvent> {
 		return new RRTagView(tagger, appView, this, key);
 	}
 
-	public SearchView getSearchView() {
+	public SearchTagsView getSearchView() {
 		return searchView;
 	}
 	/**
@@ -551,7 +551,7 @@ public class TaggedEvent implements Comparable<TaggedEvent> {
 		this.appView = appView;
 	}
 	
-	public void setSearchView(SearchView searchView) {
+	public void setSearchView(SearchTagsView searchView) {
 		this.searchView = searchView;
 	}
 }

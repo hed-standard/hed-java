@@ -25,6 +25,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import edu.utsa.tagger.AbstractTagModel;
 import edu.utsa.tagger.TaggedEvent;
 import edu.utsa.tagger.Tagger;
 import edu.utsa.tagger.guisupport.Constraint;
@@ -32,7 +33,7 @@ import edu.utsa.tagger.guisupport.ConstraintLayout;
 import edu.utsa.tagger.guisupport.XButton;
 
 /**
- * Dialog used to prompt for user's input when selecting a tag through SearchView.
+ * Dialog used to prompt for user's input when selecting a take-value tag through SearchTagsView.
  * 
  * @author Dung Truong
  */
@@ -45,16 +46,14 @@ PropertyChangeListener{
 	String btnString1 = "Save"; // used to communicate between input and optionpane
     String btnString2 = "Cancel";
     String typedText = null; 
-    TaggerView appView;
-    GuiTagModel guiTagModel = null;
-    Tagger tagger = null;
-    TaggedEvent tgevt;
-	public TagValueInputDialog(Tagger tgr,TaggerView view, GuiTagModel gtm, TaggedEvent tgevt) {
-		super(view.getFrame(),true);
-		appView = view;
+    
+    SearchTagsView searchView;
+    GuiTagModel guiTagModel;
+
+	public TagValueInputDialog(SearchTagsView searchTagsView, GuiTagModel gtm) {
+		super(searchTagsView.getAppView().getFrame(),true);
+		searchView = searchTagsView;
 		guiTagModel = gtm;
-		tagger = tgr;
-		this.tgevt = tgevt;
 		
 		bgPanel.setLayout(new ConstraintLayout());
 		bgPanel.setBackground(Color.white);
@@ -84,23 +83,9 @@ PropertyChangeListener{
 	    						options[0]);
 
 		setContentPane(bgPanel);
-
-		//Handle window closing correctly.
-//        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-//        addWindowListener(new WindowAdapter() {
-//                public void windowClosing(WindowEvent we) {
-//                /*
-//                 * Instead of directly closing the window,
-//                 * we're going to change the JOptionPane's
-//                 * value property.
-//                 */
-//                    bgPanel.setValue(new Integer(
-//                                        JOptionPane.CLOSED_OPTION));
-//            }
-//        });
         
         pack();
-		setLocationRelativeTo(appView.getFrame());
+		setLocationRelativeTo(searchView.getAppView().getFrame());
 		
 		//Ensure the text field always gets the first focus.
         addComponentListener(new ComponentAdapter() {
@@ -110,10 +95,10 @@ PropertyChangeListener{
         });
         
         //Register an event handler that puts the text into the option pane.
-        textField.addActionListener(this); // cuz implement ActionPerformed
+        textField.addActionListener(this);
         
         //Register an event handler that reacts to option pane state changes.
-        bgPanel.addPropertyChangeListener(this); // cuz implement Property Change Listener
+        bgPanel.addPropertyChangeListener(this);
 	}
 	
 	/** This method handles events for the text field. */
@@ -177,10 +162,16 @@ PropertyChangeListener{
     }
 		
 	
-	/** Add tag to event, clears the dialog and hides it. */
+	/** Add tag with value to event, clears the dialog and hides it. */
     public void finished() {
-    	guiTagModel.setPath(guiTagModel.getParentPath() + "/" + typedText);
-    	appView.enteredSearchTag(tgevt, guiTagModel);
+    	AbstractTagModel newTag = searchView.getTagger().createTransientTagModel(guiTagModel,
+				typedText);
+		GuiTagModel gtm = (GuiTagModel) newTag;
+		gtm.setAppView(searchView.getAppView());
+//		tagModel.setInAddValue(false);
+		
+//    	guiTagModel.setPath(guiTagModel.getParentPath() + "/" + typedText);
+    	searchView.addTagToEvent(gtm);
         setVisible(false);
         dispose();
     }
@@ -214,8 +205,8 @@ PropertyChangeListener{
 				.getUnitClass().split(","));
 		String[] unitsArray = {};
 		for (int i = 0; i < unitClassArray.length; i++) {
-			if (tagger.unitClasses.get(unitClassArray[i]) != null) {
-				String[] units = Tagger.trimStringArray(tagger.unitClasses.get(
+			if (searchView.getTagger().unitClasses.get(unitClassArray[i]) != null) {
+				String[] units = Tagger.trimStringArray(searchView.getTagger().unitClasses.get(
 						unitClassArray[i]).split(","));
 				unitsArray = Tagger.concat(unitsArray, units);
 			}
@@ -230,7 +221,7 @@ PropertyChangeListener{
 	 */
 	private void setDefaultUnit() {
 		String[] unitClassArray = Tagger.trimStringArray(guiTagModel.getUnitClass().split(","));
-		String unitClassDefault = tagger.unitClassDefaults.get(unitClassArray[0]);
+		String unitClassDefault = searchView.getTagger().unitClassDefaults.get(unitClassArray[0]);
 		for (int i = 0; i < unitComboBox.getItemCount(); i++) {
 			if (unitClassDefault.toLowerCase().equals(
 					unitComboBox.getItemAt(i).toString().toLowerCase())) {
@@ -244,12 +235,4 @@ PropertyChangeListener{
 	public String getTypedText() {
 		return typedText;
 	}
-//	public static void main(String[] args) {
-//		JFrame frame = new JFrame();
-//		frame.setSize(600,500);
-//		frame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-//		frame.setVisible(true);
-//		new TagValueInputDialog(frame, null, null);
-//		
-//	}
 }

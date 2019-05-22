@@ -340,6 +340,7 @@ public class RRTagView extends JComponent {
 				refreshView();
 			}
 			appView.updateEventsPanel();
+			appView.scrollToEvent(taggedEvent);
 		}
 	}
 

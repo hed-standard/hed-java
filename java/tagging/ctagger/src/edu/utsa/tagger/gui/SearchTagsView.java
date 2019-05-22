@@ -19,6 +19,7 @@ import java.util.TreeMap;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ActionMap;
+import javax.swing.JComponent;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
@@ -50,16 +51,15 @@ import edu.utsa.tagger.guisupport.ConstraintContainer.Unit;
  * @author Dung
  *
  */
-public class SearchView extends JTextArea{
-	/* Fields */
-	private JLayeredPane container;
-	private JScrollPane cont_container;
+public class SearchTagsView {
+	/* Reference Fields */
 	private TaggedEvent taggedEvent; // Event associated with this search 
-	private Constraint constraint;
 	private TaggerView appView;
 	private Tagger tagger;
 	
-	private JPanel searchResults = new JPanel() {
+	/* Component fields */
+	private JTextArea searchText = new JTextArea("search for tags ...");
+	private JPanel searchResultsPanel = new JPanel() {
 		@Override
 		protected void paintComponent(Graphics g) {
 			Graphics2D g2d = (Graphics2D) g;
@@ -68,24 +68,18 @@ public class SearchView extends JTextArea{
 			g2d.setColor(new Color(200, 200, 200));
 			g2d.draw(new Line2D.Double(6, 0, 6, getHeight() - 5));
 		}
-	};
-	
-	private JScrollPane searchResultsScrollPane; // searchResults is put in a scrollable panel
-	
+	};	
+	private JScrollPane searchResultsScrollPane; // searchResultsPanel is put in a scrollable panel	
 	private int focusedResult = -1;
 	
 	
 	/**
 	 *  Constructor
 	 */
-	public SearchView(TaggerView appView,JScrollPane cont_cont, JLayeredPane container, TaggedEvent taggedEvent, Tagger tagger, Constraint constraint) {
-		super("search for tags ...");
+	public SearchTagsView(TaggerView appView, TaggedEvent taggedEvent, Tagger tagger) {
 		this.appView = appView;
-		this.cont_container = cont_cont;
-		this.container = container;
 		this.taggedEvent = taggedEvent;
 		this.tagger = tagger;
-		this.constraint = constraint;
 		
 		/* Initialize GUI component */
 		init();
@@ -98,39 +92,39 @@ public class SearchView extends JTextArea{
 
 	}
 	
-	/**
-	 * Initialize GUI component
-	 */
+	/* Initialize GUI component */
 	private void init() {
-		this.getDocument().putProperty("filterNewlines", Boolean.TRUE);
-//		this.getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "doNothing");
-//		this.getInputMap().put(KeyStroke.getKeyStroke("TAB"), "doNothing");
-//		this.setText("search for tags ...");
+		searchText.getDocument().putProperty("filterNewlines", Boolean.TRUE);
 		
-		searchResults.setBackground(Color.WHITE);
-		searchResults.setBorder(new DropShadowBorder());
-		searchResults.setLayout(new ListLayout(0, 0, 0, 0));
+		searchResultsPanel.setBackground(Color.WHITE);
+		searchResultsPanel.setBorder(new DropShadowBorder());
+		searchResultsPanel.setLayout(new ListLayout(0, 0, 0, 0));
 		
-		searchResultsScrollPane = new JScrollPane(searchResults);
+		searchResultsScrollPane = new JScrollPane(searchResultsPanel);
 		searchResultsScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		searchResultsScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		searchResultsScrollPane.getVerticalScrollBar().setUnitIncrement(20);
 		searchResultsScrollPane.getHorizontalScrollBar().setUnitIncrement(20);
 		searchResultsScrollPane.setVisible(false);
-		// searchResultsScrollPane need to be at the top layer.
-		this.container.setLayer(searchResultsScrollPane, 1);
-		// Constraint is dynamically updated in TaggerView.updateEventsPanel(). Element in eventsPanel is added in a 
-		// linear order through a loop with updated top position.
-		// We take in the constraint created for the search textfield to add in the search result below the search text
-		this.container.add(searchResultsScrollPane,new Constraint("top:" + (Math.round(this.constraint.getTop())+27) + " height:300 left:" +
-							Math.round(this.constraint.getLeft()) + " right:0"));
+	}
+	/**
+	 * Add the SearchTagsView (search text field and the search result pane) to container given constraint for search text field.
+	 * Search result pane will be put in one layer higher than that of search text field
+	 * @param container		a JLayeredPane container to which the search view will be added
+	 * @param constraint	constraint specifying the position of the search text field
+	 */
+	public void addToContainer(JLayeredPane container, Constraint constraint) {
+		container.add(searchText, constraint);
+		container.setLayer(searchResultsScrollPane, JLayeredPane.getLayer(searchText)+1);
+		container.add(searchResultsScrollPane,new Constraint("top:" + (Math.round(constraint.getTop())+27) + " height:300 left:" +
+				Math.round(constraint.getLeft()) + " right:0"));
 	}
 	
 	/**
 	 * Set action listener
 	 */
 	private void setActionListener() {
-		this.getDocument().addDocumentListener(new DocumentListener() {
+		searchText.getDocument().addDocumentListener(new DocumentListener() {
 			@Override
 			public void changedUpdate(DocumentEvent e) {
 			}
@@ -145,7 +139,7 @@ public class SearchView extends JTextArea{
 				updateSearch();
 			}
 		});
-		this.addFocusListener(new FocusListener() {
+		searchText.addFocusListener(new FocusListener() {
 			@Override
 			public void focusGained(FocusEvent e) {
 				selectAllText();
@@ -164,18 +158,18 @@ public class SearchView extends JTextArea{
 	 * search bar.
 	 */
 	private void updateSearch() {
-		searchResults.removeAll();
+		searchResultsPanel.removeAll();
 		focusedResult = -1;
-		Set<GuiTagModel> tagModels = tagger.getSearchTags(getText());
+		Set<GuiTagModel> tagModels = tagger.getSearchTags(searchText.getText());
 		if (tagModels == null || tagModels.isEmpty()) {
 			searchResultsScrollPane.setVisible(false);
 			return;
 		}
 		for (GuiTagModel tag : tagModels) {
-			searchResults.add(tag.getTagSearchView());
+			searchResultsPanel.add(tag.getTagSearchView());
 		}
-		searchResults.revalidate();
-		searchResults.repaint();
+		searchResultsPanel.revalidate();
+		searchResultsPanel.repaint();
 		searchResultsScrollPane.setVisible(true);
 	}
 
@@ -183,11 +177,11 @@ public class SearchView extends JTextArea{
 	 * Cancels the search, causing any search items displayed to disappear.
 	 */
 	public void cancelSearch() {
-		this.setText(new String());
+		searchText.setText(new String());
 	}
 	
 	private void selectAllText() {
-		this.selectAll();
+		searchText.selectAll();
 	}
 
 
@@ -203,29 +197,29 @@ public class SearchView extends JTextArea{
 
 			@Override
 			public void keyPressed(KeyEvent event) {
-				if (isFocusOwner()) { // if search textfield is focus owner
+				if (searchText.isFocusOwner()) { // if search textfield is focus owner
 					TagSearchView searchResult = null;
 					JScrollBar vertical = searchResultsScrollPane.getVerticalScrollBar();
 					switch (event.getKeyCode()) {
 						case KeyEvent.VK_DOWN:
 							if (focusedResult > -1) { 
-								searchResult = ((TagSearchView)searchResults.getComponent(focusedResult));  // old component
+								searchResult = ((TagSearchView)searchResultsPanel.getComponent(focusedResult));  // old component
 								searchResult.setHover(false);
 							}
-							if (focusedResult == searchResults.getComponentCount()-1)
-								focusedResult = searchResults.getComponentCount()-1;
+							if (focusedResult == searchResultsPanel.getComponentCount()-1)
+								focusedResult = searchResultsPanel.getComponentCount()-1;
 							else
 								focusedResult++;
-							searchResult = ((TagSearchView)searchResults.getComponent(focusedResult));  // new component
+							searchResult = ((TagSearchView)searchResultsPanel.getComponent(focusedResult));  // new component
 							searchResult.setHover(true);
 							
 							if (focusedResult > 0)
 								vertical.setValue(vertical.getValue()+vertical.getUnitIncrement());
-							searchResults.repaint();
+							searchResultsPanel.repaint();
 							break;
 						case KeyEvent.VK_UP:
 							if (focusedResult > -1) {
-								searchResult = ((TagSearchView)searchResults.getComponent(focusedResult));  // old component
+								searchResult = ((TagSearchView)searchResultsPanel.getComponent(focusedResult));  // old component
 								searchResult.setHover(false);
 							}
 							if (focusedResult <= 0) // first key press or reach beginning
@@ -234,21 +228,21 @@ public class SearchView extends JTextArea{
 								vertical.setValue(vertical.getValue()-vertical.getUnitIncrement());
 								focusedResult--;
 							}
-							searchResult = ((TagSearchView)searchResults.getComponent(focusedResult));  // new component
+							searchResult = ((TagSearchView)searchResultsPanel.getComponent(focusedResult));  // new component
 							searchResult.setHover(true);
 							
-							searchResults.repaint();
+							searchResultsPanel.repaint();
 							break;
 						case KeyEvent.VK_ENTER:
-							if (focusedResult > -1 && focusedResult < searchResults.getComponentCount()) {
-								searchResult = (TagSearchView)searchResults.getComponent(focusedResult);
+							if (focusedResult > -1 && focusedResult < searchResultsPanel.getComponentCount()) {
+								searchResult = (TagSearchView)searchResultsPanel.getComponent(focusedResult);
 								GuiTagModel model = searchResult.getModel();
 								if (model.takesValue()) {
-									TagValueInputDialog dialog = new TagValueInputDialog(tagger,appView,model,taggedEvent);
+									TagValueInputDialog dialog = new TagValueInputDialog(SearchTagsView.this,model);
 									dialog.setVisible(true);
 								}
 								else
-									appView.enteredSearchTag(taggedEvent,model);
+									addTagToEvent(model);
 							}
 							break;
 					}
@@ -261,12 +255,42 @@ public class SearchView extends JTextArea{
 				
 			}
 		};
-		addKeyListener(keyListener);
-		searchResults.addKeyListener(keyListener);
+		searchText.addKeyListener(keyListener);
+		searchResultsPanel.addKeyListener(keyListener);
+	}
+
+	/**
+	 * Add tag to the event. Scroll to the event and continue 
+	 * putting search text field in focus
+	 * @param tgevt	the event containing searched tag
+	 * @param tagModel	the tag to include in the event
+	 */
+	public void addTagToEvent(GuiTagModel tagModel) {
+		appView.selectedGroups.clear();
+		appView.selectedGroups.add(taggedEvent.getEventGroupId());	
+		tagModel.requestToggleTag();
+		TaggedEvent tgevt = tagger.getTaggedEventFromGroupId(Collections.max(appView.selectedGroups));
+		tgevt.getSearchView().requestFocusInWindow();
+		appView.scrollToEvent(tgevt);
+	}
+	
+	public void requestFocusInWindow() {
+		// TODO Auto-generated method stub
+		searchText.requestFocusInWindow();
+	}
+
+	public TaggedEvent getTaggedEvent() {
+		return taggedEvent;
+	}
+
+	public TaggerView getAppView() {
+		return appView;
+	}
+
+	public Tagger getTagger() {
+		return tagger;
 	}
 	
 	/* Getters and Setters */
-	public Constraint getConstraint() {
-		return constraint;
-	}
+	
 }

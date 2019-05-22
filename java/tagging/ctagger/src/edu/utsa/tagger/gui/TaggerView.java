@@ -1705,10 +1705,9 @@ public class TaggerView extends ConstraintContainer {
 					}
 				}
 			}
-			Constraint constraint = new Constraint("top:" + top + " height:26 left:30 right:0"); //Constraint for SearchView
-			SearchView searchView = new SearchView(this,eventsScrollPane,eventsPanel,taggedEvent, tagger,constraint);
+			SearchTagsView searchView = new SearchTagsView(this,taggedEvent, tagger);
 			taggedEvent.setSearchView(searchView);
-			eventsPanel.add(searchView,constraint);
+			searchView.addToContainer(eventsPanel, new Constraint("top:" + top + " height:26 left:30 right:0"));
 			top += 27;
 		}
 		eventsPanel.validate();
@@ -1717,30 +1716,8 @@ public class TaggerView extends ConstraintContainer {
 		eventsScrollPane.repaint();
 		validate();
 		repaint();
-		
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				eventsScrollPane.getVerticalScrollBar().setValue(0);
-			}
-		});
 	}
 	
-	/**
-	 * Action after user hit Enter key to select searched tag
-	 * Add tag to the event. Scroll to the event and continue 
-	 * putting search text field in focus
-	 * @param tgevt	the event containing searched tag
-	 * @param tagModel	the tag to include in the event
-	 */
-	public void enteredSearchTag(TaggedEvent tgevt, GuiTagModel tagModel) {
-		selectedGroups.clear();
-		selectedGroups.add(tgevt.getEventGroupId());	
-		tagModel.requestToggleTag();
-		tgevt = tagger.getTaggedEventFromGroupId(Collections.max(selectedGroups));
-		tgevt.getSearchView().requestFocusInWindow();
-		scrollToEvent(tgevt);
-	}
 
 	/**
 	 * Updates the notification at the top of the GUI the the given preview and
