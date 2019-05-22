@@ -72,23 +72,27 @@ public class FileFormatDialog extends JDialog {
 		bgPanel.setPreferredSize(new Dimension(750, 250));
 		int top = 0;
 		label = new JLabel(message, JLabel.CENTER);
-		label.setFont(FontsAndColors.contentFont);
+		label.setFont(FontsAndColors.BASE_HEADER_FONT);
+		label.setForeground(FontsAndColors.BLUE_DARK);
 		bgPanel.add(label, new Constraint("top:0 height:30 left:0 width:750"));
-		xmlButton = TaggerView.createMenuButton("Tag hierarchy in XML");
+		xmlButton = TaggerView.createMenuButton("HED Schema");
+		xmlButton.setToolTipText("A XML file (.xml) containing HED Schema");
 		top += 60;
 		bgPanel.add(xmlButton, new Constraint("top:" + top + " height:30 left:10 right:10"));
 		xmlButton.addMouseListener(new OptionButtonListener(1));
-		jsonButton = TaggerView.createMenuButton("Event list as tab-delimited text");
+		jsonButton = TaggerView.createMenuButton("Event list spreadsheet");
+		jsonButton.setToolTipText("A tab-deliminated file (.tsv) containing event-tag mapping");
 		top += 40;
 		bgPanel.add(jsonButton, new Constraint("top:" + top + " height:30 left:10 right:10"));
 		jsonButton.addMouseListener(new OptionButtonListener(2));
 		if (isStandalone) {
-			tdtButton = TaggerView.createMenuButton("Event list and tag hierarchy in XML");
+			tdtButton = TaggerView.createMenuButton("HED Schema");
 			top += 40;
 			bgPanel.add(tdtButton, new Constraint("top:" + top + " height:30 left:10 right:10"));
 			tdtButton.addMouseListener(new OptionButtonListener(3));
 		} else {
-			tdtButton = TaggerView.createMenuButton("Field map");
+			tdtButton = TaggerView.createMenuButton("MATLAB FieldMap file");
+			tdtButton.setToolTipText("A FieldMap file (.mat) that stores the fMap MATLAB structure containing event-tag mapping");
 			top += 40;
 			bgPanel.add(tdtButton, new Constraint("top:" + top + " height:30 left:10 right:10"));
 			tdtButton.addMouseListener(new OptionButtonListener(4));

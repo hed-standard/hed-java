@@ -53,9 +53,9 @@ public class EventView extends JComponent implements MouseListener {
 		this.appView = appView;
 		this.taggedEvent = taggedEvent;
 		setLayout(layout);
-		checkbox = new XCheckBox(FontsAndColors.TRANSPARENT, Color.black,
-				FontsAndColors.TRANSPARENT, Color.blue,
-				FontsAndColors.TRANSPARENT, Color.blue) {
+		checkbox = new XCheckBox(FontsAndColors.TRANSPARENT, FontsAndColors.BLUE_LIGHT,
+				FontsAndColors.TRANSPARENT, FontsAndColors.BLUE_LIGHT,
+				FontsAndColors.BLUE_MEDIUM, FontsAndColors.BLUE_LIGHT) {
 			@Override
 			public Dimension getPreferredSize() {
 				return new Dimension((int) (ConstraintLayout.scale * 20),
@@ -125,9 +125,10 @@ public class EventView extends JComponent implements MouseListener {
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		if (SwingUtilities.isLeftMouseButton(e)) {
-			appView.selectedGroups.clear();
+//			appView.selectedGroups.clear();
 			appView.selectedGroups.add(groupId);
 			appView.updateEventsPanel();
+			appView.scrollToEvent(taggedEvent);
 		} else if (SwingUtilities.isRightMouseButton(e)) {
 			Map<String, ContextMenuAction> map = new LinkedHashMap<String, ContextMenuAction>();
 			map.put("add group", new ContextMenuAction() {
@@ -222,17 +223,19 @@ public class EventView extends JComponent implements MouseListener {
 
 		g2d.setColor(bg);
 		g2d.fill(SwingUtilities.calculateInnerArea(this, null));
-		if (selected) {
-			g2d.setColor(FontsAndColors.EVENT_SELECTED);
-			g2d.fillRect(0, 0, 30, getHeight());
-		}
+//		if (selected) {
+//			checkbox.setNormalBg(FontsAndColors.BLUE_MEDIUM);
+//			checkbox.setNormalFg(FontsAndColors.BLUE_DARK);
+//			g2d.setColor(FontsAndColors.EVENT_SELECTED);
+//			g2d.fillRect(0, 0, 30, getHeight());
+//		}
 
 		double x = getHeight() / 4 + ConstraintLayout.scale * 30;
 		double y = getHeight() * 0.75;
 
 		g2d.setColor(fg);
 		g2d.setFont(FontsAndColors.contentFont.deriveFont(Font.BOLD));
-		g2d.drawString(taggedEvent.getEventModel().getCode() + ": "
+		g2d.drawString("Code " + taggedEvent.getEventModel().getCode() + ": "
 				+ taggedEvent.getEventModel().getLabel() + " ", (int) x,
 				(int) y);
 	}

@@ -118,17 +118,17 @@ public abstract class FontsAndColors {
 	public static final Color EDITTAG_BORDER = new Color(215, 215, 50);
 
 	public static final Color EVENT_BG_NORMAL = BLUE_DARK;
-	public static final Color EVENT_FG_NORMAL = GREY_DARK;
-	public static final Color EVENT_BG_HOVER = BLUE_LIGHT;
-	public static final Color EVENT_FG_HOVER = BLUE_DARK;
+	public static final Color EVENT_FG_NORMAL = BLUE_LIGHT;
+	public static final Color EVENT_BG_HOVER = BLUE_DARK;
+	public static final Color EVENT_FG_HOVER = BLUE_MEDIUM;
 	public static final Color EVENT_BG_PRESSED = GREY_LIGHT;
 	public static final Color EVENT_FG_PRESSED = GREY_DARK;
 	public static final Color EVENT_BG_SELECTED = SOFT_BLUE;
 	public static final Color EVENT_FG_SELECTED = BLUE_LIGHT;
 	public static final Color EVENT_INFO_BACKGROUND = Color.white;
-	public static final Color EVENT_TAG_REQUIRED = BLUE_DARK;
+	public static final Color EVENT_TAG_REQUIRED = Color.red;
 	public static final Color EVENT_TAG_RECOMMENDED = BLUE_DARK;
-	public static final Color EVENT_SELECTED = BLUE_LIGHT;
+	public static final Color EVENT_SELECTED = BLUE_MEDIUM;
 
 	public static final Color EVENTTAG_BG_NORMAL = TRANSPARENT;
 	public static final Color EVENTTAG_FG_NORMAL = BLUE_DARK;

@@ -149,4 +149,16 @@ public class XCheckBox extends JComponent implements MouseListener {
 	public void setChecked(boolean checkedArg) {
 		checked = checkedArg;
 	}
+	
+	public void setHover(boolean hover) {
+		this.hover = hover;
+	}
+	
+	public void setNormalBg(Color color) {
+		normalBg = color;
+	}
+	
+	public void setNormalFg(Color color) {
+		normalFg = color;
+	}
 }

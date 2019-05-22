@@ -53,7 +53,7 @@ import edu.utsa.tagger.guisupport.XScrollTextBox;
 @SuppressWarnings("serial")
 public class RRTagView extends JComponent {
 
-	private static final int BASE_SIZE = 54;
+	private static int BASE_SIZE = 54;
 	private static final int TAG_SIZE = 27;
 	private final TaggedEvent taggedEvent;
 	private final Tagger tagger;
@@ -85,6 +85,7 @@ public class RRTagView extends JComponent {
 				return FontsAndColors.contentFont.deriveFont(Font.BOLD);
 			}
 		};
+		label.setForeground(FontsAndColors.BLUE_DARK);
 		label.addMouseListener(new LabelListener());
 		this.tagger = tagger;
 		this.appView = appView;
@@ -94,10 +95,17 @@ public class RRTagView extends JComponent {
 		// RR tag with only takes value descendant
 		this.takesValueTag = tagger.getChildValueTag(key);
 		this.tagEgtViews = new HashMap<AbstractTagModel, TagEventView>();
+		if (key.getPath().equals("Event/Description"))
+			BASE_SIZE = 81;
+		else
+			BASE_SIZE = 54;
 		if (takesValueTag != null) {
 			label.setText(key.getPath() + "/" + takesValueTag.getName());
 		}
-		valueField = new XScrollTextBox(new JTextArea());
+		JTextArea textArea = new JTextArea();
+		textArea.setLineWrap(true);
+		textArea.setWrapStyleWord(true);
+		valueField = new XScrollTextBox(textArea);
 		valueField.setBorder(normalBorder);
 		valueField.getJTextArea().getDocument().putProperty("filterNewlines", Boolean.TRUE);
 		valueField.getJTextArea().getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "doNothing");
@@ -357,6 +365,7 @@ public class RRTagView extends JComponent {
 	public void handleCancel() {
 		inAddValue = false;
 		appView.updateEventsPanel();
+		appView.scrollToEvent(taggedEvent);
 	}
 
 	private XButton save = new XButton("save") {
@@ -455,7 +464,12 @@ public class RRTagView extends JComponent {
 			if (key.isUnique()) {
 				valueField.getJTextArea().setText(tagText);
 			}
-			add(valueField, new Constraint("top:" + top + " height:26 left:15 right:20"));
+			if (key.getPath().equals("Event/Description")) {
+				add(valueField, new Constraint("top:" + top + " height:52 left:15 right:20"));
+				top += 26;
+			}
+			else
+				add(valueField, new Constraint("top:" + top + " height:26 left:15 right:20"));
 			add(cancel, new Constraint("top:5 height:20 right:20 width:45"));
 			add(save, new Constraint("top:5 height:20 right:70 width:35"));
 			SwingUtilities.invokeLater(new Runnable() {
@@ -466,7 +480,7 @@ public class RRTagView extends JComponent {
 				}
 			});
 		} else {
-			add(editView, new Constraint("top:" + top + " height:26 left:15 right:20"));
+				add(editView, new Constraint("top:" + top + " height:26 left:15 right:20"));
 		}
 		top += 29;
 		// Adds existing descendant tags to view

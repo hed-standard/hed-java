@@ -266,7 +266,7 @@ public class TaggerView extends ConstraintContainer {
 
 	private int autoCollapseDepth;
 
-	private XButton cancel = createMenuButton("cancel");
+	private XButton cancel = createMenuButton("Cancel");
 
 	/**
 	 * Creates a collapse button.
@@ -308,14 +308,14 @@ public class TaggerView extends ConstraintContainer {
 	};
 
 	private JScrollPane eventsScrollPane;
-	private JLabel eventsTitle = new JLabel("Events") {
+	private JLabel eventsTitle = new JLabel("EVENTS") {
 		@Override
 		public Font getFont() {
 			return FontsAndColors.headerFont;
 		}
 	};
 
-	private XButton close = createMenuButton("close");
+	private XButton close = createMenuButton("Close");
 	/**
 	 * Creates a expand button.
 	 */
@@ -329,15 +329,15 @@ public class TaggerView extends ConstraintContainer {
 	private JFrame frame;
 	private JLabel hoverMessage = new JLabel();
 
-	private XButton load = createMenuButton("load");
+	private XButton load = createMenuButton("Load");
 
 	private TaggerLoader loader;
 	private boolean isStandAloneVersion;
 
 	private Notification notification = new Notification();
-	private XButton proceed = createMenuButton("proceed");
+	private XButton proceed = createMenuButton("Proceed");
 	private XButton redo = new HistoryButton("redo", false);
-	private XButton save = createMenuButton("save");
+	private XButton save = createMenuButton("Save");
 	private JScrollPane searchResultsScrollPane;
 	private JPanel searchResults = new JPanel() {
 		@Override
@@ -372,7 +372,7 @@ public class TaggerView extends ConstraintContainer {
 	private ScrollLayout tagsScrollLayout;
 
 	private JLayeredPane tagsScrollPane = new JLayeredPane();
-	private JLabel tagsTitle = new JLabel("Tags") {
+	private JLabel tagsTitle = new JLabel("TAGS") {
 		@Override
 		public Font getFont() {
 			return FontsAndColors.headerFont;
@@ -1510,7 +1510,7 @@ public class TaggerView extends ConstraintContainer {
 		JTextField field2 = new JTextField("1");
 		JTextField field3 = new JTextField("2");
 		JPanel panel = new JPanel(new GridLayout(0, 1));
-		panel.add(new JLabel("Header Lines:"));
+		panel.add(new JLabel("Header Row:"));
 		panel.add(field1);
 		panel.add(new JLabel("Event Code Column(s):"));
 		panel.add(field2);

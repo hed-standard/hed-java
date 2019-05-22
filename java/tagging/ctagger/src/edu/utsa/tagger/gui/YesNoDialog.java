@@ -59,10 +59,11 @@ public class YesNoDialog extends JDialog {
 	public YesNoDialog(JFrame frame, String message) {
 		super(frame, true);
 		bgPanel.setLayout(new ConstraintLayout());
-		bgPanel.setBackground(Color.white);
+		bgPanel.setBackground(FontsAndColors.BLUE_MEDIUM);
 		bgPanel.setPreferredSize(new Dimension(400, 150));
 		label = new JLabel(message, JLabel.CENTER);
-		label.setFont(FontsAndColors.contentFont);
+		label.setFont(FontsAndColors.BASE_HEADER_FONT);
+		label.setForeground(FontsAndColors.BLUE_DARK);
 		bgPanel.add(label, new Constraint("top:0 height:30 left:0 width:400"));
 		yesButton = TaggerView.createMenuButton("Yes");
 		bgPanel.add(yesButton, new Constraint(
