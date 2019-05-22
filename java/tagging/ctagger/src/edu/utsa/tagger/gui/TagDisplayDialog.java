@@ -75,8 +75,8 @@ public class TagDisplayDialog extends JDialog {
 			g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
 					RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
 
-			Color fg = Color.gray;
-			Color bg = Color.white;
+			Color fg = FontsAndColors.BLUE_DARK;
+			Color bg = FontsAndColors.BLUE_MEDIUM;
 
 			g2d.setColor(bg);
 			g2d.fill(new Rectangle2D.Double(0, 0, getWidth(), getHeight()));
@@ -103,14 +103,14 @@ public class TagDisplayDialog extends JDialog {
 	private JLabel topMessageLabel = new JLabel() {
 		@Override
 		public Font getFont() {
-			return FontsAndColors.contentFont;
+			return FontsAndColors.BASE_MED_FONT;
 		}
 	};
 
 	private JLabel bottomMessageLabel = new JLabel() {
 		@Override
 		public Font getFont() {
-			return FontsAndColors.contentFont;
+			return FontsAndColors.BASE_MED_FONT;
 		}
 	};
 
@@ -140,21 +140,22 @@ public class TagDisplayDialog extends JDialog {
 		this.egtList = egtList;
 
 		bgPanel.setLayout(new ConstraintLayout());
-		bgPanel.setBackground(Color.white);
+		bgPanel.setBackground(FontsAndColors.BLUE_MEDIUM);
 		bgPanel.setPreferredSize(new Dimension(700, 300));
 
 		topMessageLabel.setText(topMessage);
+		topMessageLabel.setForeground(FontsAndColors.BLUE_DARK);
 		okButton = TaggerView.createMenuButton(buttonText);
 		okButton.addMouseListener(new OkButtonListener());
+		tagsPanel.setLayout(new ConstraintLayout());
 		fileScrollLayout = new ScrollLayout(fileScrollPane, tagsPanel);
 		fileScrollPane.setLayout(fileScrollLayout);
-		tagsPanel.setLayout(new ConstraintLayout());
-		tagsPanel.setBackground(Color.white);
-
+		
 		bgPanel.add(topMessageLabel, new Constraint(
 				"top:0 height:30 left:10 width:700"));
 		if (bottomMessage != null) {
 			bottomMessageLabel.setText(bottomMessage);
+			bottomMessageLabel.setForeground(FontsAndColors.BLUE_DARK);
 			bgPanel.add(fileScrollPane, new Constraint(
 					"top:40 bottom:80 left:0 right:0"));
 			bgPanel.add(bottomMessageLabel, new Constraint(
