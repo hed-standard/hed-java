@@ -55,9 +55,6 @@ PropertyChangeListener{
 		searchView = searchTagsView;
 		guiTagModel = gtm;
 		
-		bgPanel.setLayout(new ConstraintLayout());
-		bgPanel.setBackground(Color.white);
-		bgPanel.setPreferredSize(new Dimension(400, 200));
 		
 		// message display
 		populateUnitsComboBox();
@@ -81,7 +78,7 @@ PropertyChangeListener{
 	    						null,
 	    						options,
 	    						options[0]);
-
+		bgPanel.repaint();
 		setContentPane(bgPanel);
         
         pack();

@@ -43,10 +43,12 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
+import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.plaf.ColorUIResource;
 
 import edu.utsa.tagger.AbstractTagModel;
 import edu.utsa.tagger.EventModel;
@@ -684,6 +686,11 @@ public class TaggerView extends ConstraintContainer {
 		setOpaque(true);
 		setBackground(FontsAndColors.APP_BG);
 
+		// Set default panel and option pane background color
+		UIManager UI=new UIManager();
+		UI.put("OptionPane.background",new ColorUIResource(FontsAndColors.BLUE_MEDIUM));
+		UI.put("Panel.background",new ColorUIResource(FontsAndColors.BLUE_MEDIUM));
+		
 		zoomPercent.setFont(FontsAndColors.contentFont);
 		zoomPercent.setForeground(FontsAndColors.GREY_DARK);
 
@@ -1510,12 +1517,14 @@ public class TaggerView extends ConstraintContainer {
 		JTextField field2 = new JTextField("1");
 		JTextField field3 = new JTextField("2");
 		JPanel panel = new JPanel(new GridLayout(0, 1));
+		
 		panel.add(new JLabel("Header Row:"));
 		panel.add(field1);
 		panel.add(new JLabel("Event Code Column(s):"));
 		panel.add(field2);
 		panel.add(new JLabel("Tag Column(s):"));
 		panel.add(field3);
+		panel.setBackground(FontsAndColors.BLUE_MEDIUM);
 		String[] tabSeparatedOptions = {};
 		boolean validInput = false;
 		int result = 0;
@@ -1707,7 +1716,7 @@ public class TaggerView extends ConstraintContainer {
 			}
 			SearchTagsView searchView = new SearchTagsView(this,taggedEvent, tagger);
 			taggedEvent.setSearchView(searchView);
-			searchView.addToContainer(eventsPanel, new Constraint("top:" + top + " height:26 left:30 right:0"));
+			searchView.addToContainer(eventsPanel, new Constraint("top:" + top + " height:26 left:15 right:20"));
 			top += 27;
 		}
 		eventsPanel.validate();
