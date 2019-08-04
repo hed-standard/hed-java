@@ -49,7 +49,7 @@ public class TagSearchView extends JComponent implements MouseListener {
 				if (SwingUtilities.isLeftMouseButton(e)) {
 					tagger.openToClosest(model);
 					appView.cancelSearch();
-					appView.updateTags();
+					appView.updateTagsPanel();
 					appView.scrollToTag(model);
 				}
 			}

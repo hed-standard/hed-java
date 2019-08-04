@@ -205,8 +205,8 @@ public class TagDisplayDialog extends JDialog {
 		String eventString = taggedEvent.getEventModel().getCode() + ": "
 				+ taggedEvent.getLabel();
 		String message = egt.getTagModel().getPath() + " in";
-		if (egt.getGroupId() != taggedEvent.getEventGroupId()) {
-			int groupNumber = taggedEvent.getGroupNumber(egt.getGroupId());
+		if (egt.getGroupId() != taggedEvent.getEventLevelId()) {
+			int groupNumber = taggedEvent.getGroupId(egt.getGroupId());
 			message += " group " + groupNumber + " of";
 		}
 		message += " event " + eventString;

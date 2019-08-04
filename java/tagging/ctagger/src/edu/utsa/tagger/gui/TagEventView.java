@@ -72,13 +72,12 @@ public class TagEventView extends JComponent implements MouseListener {
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		if (SwingUtilities.isLeftMouseButton(e)) {
-			// GuiTagModel tagMatch = (GuiTagModel) tagger.openToClosest(model);
-			appView.updateTags();
-			appView.scrollToTag(model);
+            this.appView.updateTagsPanel();
+            this.appView.scrollToTag(this.model);
 		} else if (SwingUtilities.isRightMouseButton(e)) {
-			Map<String, ContextMenuAction> map = new LinkedHashMap<String, ContextMenuAction>();
-			TaggedEvent taggedEvent = tagger.getEventByGroupId(groupId);
-			if (taggedEvent.getEventGroupId() != groupId) {
+            Map<String, ContextMenuAction> map = new LinkedHashMap();
+            TaggedEvent taggedEvent = this.tagger.getEventByGroupId(this.groupId);
+            if (taggedEvent.getEventLevelId() != this.groupId) {
 				map.put("add ~ before", new ContextMenuAction() {
 					@Override
 					public void doAction() {
@@ -108,7 +107,7 @@ public class TagEventView extends JComponent implements MouseListener {
 				@Override
 				public void doAction() {
 					if ("Event/Label/".equals(model.getParentPath())) {
-						TaggerSet<TaggedEvent> taggedEvents = tagger.getEgtSet();
+						TaggerSet<TaggedEvent> taggedEvents = tagger.getEventSet();
 						for (TaggedEvent taggedEvent : taggedEvents) {
 							if (taggedEvent.containsTagInGroup(groupId, model)) {
 								tagger.editEventCodeLabel(taggedEvent, model, taggedEvent.getEventModel().getCode(),
@@ -131,7 +130,7 @@ public class TagEventView extends JComponent implements MouseListener {
 		int numTildes = 0;
 		TaggedEvent taggedEvent = tagger.getEventByGroupId(groupId);
 		if (taggedEvent != null) {
-			numTildes = taggedEvent.findNumTildes(groupId);
+			numTildes = taggedEvent.findGroupTildeCount(groupId);
 		}
 		if (numTildes < MAX_GROUP_TILDES) {
 			GuiTagModel newTag = (GuiTagModel) tagger.getFactory().createAbstractTagModel(tagger);

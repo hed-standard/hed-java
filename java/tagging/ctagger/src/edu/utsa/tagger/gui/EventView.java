@@ -36,11 +36,10 @@ import edu.utsa.tagger.guisupport.XCheckBox.StateListener;
  */
 @SuppressWarnings("serial")
 public class EventView extends JComponent implements MouseListener {
-
-	private final Tagger tagger;
-	private final TaggerView appView;
-	private final TaggedEvent taggedEvent;
-	private int groupId;
+    private static Tagger tagger;
+    private static TaggerView taggerView;
+    private TaggedEvent taggedEvent;
+    private int id;
 	private int currentPosition;
 	private boolean highlight = false;
 	private boolean pressed = false;
@@ -50,9 +49,20 @@ public class EventView extends JComponent implements MouseListener {
 
 	public EventView(Tagger tagger, TaggerView appView, TaggedEvent taggedEvent) {
 		this.tagger = tagger;
-		this.appView = appView;
+		this.taggerView = appView;
 		this.taggedEvent = taggedEvent;
+		createLayout();
+	}
+
+	private void createLayout() {
+		createCheckbox();
 		setLayout(layout);
+
+		addMouseListener(this);
+		new ClickDragThreshold(this);
+	}
+
+	private void createCheckbox() {
 		checkbox = new XCheckBox(FontsAndColors.TRANSPARENT, Color.black,
 				FontsAndColors.TRANSPARENT, Color.blue,
 				FontsAndColors.TRANSPARENT, Color.blue) {
@@ -64,21 +74,13 @@ public class EventView extends JComponent implements MouseListener {
 		};
 		checkbox.addStateListener(new CheckBoxListener());
 		add(checkbox);
-		addMouseListener(this);
-		new ClickDragThreshold(this);
 	}
 
 	private class CheckBoxListener implements StateListener {
 
 		@Override
-		public void stateChanged() {
-			if (appView.selectedGroups.contains(groupId)) {
-				appView.selectedGroups.remove(groupId);
-				setSelected(false);
-			} else {
-				appView.selectedGroups.add(groupId);
-				setSelected(true);
-			}
+		public void changeState() {
+			checkState();
 		}
 
 	}
@@ -111,6 +113,16 @@ public class EventView extends JComponent implements MouseListener {
 		}
 
 	};
+	private void checkState() {
+		if (taggerView.isSelected(this.id)) {
+			taggerView.removeSelectedEvent(this.id);
+			this.setSelected(false);
+		} else {
+			taggerView.addSelectedEvent(this.id);
+			this.setSelected(true);
+		}
+
+	}
 
 	public int getCurrentPosition() {
 		return currentPosition;
@@ -125,17 +137,15 @@ public class EventView extends JComponent implements MouseListener {
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		if (SwingUtilities.isLeftMouseButton(e)) {
-			appView.selectedGroups.clear();
-			appView.selectedGroups.add(groupId);
-			appView.updateEventsPanel();
+			checkState();
 		} else if (SwingUtilities.isRightMouseButton(e)) {
 			Map<String, ContextMenuAction> map = new LinkedHashMap<String, ContextMenuAction>();
 			map.put("add group", new ContextMenuAction() {
 				@Override
 				public void doAction() {
 					int groupId = tagger.addNewGroup(taggedEvent);
-					appView.updateEventsPanel();
-					appView.scrollToNewGroup(taggedEvent, groupId);
+					taggerView.updateEventsPanel();
+					taggerView.scrollToNewGroup(taggedEvent, groupId);
 				}
 			});
 			if (!taggedEvent.showInfo()) {
@@ -143,7 +153,7 @@ public class EventView extends JComponent implements MouseListener {
 					@Override
 					public void doAction() {
 						taggedEvent.setShowInfo(true);
-						appView.updateEventsPanel();
+						taggerView.updateEventsPanel();
 					}
 				});
 			} else {
@@ -151,7 +161,7 @@ public class EventView extends JComponent implements MouseListener {
 					@Override
 					public void doAction() {
 						taggedEvent.setShowInfo(false);
-						appView.updateEventsPanel();
+						taggerView.updateEventsPanel();
 					}
 				});
 			}
@@ -160,7 +170,7 @@ public class EventView extends JComponent implements MouseListener {
 					@Override
 					public void doAction() {
 						taggedEvent.setInEdit(true);
-						appView.updateEventsPanel();
+						taggerView.updateEventsPanel();
 					}
 				});
 			}
@@ -168,10 +178,10 @@ public class EventView extends JComponent implements MouseListener {
 				@Override
 				public void doAction() {
 					tagger.removeEvent(taggedEvent);
-					appView.updateEventsPanel();
+					taggerView.updateEventsPanel();
 				}
 			});
-			appView.showContextMenu(map, 205);
+			taggerView.showContextMenu(map, 205);
 		}
 	}
 
@@ -241,8 +251,8 @@ public class EventView extends JComponent implements MouseListener {
 		this.currentPosition = position;
 	}
 
-	public void setGroupId(int groupId) {
-		this.groupId = groupId;
+	public void setGroupId(int id) {
+		this.id = id;
 	}
 
 	public void setSelected(boolean selected) {

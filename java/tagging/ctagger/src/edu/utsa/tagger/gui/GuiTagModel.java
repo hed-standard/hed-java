@@ -25,6 +25,7 @@ public class GuiTagModel extends AbstractTagModel {
 	private TaggerView appView;
 	private TagView tagView;
 	private TagEditView tagEditView;
+    private AddValueView addValueView;
 	private TagChooserView tagChooserView;
 
 	private boolean inEdit;
@@ -51,7 +52,11 @@ public class GuiTagModel extends AbstractTagModel {
 	 * @return
 	 */
 	public AddValueView getAddValueView() {
-		return new AddValueView(tagger, appView, this);
+        if (this.addValueView == null) {
+            this.addValueView = new AddValueView(this.tagger, this.appView, this);
+        }
+
+        return this.addValueView;
 	}
 
 	/**
@@ -101,12 +106,12 @@ public class GuiTagModel extends AbstractTagModel {
 		return new RRTagView(tagger, appView, taggedEvent, this);
 	}
 
-	public TagEventEditView getTagEgtEditView(TaggedEvent taggedEvent) {
-		return new TagEventEditView(tagger, taggedEvent, this);
+    public TagEventEditView getTagEventEditView(TaggedEvent taggedEvent) {
+        return new TagEventEditView(this.tagger, taggedEvent, this);
 	}
 
-	public TagEventView getTagEgtView(int groupId) {
-		return new TagEventView(tagger, appView, groupId, this, false);
+    public TagEventView getTagEventView(int groupId) {
+        return new TagEventView(this.tagger, this.appView, groupId, this, false);
 	}
 
 	/**
@@ -159,7 +164,7 @@ public class GuiTagModel extends AbstractTagModel {
 	 * selected for tagging.
 	 */
 	public void requestToggleTag() {
-		requestToggleTag(appView.selectedGroups);
+        this.requestToggleTag(this.appView.getSelected());
 	}
 
 	/**
@@ -231,6 +236,8 @@ public class GuiTagModel extends AbstractTagModel {
 	 * Updates whether the tag is missing from the hierarchy.
 	 */
 	public void updateMissing() {
-		tagger.updateMissing(this);
-	}
+        this.tagger.updateMissing(this);
+    }
+
+
 }

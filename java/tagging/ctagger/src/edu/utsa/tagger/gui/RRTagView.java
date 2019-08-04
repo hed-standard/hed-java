@@ -64,9 +64,27 @@ public class RRTagView extends JComponent {
 	private int numEditTags;
 	private AbstractTagModel key;
 	private TaggerSet<AbstractTagModel> values;
-	private HashMap<AbstractTagModel, TagEventView> tagEgtViews;
+    private HashMap<AbstractTagModel, TagEventView> tagEventViews;
 	private boolean inAddValue = false;
+	private XButton save = new XButton("save") {
+		@Override
+		public Font getFont() {
+			Map<TextAttribute, Integer> fontAttributes = new HashMap<TextAttribute, Integer>();
+			fontAttributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
+			return FontsAndColors.contentFont.deriveFont(fontAttributes);
+		}
+	};
 
+	private XButton cancel = new XButton("cancel") {
+		@Override
+		public Font getFont() {
+			Map<TextAttribute, Integer> fontAttributes = new HashMap<TextAttribute, Integer>();
+			fontAttributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
+			return FontsAndColors.contentFont.deriveFont(fontAttributes);
+		}
+	};
+
+	private Border normalBorder = BorderFactory.createLineBorder(Color.black);
 	/**
 	 * Constructor finds descendant tags and creates the view.
 	 * 
@@ -78,12 +96,6 @@ public class RRTagView extends JComponent {
 	 *            The required/recommended tag
 	 */
 	public RRTagView(Tagger tagger, TaggerView appView, TaggedEvent taggedEvent, AbstractTagModel key) {
-		label = new JLabel(key.getPath()) {
-			@Override
-			public Font getFont() {
-				return FontsAndColors.contentFont.deriveFont(Font.BOLD);
-			}
-		};
 		label.addMouseListener(new LabelListener());
 		this.tagger = tagger;
 		this.appView = appView;
@@ -92,18 +104,54 @@ public class RRTagView extends JComponent {
 		this.values = taggedEvent.getRRValue(key);
 		// RR tag with only takes value descendant
 		this.takesValueTag = tagger.getChildValueTag(key);
-		this.tagEgtViews = new HashMap<AbstractTagModel, TagEventView>();
-		if (takesValueTag != null) {
-			label.setText(key.getPath() + "/" + takesValueTag.getName());
-		}
+        this.tagEventViews = new HashMap();
+        this.createLayout();
+	}
+
+	private void createLayout() {
 		valueField = new XScrollTextBox(new JTextArea());
 		valueField.setBorder(normalBorder);
+		label = new JLabel(key.getPath()) {
+			@Override
+			public Font getFont() {
+				return FontsAndColors.contentFont.deriveFont(Font.BOLD);
+			}
+		};
+		this.label.addMouseListener(new RRTagView.LabelListener());
+		this.setLayout(new ConstraintLayout());
+		this.setListners();
+		this.setColors();
+		this.refreshView();
+	}
+
+	private void setListners() {
 		valueField.getJTextArea().getDocument().putProperty("filterNewlines", Boolean.TRUE);
 		valueField.getJTextArea().getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "doNothing");
 		valueField.getJTextArea().getInputMap().put(KeyStroke.getKeyStroke("TAB"), "doNothing");
-		valueField.getJTextArea().getDocument().addDocumentListener(new valueFieldListener());
-		editView = new RREditView();
-		// No value(s) for this RR tag - highlight label
+		valueField.getJTextArea().addFocusListener(new FocusListener() {
+			public void focusGained(FocusEvent e) {
+				RRTagView.this.valueField.getJTextArea().selectAll();
+			}
+
+			public void focusLost(FocusEvent e) {
+			}
+		});
+		save.addMouseListener(new SaveListener());
+		cancel.addMouseListener(new CancelListener());
+		this.valueField.getJTextArea().addKeyListener(new KeyListener() {
+			public void keyTyped(KeyEvent e) {
+			}
+
+			public void keyPressed(KeyEvent e) {
+			}
+
+			public void keyReleased(KeyEvent e) {
+				if (e.getKeyCode() == 10) {
+					RRTagView.this.save();
+				}
+
+			}
+		});
 		if (key.isChildRequired() && values == null) {
 			if (key.isRequired()) {
 				label.setForeground(FontsAndColors.EVENT_TAG_REQUIRED);
@@ -111,22 +159,9 @@ public class RRTagView extends JComponent {
 				label.setForeground(FontsAndColors.EVENT_TAG_RECOMMENDED);
 			}
 		}
+	}
 
-		valueField.getJTextArea().addFocusListener(new FocusListener() {
-			@Override
-			public void focusGained(FocusEvent e) {
-				valueField.getJTextArea().selectAll();
-			}
-
-			@Override
-			public void focusLost(FocusEvent e) {
-			}
-		});
-
-		save.addMouseListener(new SaveButtonListener());
-
-		cancel.addMouseListener(new CancelButtonListener());
-
+	private void setColors() {
 		save.setNormalBackground(FontsAndColors.TRANSPARENT);
 		save.setNormalForeground(FontsAndColors.SOFT_BLUE);
 		save.setHoverBackground(FontsAndColors.TRANSPARENT);
@@ -139,45 +174,195 @@ public class RRTagView extends JComponent {
 		cancel.setHoverForeground(Color.BLACK);
 		cancel.setPressedBackground(FontsAndColors.TRANSPARENT);
 		cancel.setPressedForeground(FontsAndColors.SOFT_BLUE);
+	}
 
-		valueField.getJTextArea().addKeyListener(new KeyListener() {
+	public void save() {
+		AbstractTagModel newTag = this.getNewValue();
+		if (this.takesValueTag != null) {
+			this.updateTakesValueTag(newTag);
+		} else if (newTag != null) {
+			this.updateValue(newTag);
+		} else {
+			this.inAddValue = false;
+			this.refreshView();
+		}
 
-			@Override
-			public void keyTyped(KeyEvent e) {
-				// TODO Auto-generated method stub
+		this.appView.updateEventsPanel();
+	}
 
+	public void cancel() {
+		this.inAddValue = false;
+		this.appView.updateEventsPanel();
+	}
+
+	private void editTag() {
+		if (this.takesValueTag != null) {
+			this.inAddValue = true;
+			this.refreshView();
+		} else {
+			AbstractTagModel tagChosen = this.appView.showTagChooserDialog(this.getKey());
+			if (tagChosen != null) {
+				this.updateValue(tagChosen);
 			}
-
-			@Override
-			public void keyPressed(KeyEvent e) {
-
-			}
-
-			@Override
-			public void keyReleased(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					handleSave();
-				}
-			}
-
-		});
-
-		setLayout(new ConstraintLayout());
-		refreshView();
-
+		}
 	}
 
 	/**
-	 * Used to scroll to the required/recommended tag's place in the tag panel
-	 * when the label is clicked.
+	 * Returns the height needed to add this view to a Constraint layout.
+	 *
+	 * @return Desired height as an int
 	 */
-	private class LabelListener extends MouseAdapter {
+	public int getConstraintHeight() {
+		int numTags = 0;
+		if (!key.isUnique() && values != null) {
+			numTags = values.size();
+		}
+		return BASE_SIZE + TAG_SIZE * numTags + TagEventEditView.HEIGHT * numEditTags;
+	}
+	public AbstractTagModel getKey() {
+		return key;
+	}
+	/**
+	 * Finds the required/recommended tag chosen.
+	 *
+	 * @return The tag model for the tag chosen, if one exists. Returns null if
+	 *         a tag has not been chosen (or a value has not been entered, for a
+	 *         tag with a child that takes a value). For a tag with a child that
+	 *         takes a value, if the text field is currently empty, but
+	 *         previously contained a value, it will return the tag model for
+	 *         the previous tag represented (i.e. a user cannot use the edit
+	 *         field to remove an existing required/recommended tag).
+	 */
+	private AbstractTagModel getNewValue() {
+		if (valueField != null && !valueField.getJTextArea().getText().isEmpty()) {
+			String valueText = valueField.getJTextArea().getText().trim();
+			return tagger.createTransientTagModel(takesValueTag, valueText);
+		}
+		return null;
+	}
+	/**
+	 * Refreshes the view to show a text box for editing a tag with a single
+	 * takes value descendant.
+	 */
+	private void refreshView() {
+		removeAll();
+		int top = 5;
+		add(label, new Constraint("top:" + top + " height:20 left:5 right:105"));
+		top += 23;
+		if (inAddValue) {
+			String tagText = "";
+			TaggerSet<AbstractTagModel> valueTags = taggedEvent.getRRValue(key);
+			if (valueTags != null && key.isUnique()) {
+				tagText = valueTags.get(0).getName();
+				String valueString = takesValueTag.getName();
+				String before = valueString.substring(0, valueString.indexOf('#'));
+				String after = valueString.substring(valueString.indexOf('#') + 1);
+				tagText = tagText.replaceFirst(before, "");
+				tagText = tagText.replaceFirst(after + "$", "");
+			}
+			if (key.isUnique()) {
+				valueField.getJTextArea().setText(tagText);
+			}
+			add(valueField, new Constraint("top:" + top + " height:26 left:15 right:20"));
+			add(cancel, new Constraint("top:5 height:20 right:20 width:45"));
+			add(save, new Constraint("top:5 height:20 right:70 width:35"));
+			SwingUtilities.invokeLater(new Runnable() {
+				@Override
+				public void run() {
+					valueField.getJTextArea().requestFocusInWindow();
+					valueField.getJTextArea().selectAll();
+				}
+			});
+		} else {
+			add(editView, new Constraint("top:" + top + " height:26 left:15 right:20"));
+		}
+		top += 29;
+		// Adds existing descendant tags to view
+		if (!key.isUnique() && values != null) {
+			numEditTags = 0;
+			for (AbstractTagModel valueTag : values) {
+				GuiTagModel gtm = (GuiTagModel) valueTag;
+				gtm.setAppView(appView);
+				gtm.updateMissing();
+				TagEventView tagEgtView = gtm.getTagEventView(taggedEvent.getEventLevelId());
+				addTagEgtView(valueTag, tagEgtView);
+				add(tagEgtView, new Constraint("top:" + top + " height:26 left:30 right:0"));
+				top += TAG_SIZE;
+				if (gtm.isInEdit()) {
+					TagEventEditView teev = gtm.getTagEventEditView(taggedEvent);
+					teev.setAppView(appView);
+					teev.update();
+					add(teev, new Constraint("top:" + top + " height:" + TagEventEditView.HEIGHT + " left:30 right:0"));
+					top += TagEventEditView.HEIGHT;
+					numEditTags++;
+				}
+			}
+		}
+		revalidate();
+		repaint();
+	}
+	public void setKey(AbstractTagModel key) {
+		this.key = key;
+	}
+
+	/**
+	 * Updates the value for a required/recommended tag. Replaces the child tag
+	 * if it is unique, and attempts to add the child tag otherwise.
+	 *
+	 * @param newTag
+	 */
+	private void updateValue(AbstractTagModel newTag) {
+		HashSet<Integer> idSet = new HashSet<Integer>();
+		idSet.add(taggedEvent.getEventLevelId());
+		// Unassociate old value if unique
+		if (values != null && key.isUnique()) {
+			tagger.unassociate(taggedEvent.getEventModel(), values.get(0), idSet);
+		}
+		// Associate new value
+		GuiTagModel gtm = (GuiTagModel) newTag;
+		gtm.setAppView(appView);
+		gtm.requestToggleTag(idSet);
+	}
+
+	private void updateTakesValueTag(AbstractTagModel newTag) {
+		// Unassociate old value if unique
+		if (values != null && key.isUnique()) {
+			String path = values.get(0).getParentPath() + "/" + valueField.getJTextArea().getText().trim();
+			tagger.editTagPath(taggedEvent, (GuiTagModel) values.get(0), path);
+		} else {
+			updateValue(newTag);
+		}
+	}
+
+
+	public void addTagEgtView(AbstractTagModel tagModel, TagEventView tagEgtView) {
+		tagEventViews.put(tagModel, tagEgtView);
+	}
+
+	public TagEventView getTagEgtViewByKey(AbstractTagModel tagModel) {
+		return tagEventViews.get(tagModel);
+	}
+
+	/**
+	 * Used to save a value entered for a tag that takes a value.
+	 */
+	private class CancelListener extends MouseAdapter {
 		@Override
+		public void mouseClicked(MouseEvent e) {
+			cancel();
+		}
+	}
+	/**
+		 * Used to scroll to the required/recommended tag's place in the tag panel
+		 * when the label is clicked.
+		 */
+		private class LabelListener extends MouseAdapter {
+			@Override
 		public void mouseClicked(MouseEvent e) {
 			if (SwingUtilities.isLeftMouseButton(e)) {
 				// GuiTagModel tagMatch = (GuiTagModel)
 				// tagger.openToClosest(key);
-				appView.updateTags();
+				appView.updateTagsPanel();
 				appView.scrollToTag(key);
 			}
 		}
@@ -219,11 +404,10 @@ public class RRTagView extends JComponent {
 
 		@Override
 		public void mousePressed(MouseEvent e) {
-			if (!SwingUtilities.isLeftMouseButton(e)) {
-				return;
+            if (SwingUtilities.isLeftMouseButton(e)) {
+                this.pressed = true;
+                this.repaint();
 			}
-			pressed = true;
-			repaint();
 		}
 
 		@Override
@@ -277,249 +461,16 @@ public class RRTagView extends JComponent {
 		}
 	}
 
-	private class valueFieldListener implements DocumentListener {
-
-		@Override
-		public void changedUpdate(DocumentEvent e) {
-			if (!valueField.getJTextArea().getText().trim().isEmpty()) {
-				save.setEnabled(true);
-				save.setVisible(true);
-			} else {
-				save.setEnabled(false);
-				save.setVisible(false);
-			}
-		}
-
-		@Override
-		public void insertUpdate(DocumentEvent e) {
-			if (!valueField.getJTextArea().getText().trim().isEmpty()) {
-				save.setEnabled(true);
-				save.setVisible(true);
-			}
-		}
-
-		@Override
-		public void removeUpdate(DocumentEvent e) {
-			if (valueField.getJTextArea().getText().trim().isEmpty()) {
-				save.setEnabled(false);
-				save.setVisible(false);
-			}
-		}
-	}
 
 	/**
 	 * Used to save a value entered for a tag that takes a value.
 	 */
-	private class SaveButtonListener extends MouseAdapter {
+	private class SaveListener extends MouseAdapter {
 		@Override
 		public void mouseClicked(MouseEvent e) {
-			handleSave();
+			save();
 		}
 	}
 
-	public void handleSave() {
-		if (save.isEnabled()) {
-			AbstractTagModel newTag = getNewValue();
-			if (takesValueTag != null) {
-				updateTakesValueTag(newTag);
-			} else if (newTag != null) {
-				updateValue(newTag);
-			} else {
-				inAddValue = false;
-				refreshView();
-			}
-			appView.updateEventsPanel();
-		}
-	}
 
-	/**
-	 * Used to save a value entered for a tag that takes a value.
-	 */
-	private class CancelButtonListener extends MouseAdapter {
-		@Override
-		public void mouseClicked(MouseEvent e) {
-			handleCancel();
-		}
-	}
-
-	public void handleCancel() {
-		inAddValue = false;
-		appView.updateEventsPanel();
-	}
-
-	private XButton save = new XButton("save") {
-		@Override
-		public Font getFont() {
-			Map<TextAttribute, Integer> fontAttributes = new HashMap<TextAttribute, Integer>();
-			fontAttributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
-			return FontsAndColors.contentFont.deriveFont(fontAttributes);
-		}
-	};
-
-	private XButton cancel = new XButton("cancel") {
-		@Override
-		public Font getFont() {
-			Map<TextAttribute, Integer> fontAttributes = new HashMap<TextAttribute, Integer>();
-			fontAttributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
-			return FontsAndColors.contentFont.deriveFont(fontAttributes);
-		}
-	};
-
-	private Border normalBorder = BorderFactory.createLineBorder(Color.black);
-
-	/**
-	 * Edits the value of the tag. If the tag has one child that takes a value,
-	 * it opens a text box to get the value. Otherwise, it launches a tag
-	 * chooser dialog.
-	 */
-	private void editTag() {
-		if (takesValueTag != null) {
-			inAddValue = true;
-			RRTagView.this.refreshView();
-		} else {
-			AbstractTagModel tagChosen = appView.showTagChooserDialog(getKey());
-			if (tagChosen != null) {
-				updateValue(tagChosen);
-			}
-		}
-	}
-
-	/**
-	 * Returns the height needed to add this view to a Constraint layout.
-	 * 
-	 * @return Desired height as an int
-	 */
-	public int getConstraintHeight() {
-		int numTags = 0;
-		if (!key.isUnique() && values != null) {
-			numTags = values.size();
-		}
-		return BASE_SIZE + TAG_SIZE * numTags + TagEventEditView.HEIGHT * numEditTags;
-	}
-
-	public AbstractTagModel getKey() {
-		return key;
-	}
-
-	/**
-	 * Finds the required/recommended tag chosen.
-	 * 
-	 * @return The tag model for the tag chosen, if one exists. Returns null if
-	 *         a tag has not been chosen (or a value has not been entered, for a
-	 *         tag with a child that takes a value). For a tag with a child that
-	 *         takes a value, if the text field is currently empty, but
-	 *         previously contained a value, it will return the tag model for
-	 *         the previous tag represented (i.e. a user cannot use the edit
-	 *         field to remove an existing required/recommended tag).
-	 */
-	private AbstractTagModel getNewValue() {
-		if (valueField != null && !valueField.getJTextArea().getText().isEmpty()) {
-			String valueText = valueField.getJTextArea().getText().trim();
-			return tagger.createTransientTagModel(takesValueTag, valueText);
-		}
-		return null;
-	}
-
-	/**
-	 * Refreshes the view to show a text box for editing a tag with a single
-	 * takes value descendant.
-	 */
-	private void refreshView() {
-		removeAll();
-		int top = 5;
-		add(label, new Constraint("top:" + top + " height:20 left:5 right:105"));
-		top += 23;
-		if (inAddValue) {
-			String tagText = "";
-			TaggerSet<AbstractTagModel> valueTags = taggedEvent.getRRValue(key);
-			if (valueTags != null && key.isUnique()) {
-				tagText = valueTags.get(0).getName();
-				String valueString = takesValueTag.getName();
-				String before = valueString.substring(0, valueString.indexOf('#'));
-				String after = valueString.substring(valueString.indexOf('#') + 1);
-				tagText = tagText.replaceFirst(before, "");
-				tagText = tagText.replaceFirst(after + "$", "");
-			}
-			if (key.isUnique()) {
-				valueField.getJTextArea().setText(tagText);
-			}
-			add(valueField, new Constraint("top:" + top + " height:26 left:15 right:20"));
-			add(cancel, new Constraint("top:5 height:20 right:20 width:45"));
-			add(save, new Constraint("top:5 height:20 right:70 width:35"));
-			SwingUtilities.invokeLater(new Runnable() {
-				@Override
-				public void run() {
-					valueField.getJTextArea().requestFocusInWindow();
-					valueField.getJTextArea().selectAll();
-				}
-			});
-		} else {
-			add(editView, new Constraint("top:" + top + " height:26 left:15 right:20"));
-		}
-		top += 29;
-		// Adds existing descendant tags to view
-		if (!key.isUnique() && values != null) {
-			numEditTags = 0;
-			for (AbstractTagModel valueTag : values) {
-				GuiTagModel gtm = (GuiTagModel) valueTag;
-				gtm.setAppView(appView);
-				gtm.updateMissing();
-				TagEventView tagEgtView = gtm.getTagEgtView(taggedEvent.getEventGroupId());
-				addTagEgtView(valueTag, tagEgtView);
-				add(tagEgtView, new Constraint("top:" + top + " height:26 left:30 right:0"));
-				top += TAG_SIZE;
-				if (gtm.isInEdit()) {
-					TagEventEditView teev = gtm.getTagEgtEditView(taggedEvent);
-					teev.setAppView(appView);
-					teev.update();
-					add(teev, new Constraint("top:" + top + " height:" + TagEventEditView.HEIGHT + " left:30 right:0"));
-					top += TagEventEditView.HEIGHT;
-					numEditTags++;
-				}
-			}
-		}
-		revalidate();
-		repaint();
-	}
-
-	public void setKey(AbstractTagModel key) {
-		this.key = key;
-	}
-
-	/**
-	 * Updates the value for a required/recommended tag. Replaces the child tag
-	 * if it is unique, and attempts to add the child tag otherwise.
-	 * 
-	 * @param newTag
-	 */
-	private void updateValue(AbstractTagModel newTag) {
-		HashSet<Integer> idSet = new HashSet<Integer>();
-		idSet.add(taggedEvent.getEventGroupId());
-		// Unassociate old value if unique
-		if (values != null && key.isUnique()) {
-			tagger.unassociate(taggedEvent.getEventModel(), values.get(0), idSet);
-		}
-		// Associate new value
-		GuiTagModel gtm = (GuiTagModel) newTag;
-		gtm.setAppView(appView);
-		gtm.requestToggleTag(idSet);
-	}
-
-	private void updateTakesValueTag(AbstractTagModel newTag) {
-		// Unassociate old value if unique
-		if (values != null && key.isUnique()) {
-			String path = values.get(0).getParentPath() + "/" + valueField.getJTextArea().getText().trim();
-			tagger.editTagPath(taggedEvent, (GuiTagModel) values.get(0), path);
-		} else {
-			updateValue(newTag);
-		}
-	}
-
-	public void addTagEgtView(AbstractTagModel tagModel, TagEventView tagEgtView) {
-		tagEgtViews.put(tagModel, tagEgtView);
-	}
-
-	public TagEventView getTagEgtViewByKey(AbstractTagModel tagModel) {
-		return tagEgtViews.get(tagModel);
-	}
 }

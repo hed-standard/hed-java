@@ -17,7 +17,7 @@ import javax.swing.JComponent;
 public class XCheckBox extends JComponent implements MouseListener {
 
 	public interface StateListener {
-		public void stateChanged();
+		void changeState();
 	}
 	private boolean checked;
 	private boolean hover;
@@ -55,7 +55,7 @@ public class XCheckBox extends JComponent implements MouseListener {
 
 	public void fireStateChanged() {
 		for (StateListener listener : listeners) {
-			listener.stateChanged();
+			listener.changeState();
 		}
 	}
 
