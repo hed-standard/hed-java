@@ -2013,27 +2013,32 @@ public class Tagger {
         return tagsModel;
     }
 
+    /**
+     * Helper method to build hierarchical tag structure recursively.
+     */
     private AbstractTagModel tagsToXmlModelHelper(String prefix, TagXmlModel parent, Iterator<AbstractTagModel> iter) {
         if (!iter.hasNext()) {
             return null;
         } else {
-            AbstractTagModel next;
-            TagXmlModel child;
-            for(next = (AbstractTagModel)iter.next(); next != null && next.getPath().startsWith(prefix); next = this.tagsToXmlModelHelper(next.getPath(), child, iter)) {
-                child = new TagXmlModel();
+            AbstractTagModel next = iter.next();
+            while (next != null && next.getPath().startsWith(prefix)) {
+                TagXmlModel child = new TagXmlModel();
                 child.setName(next.getName());
                 child.setDescription(next.getDescription());
-                child.setIsNumeric(next.isNumeric() ? true : null);
-                child.setChildRequired(next.isChildRequired() ? true : null);
-                child.setExtensionAllowed(next.isExtensionAllowed() ? true : null);
-                child.setTakesValue(next.takesValue() ? true : null);
-                child.setPredicateType(next.getPredicateType().toString().equals(PredicateType.SUBCLASSOF) ? next.getPredicateType().toString() : null);
-                child.setRequired(next.isRequired() ? true : null);
-                child.setRecommended(next.isRecommended() ? true : null);
-                child.setUnique(next.isUnique() ? true : null);
-                child.setPosition(next.getPosition() > 0 ? next.getPosition() : null);
-                child.setUnitClass(!next.getUnitClass().isEmpty() ? next.getUnitClass() : null);
+                child.setIsNumeric(next.isNumeric());
+                child.setChildRequired(next.isChildRequired());
+                child.setExtensionAllowed(next.isExtensionAllowed());
+                child.setTakesValue(next.takesValue());
+                child.setPredicateType(next.getPredicateType().toString());
+                child.setRequired(next.isRequired());
+                child.setRecommended(next.isRecommended());
+                child.setUnique(next.isUnique());
+                child.setPosition(next.getPosition());
+                child.setUnitClass(next.getUnitClass());
                 parent.addChild(child);
+
+                // Process child node and get potential next child node
+                next = tagsToXmlModelHelper(next.getPath(), child, iter);
             }
 
             return next;

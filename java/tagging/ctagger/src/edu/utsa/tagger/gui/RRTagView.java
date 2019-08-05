@@ -59,7 +59,7 @@ public class RRTagView extends JComponent {
 	private final TaggerView appView;
 	private JLabel label;
 	private XScrollTextBox valueField;
-	private RREditView editView;
+    private RRTagView.RREditView editView = new RRTagView.RREditView();
 	private AbstractTagModel takesValueTag;
 	private int numEditTags;
 	private AbstractTagModel key;
@@ -96,7 +96,6 @@ public class RRTagView extends JComponent {
 	 *            The required/recommended tag
 	 */
 	public RRTagView(Tagger tagger, TaggerView appView, TaggedEvent taggedEvent, AbstractTagModel key) {
-		label.addMouseListener(new LabelListener());
 		this.tagger = tagger;
 		this.appView = appView;
 		this.taggedEvent = taggedEvent;
