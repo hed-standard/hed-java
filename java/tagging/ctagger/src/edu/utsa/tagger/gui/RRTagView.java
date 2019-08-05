@@ -164,13 +164,13 @@ public class RRTagView extends JComponent {
 		save.setNormalBackground(FontsAndColors.TRANSPARENT);
 		save.setNormalForeground(FontsAndColors.SOFT_BLUE);
 		save.setHoverBackground(FontsAndColors.TRANSPARENT);
-		save.setHoverForeground(Color.BLACK);
+		save.setHoverForeground(FontsAndColors.BLUE_DARK);
 		save.setPressedBackground(FontsAndColors.TRANSPARENT);
 		save.setPressedForeground(FontsAndColors.SOFT_BLUE);
 		cancel.setNormalBackground(FontsAndColors.TRANSPARENT);
 		cancel.setNormalForeground(FontsAndColors.SOFT_BLUE);
 		cancel.setHoverBackground(FontsAndColors.TRANSPARENT);
-		cancel.setHoverForeground(Color.BLACK);
+		cancel.setHoverForeground(FontsAndColors.BLUE_DARK);
 		cancel.setPressedBackground(FontsAndColors.TRANSPARENT);
 		cancel.setPressedForeground(FontsAndColors.SOFT_BLUE);
 	}

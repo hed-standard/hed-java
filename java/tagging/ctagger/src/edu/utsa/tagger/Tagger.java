@@ -269,7 +269,7 @@ public class Tagger {
                 newTag.setHighlight(highlights[childHighlightPosition]);
             }
         } else {
-            newTag.setHighlight(Highlight.GREY_VERY_VERY_LIGHT);
+            newTag.setHighlight(Highlight.BLUE_VERY_LIGHT);
         }
 
         newTag.setPath(parentPath + "/" + name);

@@ -63,9 +63,9 @@ public class EventView extends JComponent implements MouseListener {
 	}
 
 	private void createCheckbox() {
-		checkbox = new XCheckBox(FontsAndColors.TRANSPARENT, Color.black,
-				FontsAndColors.TRANSPARENT, Color.blue,
-				FontsAndColors.TRANSPARENT, Color.blue) {
+		checkbox = new XCheckBox(FontsAndColors.TRANSPARENT, FontsAndColors.BLUE_DARK,
+				FontsAndColors.TRANSPARENT, FontsAndColors.BLUE_HOVER_MEDIUM,
+				FontsAndColors.TRANSPARENT, FontsAndColors.BLUE_HOVER_MEDIUM) {
 			@Override
 			public Dimension getPreferredSize() {
 				return new Dimension((int) (ConstraintLayout.scale * 20),

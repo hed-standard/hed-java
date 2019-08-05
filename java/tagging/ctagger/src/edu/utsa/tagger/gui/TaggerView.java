@@ -232,56 +232,56 @@ public class TaggerView extends ConstraintContainer {
         this.setLayout(new ConstraintLayout());
         this.setOpaque(true);
         this.setBackground(FontsAndColors.APP_BG);
-        this.back.setHoverForeground(Color.BLACK);
-        this.done.setHoverForeground(Color.BLACK);
+        this.back.setHoverForeground(FontsAndColors.BLUE_DARK);
+        this.done.setHoverForeground(FontsAndColors.BLUE_DARK);
         this.zoomPercent.setFont(FontsAndColors.contentFont);
-        this.zoomPercent.setForeground(FontsAndColors.GREY_DARK);
-        this.eventsPanel.setBackground(Color.WHITE);
-        this.tagsPanel.setBackground(Color.WHITE);
-        this.eventsTitle.setForeground(FontsAndColors.GREY_VERY_VERY_DARK);
-        this.tagsTitle.setForeground(FontsAndColors.GREY_VERY_VERY_DARK);
+        this.zoomPercent.setForeground(FontsAndColors.BLUE_VERY_LIGHT);
+        this.eventsPanel.setBackground(FontsAndColors.BLUE_2);
+        this.tagsPanel.setBackground(FontsAndColors.BLUE_MEDIUM);
+        this.eventsTitle.setForeground(FontsAndColors.BLUE_DARK);
+        this.tagsTitle.setForeground(FontsAndColors.BLUE_DARK);
         this.addEvent.setNormalBackground(FontsAndColors.TRANSPARENT);
-        this.addEvent.setNormalForeground(FontsAndColors.GREY_MEDIUM);
+        this.addEvent.setNormalForeground(FontsAndColors.BLUE_VERY_LIGHT);
         this.addEvent.setHoverBackground(FontsAndColors.TRANSPARENT);
-        this.addEvent.setHoverForeground(Color.BLACK);
+        this.addEvent.setHoverForeground(FontsAndColors.BLUE_DARK);
         this.addEvent.setPressedBackground(FontsAndColors.TRANSPARENT);
-        this.addEvent.setPressedForeground(FontsAndColors.GREY_MEDIUM);
+        this.addEvent.setPressedForeground(FontsAndColors.BLUE_VERY_LIGHT);
         this.deselectAll.setNormalBackground(FontsAndColors.TRANSPARENT);
-        this.deselectAll.setNormalForeground(FontsAndColors.GREY_MEDIUM);
+        this.deselectAll.setNormalForeground(FontsAndColors.BLUE_VERY_LIGHT);
         this.deselectAll.setHoverBackground(FontsAndColors.TRANSPARENT);
-        this.deselectAll.setHoverForeground(Color.BLACK);
+        this.deselectAll.setHoverForeground(FontsAndColors.BLUE_DARK);
         this.deselectAll.setPressedBackground(FontsAndColors.TRANSPARENT);
-        this.deselectAll.setPressedForeground(FontsAndColors.GREY_MEDIUM);
+        this.deselectAll.setPressedForeground(FontsAndColors.BLUE_VERY_LIGHT);
         this.addGroup.setNormalBackground(FontsAndColors.TRANSPARENT);
-        this.addGroup.setNormalForeground(FontsAndColors.GREY_MEDIUM);
+        this.addGroup.setNormalForeground(FontsAndColors.BLUE_VERY_LIGHT);
         this.addGroup.setHoverBackground(FontsAndColors.TRANSPARENT);
-        this.addGroup.setHoverForeground(Color.BLACK);
+        this.addGroup.setHoverForeground(FontsAndColors.BLUE_DARK);
         this.addGroup.setPressedBackground(FontsAndColors.TRANSPARENT);
-        this.addGroup.setPressedForeground(FontsAndColors.GREY_MEDIUM);
+        this.addGroup.setPressedForeground(FontsAndColors.BLUE_VERY_LIGHT);
         this.addTag.setNormalBackground(FontsAndColors.TRANSPARENT);
-        this.addTag.setNormalForeground(FontsAndColors.GREY_MEDIUM);
+        this.addTag.setNormalForeground(FontsAndColors.BLUE_VERY_LIGHT);
         this.addTag.setHoverBackground(FontsAndColors.TRANSPARENT);
-        this.addTag.setHoverForeground(Color.BLACK);
+        this.addTag.setHoverForeground(FontsAndColors.BLUE_DARK);
         this.addTag.setPressedBackground(FontsAndColors.TRANSPARENT);
-        this.addTag.setPressedForeground(FontsAndColors.GREY_MEDIUM);
+        this.addTag.setPressedForeground(FontsAndColors.BLUE_VERY_LIGHT);
         this.collapseLabel.setBackground(FontsAndColors.TRANSPARENT);
-        this.collapseLabel.setForeground(FontsAndColors.GREY_MEDIUM);
+        this.collapseLabel.setForeground(FontsAndColors.BLUE_VERY_LIGHT);
         this.collapseAll.setNormalBackground(FontsAndColors.TRANSPARENT);
-        this.collapseAll.setNormalForeground(FontsAndColors.GREY_MEDIUM);
+        this.collapseAll.setNormalForeground(FontsAndColors.BLUE_VERY_LIGHT);
         this.collapseAll.setHoverBackground(FontsAndColors.TRANSPARENT);
-        this.collapseAll.setHoverForeground(Color.BLACK);
+        this.collapseAll.setHoverForeground(FontsAndColors.BLUE_DARK);
         this.collapseAll.setPressedBackground(FontsAndColors.TRANSPARENT);
-        this.collapseAll.setPressedForeground(FontsAndColors.GREY_MEDIUM);
+        this.collapseAll.setPressedForeground(FontsAndColors.BLUE_VERY_LIGHT);
         this.expandAll.setNormalBackground(FontsAndColors.TRANSPARENT);
-        this.expandAll.setNormalForeground(FontsAndColors.GREY_MEDIUM);
+        this.expandAll.setNormalForeground(FontsAndColors.BLUE_VERY_LIGHT);
         this.expandAll.setHoverBackground(FontsAndColors.TRANSPARENT);
-        this.expandAll.setHoverForeground(Color.BLACK);
+        this.expandAll.setHoverForeground(FontsAndColors.BLUE_DARK);
         this.expandAll.setPressedBackground(FontsAndColors.TRANSPARENT);
-        this.expandAll.setPressedForeground(FontsAndColors.GREY_MEDIUM);
-        this.zoomIn.setHoverForeground(Color.BLACK);
-        this.zoomOut.setHoverForeground(Color.BLACK);
-        this.redo.setHoverForeground(Color.BLACK);
-        this.undo.setHoverForeground(Color.BLACK);
+        this.expandAll.setPressedForeground(FontsAndColors.BLUE_VERY_LIGHT);
+        this.zoomIn.setHoverForeground(FontsAndColors.BLUE_DARK);
+        this.zoomOut.setHoverForeground(FontsAndColors.BLUE_DARK);
+        this.redo.setHoverForeground(FontsAndColors.BLUE_DARK);
+        this.undo.setHoverForeground(FontsAndColors.BLUE_DARK);
         this.hoverMessage.setBackground(FontsAndColors.LIGHT_YELLOW);
         this.searchResults.setBackground(Color.WHITE);
     }
@@ -608,8 +608,8 @@ public class TaggerView extends ConstraintContainer {
             });
             subMenu.add(subItem);
         }
-
         menu.add(subMenu);
+
         JMenuItem item = new JMenuItem("Open");
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -643,6 +643,7 @@ public class TaggerView extends ConstraintContainer {
             }
         });
         menu.add(item);
+
         menu = new JMenu("Edit");
         menuBar.add(menu);
         menu.addSeparator();
