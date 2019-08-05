@@ -10,42 +10,24 @@ import edu.utsa.tagger.gui.GuiModelFactory;
  * @author Jeremy Cockfield, Kay Robbins
  */
 public class FieldSelectLoader {
-
-	private boolean submitted = false;
-	private boolean notified = false;
-	private String primaryField = new String();
-	private String[] taggedFields = null;
-	private String[] excludedFields = null;
+    private boolean submitted;
+    private boolean notified;
+    private String primaryField;
+    private String[] taggedFields;
+    private String[] ignoredFields;
 	FieldSelectView fieldSelectView;
 
-	/**
-	 * The constructor for the FieldSelectLoader.
-	 * 
-	 * @param frameTitle
-	 *            The title for the FieldSelectView frame.
-	 * @param excluded
-	 *            The excluded fields for the FieldSelectView list box.
-	 * @param tagged
-	 *            The tagged fields for the FieldSelectView list box.
-	 */
-	public FieldSelectLoader(String frameTitle, String[] excluded, String[] tagged, String primaryField) {
-		this(new GuiModelFactory(), frameTitle, excluded, tagged, primaryField);
+    public FieldSelectLoader(String frameTitle, String[] ignoredFields, String[] taggedFields, String primaryField) {
+        this(new GuiModelFactory(), frameTitle, ignoredFields, taggedFields, primaryField);
 	}
 
-	/**
-	 * 
-	 * @param factory
-	 *            The Factory interface used to create a FieldSelectView object.
-	 * @param frameTitle
-	 *            The title for the FieldSelectView frame.
-	 * @param excluded
-	 *            The excluded fields for the FieldSelectView list box.
-	 * @param tagged
-	 *            The tagged fields for the FieldSelectView list box.
-	 */
-	public FieldSelectLoader(IFactory factory, String frameTitle, String[] excluded, String[] tagged,
-			String primaryField) {
-		fieldSelectView = factory.createFieldSelectView(this, frameTitle, excluded, tagged, primaryField);
+    public FieldSelectLoader(IFactory factory, String frameTitle, String[] ignoredFields, String[] taggedFields, String primaryField) {
+        this.submitted = false;
+        this.notified = false;
+        this.primaryField = new String();
+        this.taggedFields = null;
+        this.ignoredFields = null;
+        this.fieldSelectView = factory.createFieldSelectView(this, frameTitle, ignoredFields, taggedFields, primaryField);
 	}
 
 	/**
@@ -57,22 +39,12 @@ public class FieldSelectLoader {
 		return primaryField;
 	}
 
-	/**
-	 * Gets the tagged fields.
-	 * 
-	 * @return A String array containing the tagged fields.
-	 */
-	public synchronized String[] getTagFields() {
-		return taggedFields;
+    public synchronized String[] getTaggedFields() {
+        return this.taggedFields;
 	}
 
-	/**
-	 * Gets the excluded fields.
-	 * 
-	 * @return A String array containing the excluded fields.
-	 */
-	public synchronized String[] getExcludeFields() {
-		return excludedFields;
+    public synchronized String[] getIgnoredFields() {
+        return this.ignoredFields;
 	}
 
 	/**
@@ -93,15 +65,9 @@ public class FieldSelectLoader {
 		return submitted;
 	}
 
-	/**
-	 * Sets if the FieldSelectView is notified.
-	 * 
-	 * @param submitted
-	 *            True if the FieldSelectView is notified, false if otherwise.
-	 */
 	public synchronized void setNotified(boolean notified) {
 		this.notified = notified;
-		notify();
+        this.notify();
 	}
 
 	/**
@@ -134,14 +100,8 @@ public class FieldSelectLoader {
 		this.taggedFields = taggedFields;
 	}
 
-	/**
-	 * Sets the excluded fields.
-	 * 
-	 * @param excludedFields
-	 *            A String array containing the excluded fields.
-	 */
-	public synchronized void setExcludedFields(String[] excludedFields) {
-		this.excludedFields = excludedFields;
+    public synchronized void setIgnoredFields(String[] ignoredFields) {
+        this.ignoredFields = ignoredFields;
 	}
 
 	/**
