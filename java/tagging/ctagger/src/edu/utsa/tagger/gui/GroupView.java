@@ -215,7 +215,7 @@ public class GroupView extends JComponent implements MouseListener,
 		if (selected) {
 			g2d.setColor(FontsAndColors.GROUP_SELECTED);
 		} else {
-			g2d.setColor(Color.white);
+			g2d.setColor(FontsAndColors.GROUP_UNSELECTED);
 		}
 		g2d.fill(SwingUtilities.calculateInnerArea(this, null));
 

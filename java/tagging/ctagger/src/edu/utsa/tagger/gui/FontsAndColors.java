@@ -36,6 +36,7 @@ public abstract class FontsAndColors {
 	public static final Color BLUE_MEDIUM = new Color(168, 194, 255);
 	public static final Color BLUE_DARK = new Color(0, 0, 102);
 	public static final Color BLUE_HOVER_MEDIUM = new Color(107, 109, 219);
+	public static final Color BLUE_SELECTED = new Color(130,144,227);
 	public static final Color BLUE_1 = BLUE_MEDIUM;//new Color(224, 238, 255);
 	public static final Color BLUE_2 = BLUE_1;//new Color(180, 208, 255);
 	public static final Color BLUE_3 = BLUE_2;//new Color(171,181,237);
@@ -65,7 +66,8 @@ public abstract class FontsAndColors {
 	public static final Color ORANGE_LIGHT = new Color(250, 198, 168);
 
 	public static final Color APP_BG = BLUE_MEDIUM; //Color.WHITE;
-	public static final Color GROUP_SELECTED = GREY_VERY_LIGHT;
+	public static final Color GROUP_SELECTED = BLUE_SELECTED;
+	public static final Color GROUP_UNSELECTED = BLUE_MEDIUM;
 
 	public static final Color MENU_BG = TRANSPARENT;
 
@@ -137,7 +139,7 @@ public abstract class FontsAndColors {
 	public static final Color EVENT_INFO_BACKGROUND = Color.white;
 	public static final Color EVENT_TAG_REQUIRED = RED_MEDIUM;
 	public static final Color EVENT_TAG_RECOMMENDED = ORANGE_MEDIUM;
-	public static final Color EVENT_SELECTED = new Color(130,144,227);
+	public static final Color EVENT_SELECTED = BLUE_SELECTED;
 
 	public static final Color EVENTTAG_BG_NORMAL = TRANSPARENT;
 	public static final Color EVENTTAG_FG_NORMAL = BLUE_DARK;
@@ -156,6 +158,8 @@ public abstract class FontsAndColors {
 	public static final Color CONTEXTMENUITEM_BG_PRESSED = GREY_DARK;
 	public static final Color CONTEXTMENUITEM_FG_PRESSED = GREY_VERY_LIGHT;
 
+	public static final Color DIALOG_BG = BLUE_MEDIUM;
+	public static final Color DIALOG_MESSAGE_FG = BLUE_DARK;
 	public static final Color FILECHOOSER_CD_BG_NORMAL = GREY_DARK;
 	public static final Color FILECHOOSER_CD_FG_NORMAL = GREY_VERY_LIGHT;
 	public static final Color FILECHOOSER_CD_BG_HOVER = SOFT_BLUE;

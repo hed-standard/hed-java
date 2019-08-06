@@ -66,8 +66,8 @@ public class TaggerView extends ConstraintContainer {
     };
     private boolean autoCollapse = true;
     private int autoCollapseDepth;
-    private XButton back = createMenuButton("go back");
-    private XButton cancel = createMenuButton("cancel");
+    //private XButton exit = createMenuButton("go exit");
+    private XButton cancel = createMenuButton("Cancel");
     /**
      * Creates a collapse button.
      */
@@ -109,7 +109,6 @@ public class TaggerView extends ConstraintContainer {
             return FontsAndColors.headerFont;
         }
     };
-    private XButton close = createMenuButton("close");
     /**
      * Creates a expand button.
      */
@@ -121,14 +120,11 @@ public class TaggerView extends ConstraintContainer {
     };
     private JFrame frame;
     private JLabel hoverMessage = new JLabel();
-    //private XButton load = createMenuButton("load"); //don't have this
     private TaggerLoader loader;
     private boolean isStandAloneVersion;
     private Notification notification = new Notification();
-    //private XButton proceed = createMenuButton("proceed");
-    private XButton done = createMenuButton("done");
+    private XButton done = createMenuButton("Done");
     private XButton redo = new HistoryButton("redo", false);
-    private XButton save = createMenuButton("save");
     private JPanel searchResults = new JPanel() {
         @Override
         protected void paintComponent(Graphics g) {
@@ -232,7 +228,7 @@ public class TaggerView extends ConstraintContainer {
         this.setLayout(new ConstraintLayout());
         this.setOpaque(true);
         this.setBackground(FontsAndColors.APP_BG);
-        this.back.setHoverForeground(FontsAndColors.BLUE_DARK);
+        this.cancel.setHoverForeground(FontsAndColors.BLUE_DARK);
         this.done.setHoverForeground(FontsAndColors.BLUE_DARK);
         this.zoomPercent.setFont(FontsAndColors.contentFont);
         this.zoomPercent.setForeground(FontsAndColors.BLUE_VERY_LIGHT);
@@ -295,10 +291,11 @@ public class TaggerView extends ConstraintContainer {
                 TaggerView.this.loader.setBack(false);
             }
         });
-        this.back.addMouseListener(new MouseAdapter() {
+        this.cancel.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-                TaggerView.this.proceed(e);
-                TaggerView.this.loader.setBack(true);
+                askBeforeClose();
+                //TaggerView.this.proceed(e);
+                //TaggerView.this.loader.setBack(true);
             }
         });
         this.zoomOut.addMouseListener(new MouseAdapter() {
@@ -599,7 +596,6 @@ public class TaggerView extends ConstraintContainer {
         }
 
         if (this.tagger.getExtensionsAllowed()) {
-            menu.addSeparator();
             subItem = new JMenuItem("Tag");
             subItem.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
@@ -610,13 +606,71 @@ public class TaggerView extends ConstraintContainer {
         }
         menu.add(subMenu);
 
-        JMenuItem item = new JMenuItem("Open");
-        item.addActionListener(new ActionListener() {
+        menu.addSeparator();
+        subMenu = new JMenu("Import tagged events");
+        subItem = new JMenuItem("From tab-deliminated file (.tsv)");
+        subItem.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
-                TaggerView.this.open();
+                loadTSVDialog(2);
+            }
+        });
+        subMenu.add(subItem);
+        subItem = new JMenuItem("From FieldMap MATLAB structure (.mat)");
+        subItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                loadFieldMapDialog(4);
+            }
+        });
+        subMenu.add(subItem);
+        menu.add(subMenu);
+
+
+        subMenu = new JMenu("Export tagged events");
+        subItem = new JMenuItem("To tab-deliminated file (.tsv)");
+        subItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                saveTSVDialog(2);
+            }
+        });
+        subMenu.add(subItem);
+        subItem = new JMenuItem("To FieldMap MATLAB structure (.mat)");
+        subItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                saveFieldMapDialog(4);
+            }
+        });
+        subMenu.add(subItem);
+        menu.add(subMenu);
+
+        menu.addSeparator();
+        JMenuItem item = new JMenuItem("Load HED schema");
+        item.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                loadHEDDialog(1);
             }
         });
         menu.add(item);
+        item = new JMenuItem("Save HED schema");
+        item.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                saveHEDDialog(1);
+            }
+        });
+        menu.add(item);
+
+//        item = new JMenuItem("Open");
+//        item.addActionListener(new ActionListener() {
+//            public void actionPerformed(ActionEvent e) {
+//                TaggerView.this.open();
+//            }
+//        });
+//        menu.add(item);
         if (this.isStandAloneVersion) {
             menu.addSeparator();
             item = new JMenuItem("Clear");
@@ -628,13 +682,13 @@ public class TaggerView extends ConstraintContainer {
             menu.add(item);
         }
 
-        item = new JMenuItem("Save");
-        item.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                TaggerView.this.save();
-            }
-        });
-        menu.add(item);
+//        item = new JMenuItem("Save");
+//        item.addActionListener(new ActionListener() {
+//            public void actionPerformed(ActionEvent e) {
+//                TaggerView.this.save();
+//            }
+//        });
+//        menu.add(item);
         menu.addSeparator();
         item = new JMenuItem("Exit");
         item.addActionListener(new ActionListener() {
@@ -1255,9 +1309,9 @@ public class TaggerView extends ConstraintContainer {
         if (this.isStandAloneVersion) {
             this.splitPaneLeft.add(this.addEvent, new Constraint("top:0 height:50 right:10 width:115"));
         } else {
-            this.add(this.back, new Constraint("top:0 height:50 left:0 width:120"));
+            this.add(this.cancel, new Constraint("top:0 height:50 left:0 width:120"));
             this.add(this.done, new Constraint("top:0 height:50 left:160 width:120"));
-            this.back.setEnabled(!this.loader.checkFlags(64));
+            this.cancel.setEnabled(!this.loader.checkFlags(64));
         }
 
         if (this.tagger.getExtensionsAllowed()) {

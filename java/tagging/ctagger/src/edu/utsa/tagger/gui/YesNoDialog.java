@@ -59,18 +59,19 @@ public class YesNoDialog extends JDialog {
 	public YesNoDialog(JFrame frame, String message) {
 		super(frame, true);
 		bgPanel.setLayout(new ConstraintLayout());
-		bgPanel.setBackground(Color.white);
+		bgPanel.setBackground(FontsAndColors.DIALOG_BG);
 		bgPanel.setPreferredSize(new Dimension(400, 150));
 		label = new JLabel(message, JLabel.CENTER);
 		label.setFont(FontsAndColors.contentFont);
+		label.setForeground(FontsAndColors.DIALOG_MESSAGE_FG);
 		bgPanel.add(label, new Constraint("top:0 height:30 left:0 width:400"));
-		yesButton = TaggerView.createMenuButton("Yes");
+		yesButton = TaggerView.createMenuButton("Ok");
 		bgPanel.add(yesButton, new Constraint(
-				"bottom:10 height:30 left:5 width:80"));
-		yesButton.addMouseListener(new OptionButtonListener(0));
-		noButton = TaggerView.createMenuButton("No");
-		bgPanel.add(noButton, new Constraint(
 				"bottom:10 height:30 right:5 width:80"));
+		yesButton.addMouseListener(new OptionButtonListener(0));
+		noButton = TaggerView.createMenuButton("Cancel");
+		bgPanel.add(noButton, new Constraint(
+				"bottom:10 height:30 right:100 width:80"));
 		noButton.addMouseListener(new OptionButtonListener(1));
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		getContentPane().add(bgPanel);
