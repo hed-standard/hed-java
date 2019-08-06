@@ -150,7 +150,7 @@ public class TagDisplayDialog extends JDialog {
 		fileScrollLayout = new ScrollLayout(fileScrollPane, tagsPanel);
 		fileScrollPane.setLayout(fileScrollLayout);
 		tagsPanel.setLayout(new ConstraintLayout());
-		tagsPanel.setBackground(Color.white);
+		tagsPanel.setBackground(FontsAndColors.DIALOG_BG);
 
 		bgPanel.add(topMessageLabel, new Constraint(
 				"top:0 height:30 left:10 width:700"));
@@ -166,12 +166,12 @@ public class TagDisplayDialog extends JDialog {
 					"top:40 bottom:80 left:0 right:0"));
 		}
 		bgPanel.add(okButton, new Constraint(
-				"bottom:10 height:30 right:10 width:120"));
+				"bottom:10 height:30 right:5 width:120"));
 		if (options) {
 			cancelButton = TaggerView.createMenuButton("Cancel");
 			cancelButton.addMouseListener(new CancelButtonListener());
 			bgPanel.add(cancelButton, new Constraint(
-					"bottom:10 height:30 left:10 width:80"));
+					"bottom:10 height:30 right:140 width:80"));
 		}
 
 		addTags();

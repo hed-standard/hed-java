@@ -225,7 +225,6 @@ public class TaggerView extends ConstraintContainer {
     }
 
     private void setColors() {
-        this.setLayout(new ConstraintLayout());
         this.setOpaque(true);
         this.setBackground(FontsAndColors.APP_BG);
         this.cancel.setHoverForeground(FontsAndColors.BLUE_DARK);
@@ -431,6 +430,7 @@ public class TaggerView extends ConstraintContainer {
     }
 
     private void addComponents() {
+        this.setLayout(new ConstraintLayout());
         this.addOptionComponents();
         this.searchResults.setBorder(new DropShadowBorder());
         this.searchResults.setLayout(new ListLayout(1, 1, 0, 1));
@@ -546,7 +546,7 @@ public class TaggerView extends ConstraintContainer {
         if (loadFile == null)
             return -1;
         if (!loadSuccess) {
-            TaggerView.this.showTaggerMessageDialog(MessageConstants.LOAD_ERROR, "Okay", null, null);
+            TaggerView.this.showTaggerMessageDialog(MessageConstants.LOAD_ERROR, "Ok", null, null);
             return -1;
         }
         refreshPanels();
@@ -567,7 +567,7 @@ public class TaggerView extends ConstraintContainer {
             return -1;
         }
         if (!saveSuccess) {
-            TaggerView.this.showTaggerMessageDialog(MessageConstants.SAVE_ERROR, "Okay", null, null);
+            TaggerView.this.showTaggerMessageDialog(MessageConstants.SAVE_ERROR, "Ok", null, null);
             return -1;
         }
         return option;
@@ -1761,7 +1761,7 @@ public class TaggerView extends ConstraintContainer {
             TaggedEvent event = tagger.addNewEvent(eventFields[0], eventFields[1]);
             updateEventsPanel();
             if (event == null) {
-                showTaggerMessageDialog(MessageConstants.ADD_EVENT_ERROR, "Okay", null, null);
+                showTaggerMessageDialog(MessageConstants.ADD_EVENT_ERROR, "Ok", null, null);
             } else {
                 ScrollLayout eventScrollLayout = (ScrollLayout) eventsScrollPane.getLayout();
                 eventScrollLayout.scrollTo(event.getEventView().getCurrentPosition());
@@ -1896,7 +1896,7 @@ public class TaggerView extends ConstraintContainer {
      */
     public void showDescendantDialog(ToggleTagMessage message) {
         TagDisplayDialog dialog = new TagDisplayDialog(frame, message.descendants, MessageConstants.DESCENDANT, null,
-                false, "Okay", "Warning");
+                false, "Ok", "Warning");
         dialog.showDialog();
     }
 
@@ -1918,7 +1918,7 @@ public class TaggerView extends ConstraintContainer {
      */
     public boolean showRequiredMissingDialog(List<EventModel> missingTags) {
         TagDisplayDialog dialog = new TagDisplayDialog(frame, missingTags, MessageConstants.MISSING_REQUIRED,
-                MessageConstants.EXIT_Q, true, "Okay", "Warning");
+                MessageConstants.EXIT_Q, true, "Ok", "Warning");
         return dialog.showDialog();
     }
 
@@ -1940,7 +1940,7 @@ public class TaggerView extends ConstraintContainer {
      */
     public void showUniqueDialog(ToggleTagMessage message) {
         String text = MessageConstants.UNIQUE + message.uniqueKey.getPath() + ":";
-        TagDisplayDialog dialog = new TagDisplayDialog(frame, message.uniqueValues, text, null, false, "Okay",
+        TagDisplayDialog dialog = new TagDisplayDialog(frame, message.uniqueValues, text, null, false, "Ok",
                 "Warning");
         dialog.showDialog();
     }
