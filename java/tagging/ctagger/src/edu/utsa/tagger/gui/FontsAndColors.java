@@ -128,9 +128,9 @@ public abstract class FontsAndColors {
 	public static final Color EDITTAG_BG = LIGHT_YELLOW;
 	public static final Color EDITTAG_BORDER = new Color(215, 215, 50);
 
-	public static final Color EVENT_BG_NORMAL = BLUE_VERY_LIGHT;
-	public static final Color EVENT_FG_NORMAL = BLUE_DARK;
-	public static final Color EVENT_BG_HOVER = BLUE_VERY_LIGHT;
+	public static final Color EVENT_BG_NORMAL = BLUE_DARK;
+	public static final Color EVENT_FG_NORMAL = BLUE_VERY_LIGHT;
+	public static final Color EVENT_BG_HOVER = BLUE_DARK;
 	public static final Color EVENT_FG_HOVER = BLUE_HOVER_MEDIUM;
 	public static final Color EVENT_BG_PRESSED = BLUE_VERY_LIGHT;
 	public static final Color EVENT_FG_PRESSED = BLUE_DARK;

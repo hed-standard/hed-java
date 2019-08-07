@@ -63,7 +63,7 @@ public class EventView extends JComponent implements MouseListener {
 	}
 
 	private void createCheckbox() {
-		checkbox = new XCheckBox(FontsAndColors.TRANSPARENT, FontsAndColors.BLUE_DARK,
+		checkbox = new XCheckBox(FontsAndColors.TRANSPARENT, FontsAndColors.BLUE_VERY_LIGHT,
 				FontsAndColors.TRANSPARENT, FontsAndColors.BLUE_HOVER_MEDIUM,
 				FontsAndColors.TRANSPARENT, FontsAndColors.BLUE_HOVER_MEDIUM) {
 			@Override
