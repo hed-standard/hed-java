@@ -700,7 +700,6 @@ public class TaggerView extends ConstraintContainer {
 
         menu = new JMenu("Edit");
         menuBar.add(menu);
-        menu.addSeparator();
         item = new JMenuItem("Select All");
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {

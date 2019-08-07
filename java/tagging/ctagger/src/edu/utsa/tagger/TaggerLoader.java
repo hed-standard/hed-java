@@ -40,16 +40,57 @@ public class TaggerLoader {
         return load(xmlData, flags, frameTitle, initialDepth, new GuiModelFactory());
     }
 
+    /**
+     * Creates a Loader that launches the Tagger GUI with the given parameters.
+     *
+     * @param xmlData
+     *            An XML string in the TaggerData format containing the events
+     *            and the HED hierarchy
+     * @param flags
+     *            Options for running Tagger
+     * @param frameTitle
+     *            Title of Tagger GUI window
+     * @param initialDepth
+     *            Initial depth to display tags
+     * @param factory
+     *            Factory used to create the GUI
+     * @return String containing the TaggerData XML. If the user presses "Done,"
+     *         this includes the changes the user made in the GUI. If the user
+     *         presses "Cancel," this is equal to the String passed in as a
+     *         parameter (with no changes included).
+     */
     public static String load(String xmlData, int flags, String frameTitle, int initialDepth, IFactory factory) {
         TaggerLoader loader = new TaggerLoader(xmlData, flags, frameTitle, initialDepth, factory);
         loader.waitForSubmitted();
         return loader.isSubmitted() ? loader.tagger.getXmlDataString() : xmlData;
     }
 
-    public static String[] load(String tags, String events, int flags, String frameTitle, int initialDepth, boolean isPrimary, boolean isStandAloneVersion, boolean firstField) throws IOException {
+    public static String[] load(String tags, String events, int flags, String frameTitle, int initialDepth) throws IOException {
         return load(tags, events, flags, frameTitle, initialDepth, new GuiModelFactory());
     }
 
+    /**
+     * Creates a Loader that launches the Tagger GUI with the given parameters.
+     *
+     * @param tags
+     *            HED XML String
+     * @param events
+     *            Events JSON String
+     * @param flags
+     *            Options for running Tagger
+     * @param frameTitle
+     *            Title of Tagger GUI window
+     * @param initialDepth
+     *            Initial depth to display tags
+     * @param factory
+     *            Factory used to create the GUI
+     * @return String array containing the HED XML (index 0) and the events JSON
+     *         (index 1). If the user presses "Done," these include the changes
+     *         the user made in the GUI. If the user presses "Cancel," these are
+     *         equal to the Strings passed in as parameters (with no changes
+     *         included).
+     * @throws IOException
+     */
     public static String[] load(String tags, String events, int flags, String frameTitle, int initialDepth, IFactory factory) throws IOException {
         TaggerLoader loader = new TaggerLoader(tags, events, flags, frameTitle, initialDepth, factory);
         String[] returnString = new String[]{tags, events};
@@ -62,7 +103,7 @@ public class TaggerLoader {
         return returnString;
     }
 
-    public static String[] load(TaggerLoader loader, String tags, String events) throws IOException {
+    public static String[] load(TaggerLoader loader) throws IOException {
         String[] returnString = new String[]{loader.tagger.hedToString(), loader.checkFlags(1) ? loader.tagger.getJSONString() : loader.tagger.createTSVString()};
         return returnString;
     }
@@ -155,9 +196,9 @@ public class TaggerLoader {
         return this.title;
     }
 
-    public synchronized String[] getXMLAndEvents() throws IOException {
-        return load(this, this.tags, this.events);
-    }
+//    public synchronized String[] getXMLAndEvents() throws IOException {
+//        return load(this, this.tags, this.events);
+//    }
 
     public synchronized boolean isBack() {
         return this.back;
