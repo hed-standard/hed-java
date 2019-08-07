@@ -193,6 +193,8 @@ public class TagView extends JComponent implements MouseListener {
 		try {
 			Field f = FontsAndColors.class.getField(model.getHighlight().toString().toUpperCase());
 			bg = (Color) f.get(bg);
+			if (pressed || highlight)
+				bg = FontsAndColors.BLUE_VERY_LIGHT;
 		} catch (Exception ex) {
 		}
 

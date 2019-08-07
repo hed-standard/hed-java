@@ -59,7 +59,7 @@ public class RRTagView extends JComponent {
 	private final TaggerView appView;
 	private JLabel label;
 	private XScrollTextBox valueField;
-    private RRTagView.RREditView editView = new RRTagView.RREditView();
+    private RRTagView.RREditView editView = new RRTagView.RREditView(); // View to prompt for tag editing/adding
 	private AbstractTagModel takesValueTag;
 	private int numEditTags;
 	private AbstractTagModel key;
@@ -118,12 +118,12 @@ public class RRTagView extends JComponent {
 		};
 		this.label.addMouseListener(new RRTagView.LabelListener());
 		this.setLayout(new ConstraintLayout());
-		this.setListners();
+		this.setListeners();
 		this.setColors();
 		this.refreshView();
 	}
 
-	private void setListners() {
+	private void setListeners() {
 		valueField.getJTextArea().getDocument().putProperty("filterNewlines", Boolean.TRUE);
 		valueField.getJTextArea().getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "doNothing");
 		valueField.getJTextArea().getInputMap().put(KeyStroke.getKeyStroke("TAB"), "doNothing");
@@ -161,6 +161,7 @@ public class RRTagView extends JComponent {
 	}
 
 	private void setColors() {
+	    label.setForeground(FontsAndColors.TAG_FG_NORMAL);
 		save.setNormalBackground(FontsAndColors.TRANSPARENT);
 		save.setNormalForeground(FontsAndColors.SOFT_BLUE);
 		save.setHoverBackground(FontsAndColors.TRANSPARENT);
@@ -240,8 +241,7 @@ public class RRTagView extends JComponent {
 		return null;
 	}
 	/**
-	 * Refreshes the view to show a text box for editing a tag with a single
-	 * takes value descendant.
+	 * Add components to the view or Refreshes the view (when there's already components in it)
 	 */
 	private void refreshView() {
 		removeAll();
@@ -368,9 +368,9 @@ public class RRTagView extends JComponent {
 	}
 
 	/**
-	 * View for editing or adding required/recommended tags. For unique tags, it
-	 * is used to edit (replace) the value, if it exists. If there is no value,
-	 * or the required/recommended tag is not unique, it is used to add a value.
+	 * View for the prompting of editing or adding required/recommended tags. For unique tags, it
+	 * prompts to edit (replace) the value, if it exists. If there is no value,
+	 * or the required/recommended tag is not unique, it prompts to add a value.
 	 */
 	private class RREditView extends JComponent implements MouseListener {
 
@@ -382,7 +382,7 @@ public class RRTagView extends JComponent {
 		}
 
 		/**
-		 * When the mouse is clicked, it edits the value of the given tag.
+		 * When the mouse is clicked, refresh the tag view for editing
 		 */
 		@Override
 		public void mouseClicked(MouseEvent e) {
@@ -430,18 +430,18 @@ public class RRTagView extends JComponent {
 			double x = 5;
 			double y = getHeight() * 0.75;
 
-			if (pressed) {
-				g2d.setColor(FontsAndColors.TAG_FG_PRESSED);
-			} else if (hover) {
-				g2d.setColor(FontsAndColors.TAG_FG_HOVER);
-			} else {
-				g2d.setColor(fg);
-			}
+			/*
+			For tags that don't take unique value (e.g. Event/Category), message is the prompt to add tag
+			Otherwise, message contains the tag value.
+			We also have info, which contains the prompt for user to edit the tag
+			 */
 			String message = "";
 			String info = null;
+			boolean isTagPrompt = false;
 			if (values == null || !key.isUnique()) {
 				font = FontsAndColors.contentFont.deriveFont(Font.ITALIC);
 				message = "Click to add tag";
+				isTagPrompt = true;
 			} else {
 				info = "(click to edit)";
 				if (takesValueTag != null) {
@@ -450,11 +450,29 @@ public class RRTagView extends JComponent {
 					message = values.get(0).getPath();
 				}
 			}
+
+			/*
+			Any prompt related text is in a different color from normal text,
+			except when pressed and hovered
+			 */
+			if (pressed) {
+				g2d.setColor(FontsAndColors.TAG_FG_PRESSED);
+			} else if (hover) {
+				g2d.setColor(FontsAndColors.TAG_FG_HOVER);
+			} else {
+			    if (isTagPrompt)
+					g2d.setColor(FontsAndColors.TAG_FG_EDIT_PROMPT);
+			    else
+					g2d.setColor(fg);
+			}
 			g2d.setFont(font);
 			g2d.drawString(message, (int) x, (int) y);
+
 			if (info != null) {
 				x += g2d.getFontMetrics().stringWidth(message + " ");
 				x += getHeight();
+				if (!hover && !pressed)
+					g2d.setColor(FontsAndColors.TAG_FG_EDIT_PROMPT);
 				g2d.drawString(info, (int) x, (int) y);
 			}
 		}

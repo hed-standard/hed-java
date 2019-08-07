@@ -115,6 +115,7 @@ public abstract class FontsAndColors {
 	public static final Color TAG_BG_SELECTED = SOFT_BLUE;
 	public static final Color TAG_FG_SELECTED = GREY_VERY_LIGHT;
 	public static final Color TAG_FG_TAKES_VALUE = BLUE_DARK;
+	public static final Color TAG_FG_EDIT_PROMPT = BLUE_VERY_LIGHT;
 
 	public static final Color SEARCHTAG_BG_NORMAL = Color.WHITE;
 	public static final Color SEARCHTAG_FG_NORMAL = GREY_DARK;
@@ -134,17 +135,15 @@ public abstract class FontsAndColors {
 	public static final Color EVENT_FG_HOVER = BLUE_HOVER_MEDIUM;
 	public static final Color EVENT_BG_PRESSED = BLUE_VERY_LIGHT;
 	public static final Color EVENT_FG_PRESSED = BLUE_DARK;
-	public static final Color EVENT_BG_SELECTED = SOFT_BLUE;
-	public static final Color EVENT_FG_SELECTED = GREY_VERY_LIGHT;
+	public static final Color EVENT_BG_SELECTED = BLUE_SELECTED;
+	public static final Color EVENT_FG_SELECTED = BLUE_DARK;
 	public static final Color EVENT_INFO_BACKGROUND = Color.white;
 	public static final Color EVENT_TAG_REQUIRED = RED_MEDIUM;
 	public static final Color EVENT_TAG_RECOMMENDED = ORANGE_MEDIUM;
-	public static final Color EVENT_SELECTED_BG = BLUE_SELECTED;
-	public static final Color EVENT_SELECTED_CHECKBOX = BLUE_DARK;
 
 	public static final Color EVENTTAG_BG_NORMAL = TRANSPARENT;
 	public static final Color EVENTTAG_FG_NORMAL = BLUE_DARK;
-	public static final Color EVENTTAG_BG_HOVER = TRANSPARENT;
+	public static final Color EVENTTAG_BG_HOVER = BLUE_VERY_LIGHT;
 	public static final Color EVENTTAG_FG_HOVER = BLUE_HOVER_MEDIUM;
 	public static final Color EVENTTAG_BG_PRESSED = GREY_VERY_VERY_LIGHT;
 	public static final Color EVENTTAG_FG_PRESSED = BLUE_DARK;
