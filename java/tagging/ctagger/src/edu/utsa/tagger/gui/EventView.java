@@ -63,7 +63,7 @@ public class EventView extends JComponent implements MouseListener {
 	}
 
 	private void createCheckbox() {
-		checkbox = new XCheckBox(FontsAndColors.TRANSPARENT, FontsAndColors.BLUE_VERY_LIGHT,
+		checkbox = new XCheckBox(FontsAndColors.TRANSPARENT, FontsAndColors.EVENT_SELECTED_CHECKBOX,
 				FontsAndColors.TRANSPARENT, FontsAndColors.BLUE_HOVER_MEDIUM,
 				FontsAndColors.TRANSPARENT, FontsAndColors.BLUE_HOVER_MEDIUM) {
 			@Override
@@ -233,7 +233,7 @@ public class EventView extends JComponent implements MouseListener {
 		g2d.setColor(bg);
 		g2d.fill(SwingUtilities.calculateInnerArea(this, null));
 		if (selected) {
-			g2d.setColor(FontsAndColors.EVENT_SELECTED);
+			g2d.setColor(FontsAndColors.EVENT_SELECTED_BG);
 			g2d.fillRect(0, 0, 30, getHeight());
 		}
 

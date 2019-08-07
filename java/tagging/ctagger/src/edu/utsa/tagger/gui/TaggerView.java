@@ -2013,4 +2013,8 @@ public class TaggerView extends ConstraintContainer {
             TaggerView.this.addGroup();
         }
     }
+
+    public JFrame getFrame() {
+        return frame;
+    }
 }
