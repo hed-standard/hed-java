@@ -5,13 +5,8 @@
 
 package edu.utsa.tagger;
 
-import edu.utsa.tagger.gui.EventEditView;
-import edu.utsa.tagger.gui.EventView;
-import edu.utsa.tagger.gui.GroupView;
-import edu.utsa.tagger.gui.GuiEventModel;
-import edu.utsa.tagger.gui.RRTagView;
-import edu.utsa.tagger.gui.TagEventView;
-import edu.utsa.tagger.gui.TaggerView;
+import edu.utsa.tagger.gui.*;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -36,6 +31,7 @@ public class TaggedEvent implements Comparable<TaggedEvent> {
     private HashMap<AbstractTagModel, TagEventView> tagEgtViews;
     private HashMap<AbstractTagModel, RRTagView> rrTagViews;
     private EventEditView eventEditView;
+    private EventTagSearchView eventTagSearchView;
 
     public TaggedEvent(GuiEventModel guiEventModel, Tagger tagger) {
         this.guiEventModel = guiEventModel;
@@ -44,6 +40,7 @@ public class TaggedEvent implements Comparable<TaggedEvent> {
         this.groupViews = new HashMap();
         this.tagEgtViews = new HashMap();
         this.rrTagViews = new HashMap();
+        this.eventTagSearchView = new EventTagSearchView(tagger, this);
     }
 
     public boolean addGroup(int groupId) {
@@ -343,6 +340,8 @@ public class TaggedEvent implements Comparable<TaggedEvent> {
     public TreeMap<Integer, TaggerSet<AbstractTagModel>> getTagGroups() {
         return this.tagGroups;
     }
+
+    public EventTagSearchView getEventTagSearchView() {return eventTagSearchView;}
 
     public int findTagCount() {
         int numTags = 0;

@@ -132,7 +132,6 @@ public class TaggerView extends ConstraintContainer {
             g2d.setColor(Color.white);
             g2d.fill(new Rectangle2D.Double(0, 0, getWidth(), getHeight()));
             g2d.setColor(new Color(200, 200, 200));
-            g2d.draw(new Line2D.Double(6, 0, 6, getHeight() - 5));
         }
     };
     private JScrollPane searchResultsScrollPane = new JScrollPane(searchResults);
@@ -152,7 +151,7 @@ public class TaggerView extends ConstraintContainer {
     private ConstraintContainer splitPaneRight = new ConstraintContainer();
     private Tagger tagger;
     private JPanel tagsPanel = new JPanel();
-    private JPanel eventsPanel = new JPanel();
+    private JLayeredPane eventsPanel = new JLayeredPane();
     //private boolean startOver;
     //private boolean fMapLoaded;
     //private String fMapPath;
@@ -232,6 +231,7 @@ public class TaggerView extends ConstraintContainer {
         this.done.setHoverForeground(FontsAndColors.BLUE_DARK);
         this.zoomPercent.setFont(FontsAndColors.contentFont);
         this.zoomPercent.setForeground(FontsAndColors.BLUE_VERY_LIGHT);
+        this.eventsPanel.setOpaque(true);
         this.eventsPanel.setBackground(FontsAndColors.BLUE_2);
         this.tagsPanel.setBackground(FontsAndColors.BLUE_MEDIUM);
         this.eventsTitle.setForeground(FontsAndColors.BLUE_DARK);
@@ -433,11 +433,9 @@ public class TaggerView extends ConstraintContainer {
     private void addComponents() {
         this.setLayout(new ConstraintLayout());
         this.addOptionComponents();
-        this.searchResults.setBorder(new DropShadowBorder());
         this.searchResults.setLayout(new ListLayout(0, 0, 0, 0));
-        //this.searchResultsScrollPane = new JScrollPane(searchResults);
         this.searchResultsScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        this.searchResultsScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        this.searchResultsScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         this.searchResultsScrollPane.getVerticalScrollBar().setUnitIncrement(20);
         this.searchResultsScrollPane.getHorizontalScrollBar().setUnitIncrement(20);
         this.tagsPanel.setLayout(new ListLayout(1, 1, 0, 1));
@@ -532,6 +530,7 @@ public class TaggerView extends ConstraintContainer {
             top = addEvents(taggedEvent, top);
             top = addRRTags(taggedEvent, top);
             top = addOtherTags(taggedEvent, top);
+            top = addEventTagSearchPanel(taggedEvent, top);
         }
         validate();
         repaint();
@@ -1291,6 +1290,7 @@ public class TaggerView extends ConstraintContainer {
             searchResults.add(tag.getTagSearchView());
         }
         searchResults.revalidate();
+        searchResultsScrollPane.getViewport().revalidate();
 //        splitPaneRight.setTopHeight(searchResultsScrollPane, 40.0, Unit.PX,
 //                searchResults.getPreferredSize().getHeight() / ConstraintLayout.scale, Unit.PX);
         //splitPaneRight.setTopBottom(searchResultsScrollPane,40.0, Unit.PX, 1.0, Unit.PX);
@@ -1402,6 +1402,18 @@ public class TaggerView extends ConstraintContainer {
             top = this.addSeparator(top);
         }
 
+        return top;
+    }
+
+    private int addEventTagSearchPanel(TaggedEvent taggedEvent, int top) {
+        EventTagSearchView evTagSearchView = taggedEvent.getEventTagSearchView();
+        evTagSearchView.setAppView(this);
+
+        this.eventsPanel.add(evTagSearchView.getjTextArea(), new Constraint("top:" + top + " height:26 left:37 right:200"));
+        top += 27;
+        this.eventsPanel.setLayer(evTagSearchView.getSearchResultsScrollPane(), 1);
+        this.eventsPanel.add(evTagSearchView.getSearchResultsScrollPane(), new Constraint("top:" + top + " left:37 right:0 height:200"));
+        top += 5;
         return top;
     }
 
