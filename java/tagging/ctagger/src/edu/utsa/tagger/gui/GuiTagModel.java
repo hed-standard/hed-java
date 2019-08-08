@@ -172,17 +172,19 @@ public class GuiTagModel extends AbstractTagModel {
 	 * Attempts to toggle this tag with the groups with the given IDs.
 	 * 
 	 * @param groupIds
+	 *
+	 * @return 0 if sucess, -1 if failed
 	 */
-	public void requestToggleTag(Set<Integer> groupIds) {
+	public int requestToggleTag(Set<Integer> groupIds) {
 		if (groupIds.isEmpty()) {
 			appView.showTaggerMessageDialog(MessageConstants.NO_EVENT_SELECTED,
 					"Okay", null, null);
-			return;
+			return -1;
 		}
 		if (isChildRequired()) {
 			appView.showTaggerMessageDialog(
 					MessageConstants.SELECT_CHILD_ERROR, "Okay", null, null);
-			return;
+			return -1;
 		}
 		ToggleTagMessage message = tagger.toggleTag(this, groupIds);
 		if (message != null) {
@@ -199,6 +201,7 @@ public class GuiTagModel extends AbstractTagModel {
 		}
 		// appView.updateTags();
 		appView.updateEventsPanel();
+		return 0;
 	}
 
 	public void setAppView(TaggerView appView) {

@@ -2,7 +2,6 @@ package edu.utsa.tagger.gui;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.util.Collections;
@@ -30,7 +29,6 @@ import edu.utsa.tagger.gui.ContextMenu.ContextMenuAction;
 import edu.utsa.tagger.guisupport.Constraint;
 import edu.utsa.tagger.guisupport.ConstraintContainer;
 import edu.utsa.tagger.guisupport.ConstraintLayout;
-import edu.utsa.tagger.guisupport.DropShadowBorder;
 import edu.utsa.tagger.guisupport.ListLayout;
 import edu.utsa.tagger.guisupport.ScrollLayout;
 import edu.utsa.tagger.guisupport.VerticalSplitLayout;
@@ -141,6 +139,8 @@ public class TaggerView extends ConstraintContainer {
             return FontsAndColors.contentFont;
         }
     };
+
+    private EventEnterTagView eventEnterTagView;
     private Set<Integer> selected = new HashSet<>();
     private Set<Integer> selectedEvents = new HashSet<>();
     private Set<Integer> selectedGroups = new HashSet<Integer>();
@@ -418,7 +418,7 @@ public class TaggerView extends ConstraintContainer {
         this.searchTags.getJTextArea().getDocument().putProperty("filterNewlines", Boolean.TRUE);
         this.searchTags.getJTextArea().getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "doNothing");
         this.searchTags.getJTextArea().getInputMap().put(KeyStroke.getKeyStroke("TAB"), "doNothing");
-        this.searchTags.getJTextArea().setText("search for tags ...");
+        this.searchTags.getJTextArea().setText("Lookup tags ...");
         this.searchTags.getJTextArea().addFocusListener(new FocusListener() {
             public void focusGained(FocusEvent e) {
                 TaggerView.this.searchTags.getJTextArea().selectAll();
@@ -438,16 +438,22 @@ public class TaggerView extends ConstraintContainer {
         this.searchResultsScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         this.searchResultsScrollPane.getVerticalScrollBar().setUnitIncrement(20);
         this.searchResultsScrollPane.getHorizontalScrollBar().setUnitIncrement(20);
+        this.eventEnterTagView = new EventEnterTagView(tagger, this);
         this.tagsPanel.setLayout(new ListLayout(1, 1, 0, 1));
         this.eventsPanel.setLayout(new ConstraintLayout());
         this.eventsScrollLayout = new ScrollLayout(this.eventsScrollPane, this.eventsPanel);
         this.eventsScrollPane.setLayout(this.eventsScrollLayout);
         this.tagsScrollLayout = new ScrollLayout(this.tagsScrollPane, this.tagsPanel);
         this.tagsScrollPane.setLayout(this.tagsScrollLayout);
+
         this.splitPaneLeft.add(this.eventsTitle, new Constraint("top:0 height:50 left:10 width:100"));
+        this.splitPaneLeft.add(this.eventEnterTagView.getjTextArea(), new Constraint("top:12 height:26 left:130 right:100"));
+        this.splitPaneLeft.add(this.eventEnterTagView.getSearchResultsScrollPane(), new Constraint("top:40 bottom:300 left:130 right:0"));
+        this.splitPaneLeft.setLayer(this.eventEnterTagView.getSearchResultsScrollPane(), 1);
         this.splitPaneLeft.add(this.deselectAll, new Constraint("top:50 height:30 left:10 width:150"));
         this.splitPaneLeft.add(this.addGroup, new Constraint("top:50 height:30 right:20 width:150"));
         this.splitPaneLeft.add(this.eventsScrollPane, new Constraint("top:85 bottom:0 left:0 right:5"));
+
         this.splitPaneRight.add(this.tagsTitle, new Constraint("top:0 height:50 left:5 width:100"));
         this.splitPaneRight.add(this.searchTags, new Constraint("top:12 height:26 left:90 right:100"));
         this.splitPaneRight.add(this.searchResultsScrollPane, new Constraint("top:40 bottom:300 left:90 right:0"));
@@ -457,6 +463,7 @@ public class TaggerView extends ConstraintContainer {
         this.splitPaneRight.add(this.collapseLabel, new Constraint("top:50 height:30 left:315 width:115"));
         this.splitPaneRight.add(this.collapseLevel, new Constraint("top:48 height:30 left:415 width:30"));
         this.splitPaneRight.add(this.tagsScrollPane, new Constraint("top:85 bottom:0 left:5 right:0"));
+
         this.add(this.notification, new Constraint("top:10 height:30 left:305 right:245"));
         this.setLayer(this.notification, 1);
         this.notification.setVisible(false);
@@ -530,7 +537,7 @@ public class TaggerView extends ConstraintContainer {
             top = addEvents(taggedEvent, top);
             top = addRRTags(taggedEvent, top);
             top = addOtherTags(taggedEvent, top);
-            top = addEventTagSearchPanel(taggedEvent, top);
+//            top = addEventTagSearchPanel(taggedEvent, top);
         }
         validate();
         repaint();
@@ -1405,17 +1412,17 @@ public class TaggerView extends ConstraintContainer {
         return top;
     }
 
-    private int addEventTagSearchPanel(TaggedEvent taggedEvent, int top) {
-        EventTagSearchView evTagSearchView = taggedEvent.getEventTagSearchView();
-        evTagSearchView.setAppView(this);
-
-        this.eventsPanel.add(evTagSearchView.getjTextArea(), new Constraint("top:" + top + " height:26 left:37 right:200"));
-        top += 27;
-        this.eventsPanel.setLayer(evTagSearchView.getSearchResultsScrollPane(), 1);
-        this.eventsPanel.add(evTagSearchView.getSearchResultsScrollPane(), new Constraint("top:" + top + " left:37 right:0 height:200"));
-        top += 5;
-        return top;
-    }
+//    private int addEventTagSearchPanel(TaggedEvent taggedEvent, int top) {
+//        EventEnterTagView evTagSearchView = taggedEvent.getEventEnterTagView();
+//        evTagSearchView.setAppView(this);
+//
+//        this.eventsPanel.add(evTagSearchView.getjTextArea(), new Constraint("top:" + top + " height:26 left:37 right:200"));
+//        top += 27;
+//        this.eventsPanel.setLayer(evTagSearchView.getSearchResultsScrollPane(), 1);
+//        this.eventsPanel.add(evTagSearchView.getSearchResultsScrollPane(), new Constraint("top:" + top + " left:37 right:0 height:200"));
+//        top += 5;
+//        return top;
+//    }
 
     private int createGroupSpace(TaggedEvent taggedEvent, Map.Entry<Integer, TaggerSet<AbstractTagModel>> tagGroup, int top) {
         if ((Integer) tagGroup.getKey() != taggedEvent.getEventLevelId()) {
@@ -2035,5 +2042,9 @@ public class TaggerView extends ConstraintContainer {
 
     public JFrame getFrame() {
         return frame;
+    }
+
+    public EventEnterTagView getEventEnterTagView() {
+        return eventEnterTagView;
     }
 }

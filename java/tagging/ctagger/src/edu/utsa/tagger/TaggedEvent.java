@@ -31,7 +31,7 @@ public class TaggedEvent implements Comparable<TaggedEvent> {
     private HashMap<AbstractTagModel, TagEventView> tagEgtViews;
     private HashMap<AbstractTagModel, RRTagView> rrTagViews;
     private EventEditView eventEditView;
-    private EventTagSearchView eventTagSearchView;
+//    private EventEnterTagView eventEnterTagView;
 
     public TaggedEvent(GuiEventModel guiEventModel, Tagger tagger) {
         this.guiEventModel = guiEventModel;
@@ -40,9 +40,16 @@ public class TaggedEvent implements Comparable<TaggedEvent> {
         this.groupViews = new HashMap();
         this.tagEgtViews = new HashMap();
         this.rrTagViews = new HashMap();
-        this.eventTagSearchView = new EventTagSearchView(tagger, this);
+//        this.eventEnterTagView = new EventEnterTagView(tagger, this);
     }
 
+    /**
+     * Adds a group with the given ID to the event.
+     *
+     * @param groupId
+     * @return True if the group was added successfully, false if the group ID
+     *         already existed for this event.
+     */
     public boolean addGroup(int groupId) {
         TaggerSet<AbstractTagModel> tags = (TaggerSet)this.tagGroups.get(groupId);
         if (tags != null) {
@@ -341,7 +348,7 @@ public class TaggedEvent implements Comparable<TaggedEvent> {
         return this.tagGroups;
     }
 
-    public EventTagSearchView getEventTagSearchView() {return eventTagSearchView;}
+//    public EventEnterTagView getEventEnterTagView() {return eventEnterTagView;}
 
     public int findTagCount() {
         int numTags = 0;

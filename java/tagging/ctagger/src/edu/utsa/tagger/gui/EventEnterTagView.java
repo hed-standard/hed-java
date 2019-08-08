@@ -1,7 +1,6 @@
 package edu.utsa.tagger.gui;
 
 import java.awt.Color;
-import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.FocusEvent;
@@ -9,7 +8,6 @@ import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.geom.Rectangle2D;
-import java.util.Collections;
 import java.util.Set;
 
 import javax.swing.*;
@@ -27,7 +25,7 @@ import edu.utsa.tagger.guisupport.ListLayout;
  * @author Dung
  *
  */
-public class EventTagSearchView extends JComponent {
+public class EventEnterTagView extends JComponent {
     /* Fields */
     private Tagger tagger;
     private TaggerView appView;
@@ -45,12 +43,11 @@ public class EventTagSearchView extends JComponent {
     private JScrollPane searchResultsScrollPane; // searchResults is put in a scrollable panel
     private int focusedResult = -1;
 
-    /* Constructor */
-    public EventTagSearchView(Tagger tagger, TaggedEvent taggedEvent) {
+    public EventEnterTagView(Tagger tagger, TaggerView appView) {
         this.tagger = tagger;
-        this.taggedEvent = taggedEvent;
+        this.appView = appView;
         /* Initialize GUI component */
-        jTextArea = new JTextArea("search for tags ...");
+        jTextArea = new JTextArea("Enter tag ...");
         jTextArea.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         this.jTextArea.getDocument().putProperty("filterNewlines", Boolean.TRUE);
 
@@ -89,6 +86,60 @@ public class EventTagSearchView extends JComponent {
             @Override
             public void focusLost(FocusEvent e) {
                 searchResultsScrollPane.setVisible(false);
+                focusedResult = -1;
+            }
+        });
+
+        setKeyListener();
+
+    }
+
+    /* Constructor */
+    public EventEnterTagView(Tagger tagger, TaggedEvent taggedEvent) {
+        this.tagger = tagger;
+        this.taggedEvent = taggedEvent;
+        /* Initialize GUI component */
+        jTextArea = new JTextArea("Enter tag ...");
+        jTextArea.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        this.jTextArea.getDocument().putProperty("filterNewlines", Boolean.TRUE);
+
+        searchResults.setBackground(Color.WHITE);
+        searchResults.setLayout(new ListLayout(0, 0, 0, 0));
+
+        searchResultsScrollPane = new JScrollPane(searchResults);
+        searchResultsScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        searchResultsScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        searchResultsScrollPane.getVerticalScrollBar().setUnitIncrement(20);
+        searchResultsScrollPane.getHorizontalScrollBar().setUnitIncrement(20);
+        searchResultsScrollPane.setVisible(false);
+
+        /* Action listener */
+        this.jTextArea.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                updateSearch();
+            }
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                updateSearch();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                updateSearch();
+            }
+        });
+        this.jTextArea.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                selectAllText();
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                searchResultsScrollPane.setVisible(false);
+                focusedResult = -1;
             }
         });
 
@@ -104,13 +155,14 @@ public class EventTagSearchView extends JComponent {
      */
     private void updateSearch() {
         searchResults.removeAll();
+        searchResults.revalidate();
         Set<GuiTagModel> tagModels = tagger.getSearchTags(jTextArea.getText());
         if (tagModels == null || tagModels.isEmpty()) {
             searchResultsScrollPane.setVisible(false);
             return;
         }
         for (GuiTagModel tag : tagModels) {
-            searchResults.add(tag.getTagSearchView());
+            searchResults.add(new TagEnterSearchView(this, tag));
         }
         searchResults.revalidate();
         searchResultsScrollPane.setVisible(true);
@@ -129,19 +181,19 @@ public class EventTagSearchView extends JComponent {
             @Override
             public void keyPressed(KeyEvent event) {
                 if (jTextArea.isFocusOwner()) { // if search textfield is focus owner
-                    TagSearchView searchResult = null;
+                    TagEnterSearchView searchResult = null;
                     JScrollBar vertical = searchResultsScrollPane.getVerticalScrollBar();
                     switch (event.getKeyCode()) {
                         case KeyEvent.VK_DOWN:
                             if (focusedResult > -1) {
-                                searchResult = ((TagSearchView)searchResults.getComponent(focusedResult));  // old component
+                                searchResult = ((TagEnterSearchView)searchResults.getComponent(focusedResult));  // old component
                                 searchResult.setHover(false);
                             }
                             if (focusedResult == searchResults.getComponentCount()-1)
                                 focusedResult = searchResults.getComponentCount()-1;
                             else
                                 focusedResult++;
-                            searchResult = ((TagSearchView)searchResults.getComponent(focusedResult));  // new component
+                            searchResult = ((TagEnterSearchView)searchResults.getComponent(focusedResult));  // new component
                             searchResult.setHover(true);
                             if (focusedResult > 0)
                                 vertical.setValue(vertical.getValue()+vertical.getUnitIncrement());
@@ -149,7 +201,7 @@ public class EventTagSearchView extends JComponent {
                             break;
                         case KeyEvent.VK_UP:
                             if (focusedResult > -1) {
-                                searchResult = ((TagSearchView)searchResults.getComponent(focusedResult));  // old component
+                                searchResult = ((TagEnterSearchView)searchResults.getComponent(focusedResult));  // old component
                                 searchResult.setHover(false);
                             }
                             if (focusedResult <= 0) // first key press or reach beginning
@@ -158,22 +210,21 @@ public class EventTagSearchView extends JComponent {
                                 vertical.setValue(vertical.getValue() - vertical.getUnitIncrement());
                                 focusedResult--;
                             }
-                            searchResult = ((TagSearchView)searchResults.getComponent(focusedResult));  // new component
+                            searchResult = ((TagEnterSearchView)searchResults.getComponent(focusedResult));  // new component
                             searchResult.setHover(true);
 
                             searchResults.repaint();
                             break;
                         case KeyEvent.VK_ENTER:
                             if (focusedResult > -1 && focusedResult < searchResults.getComponentCount()) {
-                                searchResult = (TagSearchView)searchResults.getComponent(focusedResult);
-                                searchResult.mouseClickedEvent(tagger,appView);
+                                searchResult = (TagEnterSearchView)searchResults.getComponent(focusedResult);
                                 GuiTagModel model = searchResult.getModel();
                                 if (model.takesValue()) {
-                                    TagValueInputDialog dialog = new TagValueInputDialog(EventTagSearchView.this, model);
+                                    TagValueInputDialog dialog = new TagValueInputDialog(EventEnterTagView.this, searchResult);
                                     dialog.setVisible(true);
                                 }
                                 else {
-                                    tagSelected(searchResult.getModel());
+                                    searchResult.addTagToEvent();
                                 }
                             }
                             break;
@@ -220,12 +271,7 @@ public class EventTagSearchView extends JComponent {
         return tagger;
     }
 
-    public void tagSelected(GuiTagModel tagModel) {
-        appView.getSelected().clear();
-        appView.addSelectedGroup(taggedEvent.getEventLevelId());
-        tagModel.requestToggleTag();
-        TaggedEvent tgevt = tagger.getTaggedEventFromGroupId(Collections.max(appView.getSelected()));
-        tgevt.getEventTagSearchView().getjTextArea().requestFocusInWindow();
-        appView.scrollToEvent(tgevt);
+    public TaggedEvent getTaggedEvent() {
+        return taggedEvent;
     }
 }

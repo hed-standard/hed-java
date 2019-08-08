@@ -110,7 +110,7 @@ public class TaggerMessageDialog extends JDialog {
 		setLocationRelativeTo(frame);
 
 		this.addKeyListener(new KeyListener() {
-
+			private boolean enterPressed = false;
 			@Override
 			public void keyTyped(KeyEvent e) {
 				// TODO Auto-generated method stub
@@ -119,12 +119,14 @@ public class TaggerMessageDialog extends JDialog {
 
 			@Override
 			public void keyPressed(KeyEvent e) {
-
+				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+					enterPressed = true;
+				}
 			}
 
 			@Override
 			public void keyReleased(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+				if (enterPressed && e.getKeyCode() == KeyEvent.VK_ENTER) {
 					handlePressedButton(0);
 				}
 				if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {

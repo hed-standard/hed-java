@@ -15,12 +15,11 @@ import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
-import edu.utsa.tagger.TaggedEvent;
 import edu.utsa.tagger.Tagger;
 import edu.utsa.tagger.guisupport.ConstraintLayout;
 
 /**
- * Dialog used to prompt for user's input when selecting a tag through SearchView.
+ * Dialog used to prompt for user's input when selecting a tag through EventEnterTagView represented by an TagEnterSearchView.
  *
  * @author Dung Truong
  */
@@ -35,13 +34,15 @@ public class TagValueInputDialog extends JDialog implements ActionListener,
     String typedText = null;
     GuiTagModel guiTagModel;
     Tagger tagger;
-    EventTagSearchView eventTagSearchView;
+    EventEnterTagView eventEnterTagView;
+    TagEnterSearchView tagEnterSearchView;
 
-    public TagValueInputDialog(EventTagSearchView eventTagSearchView, GuiTagModel selectedTagModel) {
-        super(eventTagSearchView.getAppView().getFrame(),true);
-        guiTagModel = selectedTagModel;
-        this.tagger = eventTagSearchView.getTagger();
-        this.eventTagSearchView = eventTagSearchView;
+    public TagValueInputDialog(EventEnterTagView eventEnterTagView, TagEnterSearchView enteredTag) {
+        super(eventEnterTagView.getAppView().getFrame(),true);
+        guiTagModel = enteredTag.getModel();
+        this.tagger = eventEnterTagView.getTagger();
+        this.eventEnterTagView = eventEnterTagView;
+        this.tagEnterSearchView = enteredTag;
 
         bgPanel.setLayout(new ConstraintLayout());
         bgPanel.setBackground(Color.white);
@@ -73,7 +74,7 @@ public class TagValueInputDialog extends JDialog implements ActionListener,
         setContentPane(bgPanel);
 
         pack();
-        setLocationRelativeTo(eventTagSearchView.getAppView().getFrame());
+        setLocationRelativeTo(eventEnterTagView.getAppView().getFrame());
 
         //Ensure the text field always gets the first focus.
         addComponentListener(new ComponentAdapter() {
@@ -152,9 +153,9 @@ public class TagValueInputDialog extends JDialog implements ActionListener,
     /** This method clears the dialog and hides it. */
     public void finished() {
         guiTagModel.setPath(guiTagModel.getParentPath() + "/" + typedText);
-        eventTagSearchView.tagSelected(guiTagModel);
         setVisible(false);
         dispose();
+        tagEnterSearchView.addTagToEvent();
     }
 
     /**
