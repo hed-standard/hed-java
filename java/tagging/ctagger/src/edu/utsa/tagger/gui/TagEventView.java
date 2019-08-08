@@ -191,6 +191,7 @@ public class TagEventView extends JComponent implements MouseListener {
 
 		if (highlight) {
 			fg = FontsAndColors.EVENTTAG_FG_HOVER;
+			bg = FontsAndColors.EVENT_BG_PRESSED;
 		}
 
 		if (bg != null) {

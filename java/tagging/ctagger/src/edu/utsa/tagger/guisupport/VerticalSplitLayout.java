@@ -62,7 +62,7 @@ public class VerticalSplitLayout implements LayoutManager {
 		
 		@Override protected void paintComponent(Graphics g) {
 			if (hover || pressed) {
-				g.setColor(FontsAndColors.BLUE_MEDIUM);
+				g.setColor(FontsAndColors.BLUE_VERY_LIGHT);
 				g.fillRect(getWidth() / 2 - 1, 0, 2, getHeight());
 			}
 		}

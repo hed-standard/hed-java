@@ -18,6 +18,13 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeMap;
 
+/**
+ * This class represents a tagged event, consisting of the event model and the
+ * associated groupIds and tag models.
+ *
+ * @author Lauren Jett, Rebecca Strautman, Thomas Rognon, Jeremy Cockfield, Kay
+ *         Robbins
+ */
 public class TaggedEvent implements Comparable<TaggedEvent> {
     private static Tagger tagger;
     private static TaggerView appView;

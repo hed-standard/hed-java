@@ -135,6 +135,7 @@ public class TaggerView extends ConstraintContainer {
             g2d.draw(new Line2D.Double(6, 0, 6, getHeight() - 5));
         }
     };
+    private JScrollPane searchResultsScrollPane = new JScrollPane(searchResults);
     private XScrollTextBox searchTags = new XScrollTextBox(new XTextBox()) {
         @Override
         public Font getFont() {
@@ -424,7 +425,7 @@ public class TaggerView extends ConstraintContainer {
             }
 
             public void focusLost(FocusEvent e) {
-                TaggerView.this.searchResults.setVisible(false);
+                TaggerView.this.searchResultsScrollPane.setVisible(false);
             }
         });
     }
@@ -433,7 +434,12 @@ public class TaggerView extends ConstraintContainer {
         this.setLayout(new ConstraintLayout());
         this.addOptionComponents();
         this.searchResults.setBorder(new DropShadowBorder());
-        this.searchResults.setLayout(new ListLayout(1, 1, 0, 1));
+        this.searchResults.setLayout(new ListLayout(0, 0, 0, 0));
+        //this.searchResultsScrollPane = new JScrollPane(searchResults);
+        this.searchResultsScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        this.searchResultsScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        this.searchResultsScrollPane.getVerticalScrollBar().setUnitIncrement(20);
+        this.searchResultsScrollPane.getHorizontalScrollBar().setUnitIncrement(20);
         this.tagsPanel.setLayout(new ListLayout(1, 1, 0, 1));
         this.eventsPanel.setLayout(new ConstraintLayout());
         this.eventsScrollLayout = new ScrollLayout(this.eventsScrollPane, this.eventsPanel);
@@ -446,8 +452,8 @@ public class TaggerView extends ConstraintContainer {
         this.splitPaneLeft.add(this.eventsScrollPane, new Constraint("top:85 bottom:0 left:0 right:5"));
         this.splitPaneRight.add(this.tagsTitle, new Constraint("top:0 height:50 left:5 width:100"));
         this.splitPaneRight.add(this.searchTags, new Constraint("top:12 height:26 left:90 right:100"));
-        this.splitPaneRight.add(this.searchResults, new Constraint("top:40 height:0 left:90 right:0"));
-        this.splitPaneRight.setLayer(this.searchResults, 1);
+        this.splitPaneRight.add(this.searchResultsScrollPane, new Constraint("top:40 bottom:300 left:90 right:0"));
+        this.splitPaneRight.setLayer(this.searchResultsScrollPane, 1);
         this.splitPaneRight.add(this.collapseAll, new Constraint("top:52 height:30 left:85 width:100"));
         this.splitPaneRight.add(this.expandAll, new Constraint("top:52 height:30 left:215 width:100"));
         this.splitPaneRight.add(this.collapseLabel, new Constraint("top:50 height:30 left:315 width:115"));
@@ -478,7 +484,7 @@ public class TaggerView extends ConstraintContainer {
 
     public void updateTagsPanel() {
         this.tagger.updateTagHighlights(true);
-        this.searchResults.setVisible(false);
+        this.searchResultsScrollPane.setVisible(false);
         this.tagsPanel.removeAll();
         String lastVisibleTagPath = null;
         Iterator var3 = this.tagger.getTagSet().iterator();
@@ -1278,16 +1284,17 @@ public class TaggerView extends ConstraintContainer {
         searchResults.removeAll();
         Set<GuiTagModel> tagModels = tagger.getSearchTags(searchTags.getJTextArea().getText());
         if (tagModels == null || tagModels.isEmpty()) {
-            searchResults.setVisible(false);
+            searchResultsScrollPane.setVisible(false);
             return;
         }
         for (GuiTagModel tag : tagModels) {
             searchResults.add(tag.getTagSearchView());
         }
         searchResults.revalidate();
-        splitPaneRight.setTopHeight(searchResults, 40.0, Unit.PX,
-                searchResults.getPreferredSize().getHeight() / ConstraintLayout.scale, Unit.PX);
-        searchResults.setVisible(true);
+//        splitPaneRight.setTopHeight(searchResultsScrollPane, 40.0, Unit.PX,
+//                searchResults.getPreferredSize().getHeight() / ConstraintLayout.scale, Unit.PX);
+        //splitPaneRight.setTopBottom(searchResultsScrollPane,40.0, Unit.PX, 1.0, Unit.PX);
+        searchResultsScrollPane.setVisible(true);
     }
 
     private void zoomIn() {
