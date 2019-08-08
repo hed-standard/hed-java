@@ -18,12 +18,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import javax.swing.BorderFactory;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JTextArea;
-import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -179,6 +174,16 @@ public class RRTagView extends JComponent {
 	public void save() {
 		AbstractTagModel newTag = this.getNewValue();
 		if (this.takesValueTag != null) {
+			// Check if description has comma
+			if ("Event/Description".equals(newTag.getParentPath())) {
+				if (newTag.getName().indexOf(',') != -1) {
+					JOptionPane.showMessageDialog(appView.getFrame(), "Description should not contain commas.", "Input error",
+							JOptionPane.ERROR_MESSAGE);
+					inAddValue = true;
+					refreshView();
+					return;
+				}
+			}
 			this.updateTakesValueTag(newTag);
 		} else if (newTag != null) {
 			this.updateValue(newTag);
