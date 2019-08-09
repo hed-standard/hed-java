@@ -164,8 +164,8 @@ public class GuiTagModel extends AbstractTagModel {
 	 * Attempts to toggle this tag with the groups with the groups currently
 	 * selected for tagging.
 	 */
-	public void requestToggleTag() {
-        this.requestToggleTag(this.appView.getSelected());
+	public int requestToggleTag() {
+        return this.requestToggleTag(this.appView.getSelected());
 	}
 
 	/**
@@ -183,14 +183,14 @@ public class GuiTagModel extends AbstractTagModel {
 		}
 		if (isChildRequired()) {
 			appView.showTaggerMessageDialog(
-					MessageConstants.SELECT_CHILD_ERROR, "Okay", null, null);
+					MessageConstants.SELECT_CHILD_ERROR, "Ok", null, null);
 			return -1;
 		}
 		ToggleTagMessage message = tagger.toggleTag(this, groupIds);
 		if (message != null) {
 			if (message.rrError) {
 				appView.showTaggerMessageDialog(
-						MessageConstants.ASSOCIATE_RR_ERROR, "Okay", null, null);
+						MessageConstants.ASSOCIATE_RR_ERROR, "Ok", null, null);
 			} else if (message.descendants.size() > 0) {
 				appView.showDescendantDialog(message);
 			} else if (message.uniqueValues.size() > 0) {
@@ -199,7 +199,6 @@ public class GuiTagModel extends AbstractTagModel {
 				appView.showAncestorDialog(message);
 			}
 		}
-		// appView.updateTags();
 		appView.updateEventsPanel();
 		return 0;
 	}

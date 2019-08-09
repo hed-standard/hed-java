@@ -15,6 +15,7 @@ import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
+import edu.utsa.tagger.AbstractTagModel;
 import edu.utsa.tagger.Tagger;
 import edu.utsa.tagger.guisupport.ConstraintLayout;
 
@@ -95,7 +96,7 @@ public class TagValueInputDialog extends JDialog implements ActionListener,
         bgPanel.setValue(btnString1);
     }
 
-    /** This method reacts to state changes in the option pane. */
+    /** This method reacts to state changes in the option pane. e.g. when a menu button is clicked */
     public void propertyChange(PropertyChangeEvent e) {
         String prop = e.getPropertyName();
 
@@ -117,45 +118,48 @@ public class TagValueInputDialog extends JDialog implements ActionListener,
             bgPanel.setValue(
                     JOptionPane.UNINITIALIZED_VALUE);
 
-            if (btnString1.equals(value)) {
+            if (btnString1.equals(value) && !textField.getText().isEmpty()) { // user supposedly enter a value and hit ok
                 typedText = textField.getText();
+                TaggerView appView = eventEnterTagView.getAppView();
                 if (guiTagModel.isNumeric()) {
-                    String unitString = unitComboBox.getSelectedItem().toString();
+                    String unitString = new String();
+                    if (unitComboBox.getSelectedItem() != null) {
+                        unitString = unitComboBox.getSelectedItem().toString();
+                    }
                     typedText = validateNumericValue(typedText.trim(), unitString);
-                    if (typedText != null) {
-                        //we're done; clear, dismiss the dialog, and update tag event
-                        finished();
-                    }
-                    else {
-                        //text was invalid
-                        textField.selectAll();
-                        JOptionPane.showMessageDialog(
-                                TagValueInputDialog.this,
-                                "Input must be numeric",
-                                "Try again",
-                                JOptionPane.ERROR_MESSAGE);
-                        typedText = null;
-                        textField.requestFocusInWindow();
+                    if (typedText == null) {
+                        inputFailed();
+                        appView.showTaggerMessageDialog(
+                                MessageConstants.TAG_UNIT_ERROR, "Ok", null, null);
+                        return;
                     }
                 }
-                else { // if not numeric takes in any value
-                    finished();
-                }
+                AbstractTagModel newTag = tagger.createTransientTagModel(guiTagModel,
+                        typedText);
+                GuiTagModel gtm = (GuiTagModel) newTag;
+                gtm.setAppView(appView);
+                inputSuccess(gtm);
             }
             else { //user closed dialog or clicked cancel
                 typedText = null;
-                finished();
+                inputFailed();
             }
         }
     }
 
 
     /** This method clears the dialog and hides it. */
-    public void finished() {
-        guiTagModel.setPath(guiTagModel.getParentPath() + "/" + typedText);
+    public void inputSuccess(GuiTagModel tagModel) {
         setVisible(false);
         dispose();
-        tagEnterSearchView.addTagToEvent();
+        tagEnterSearchView.addTagToEvent(tagModel);
+
+    }
+
+    /** This method clears the dialog and hides it. */
+    public void inputFailed() {
+        setVisible(false);
+        dispose();
     }
 
     /**

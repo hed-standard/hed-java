@@ -21,7 +21,12 @@ public class TagEnterSearchView extends TagSearchView {
 
     @Override
     public void mouseClickedEvent(Tagger tagger, TaggerView appView) {
-        addTagToEvent();
+        if (getModel().takesValue()){
+            TagValueInputDialog dialog = new TagValueInputDialog(eventEnterTagView, this);
+            dialog.setVisible(true);
+        }
+        else
+            addTagToEvent();
     }
 
     /**
@@ -29,9 +34,21 @@ public class TagEnterSearchView extends TagSearchView {
      * and any selected group that the event contains
      */
     public void addTagToEvent() {
-        if (getModel().requestToggleTag(eventEnterTagView.getAppView().getSelected()) == 0) {
-            TaggedEvent tgevt = eventEnterTagView.getTagger().getTaggedEventFromGroupId(Collections.max(eventEnterTagView.getAppView().getSelected()));
-            eventEnterTagView.getAppView().scrollToEvent(tgevt);
+        if (getModel().requestToggleTag() == 0) {
+            eventEnterTagView.getAppView().scrollToEventTag(getModel());
+            eventEnterTagView.getAppView().getEventEnterTagView().getjTextArea().transferFocusBackward();
+            eventEnterTagView.getAppView().getEventEnterTagView().getjTextArea().setText("Enter tag ...");
+            eventEnterTagView.getAppView().getEventEnterTagView().getjTextArea().requestFocusInWindow();
+        }
+    }
+
+    /**
+     * Add tag to the event associated with this eventEnterTagView
+     * and any selected group that the event contains
+     */
+    public void addTagToEvent(GuiTagModel tagModel) {
+        if (tagModel.requestToggleTag() == 0) {
+            eventEnterTagView.getAppView().scrollToEventTag(getModel());
             eventEnterTagView.getAppView().getEventEnterTagView().getjTextArea().transferFocusBackward();
             eventEnterTagView.getAppView().getEventEnterTagView().getjTextArea().setText("Enter tag ...");
             eventEnterTagView.getAppView().getEventEnterTagView().getjTextArea().requestFocusInWindow();

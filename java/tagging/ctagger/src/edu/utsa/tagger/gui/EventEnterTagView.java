@@ -42,6 +42,7 @@ public class EventEnterTagView extends JComponent {
     };
     private JScrollPane searchResultsScrollPane; // searchResults is put in a scrollable panel
     private int focusedResult = -1;
+    private TagView searchResult;
 
     public EventEnterTagView(Tagger tagger, TaggerView appView) {
         this.tagger = tagger;
@@ -218,14 +219,15 @@ public class EventEnterTagView extends JComponent {
                         case KeyEvent.VK_ENTER:
                             if (focusedResult > -1 && focusedResult < searchResults.getComponentCount()) {
                                 searchResult = (TagEnterSearchView)searchResults.getComponent(focusedResult);
-                                GuiTagModel model = searchResult.getModel();
-                                if (model.takesValue()) {
-                                    TagValueInputDialog dialog = new TagValueInputDialog(EventEnterTagView.this, searchResult);
-                                    dialog.setVisible(true);
-                                }
-                                else {
-                                    searchResult.addTagToEvent();
-                                }
+                                searchResult.mouseClickedEvent(tagger,appView);
+//                                GuiTagModel model = searchResult.getModel();
+//                                if (model.takesValue()) {
+//                                    TagValueInputDialog dialog = new TagValueInputDialog(EventEnterTagView.this, searchResult);
+//                                    dialog.setVisible(true);
+//                                }
+//                                else {
+//                                    searchResult.addTagToEvent();
+//                                }
                             }
                             break;
                     }
