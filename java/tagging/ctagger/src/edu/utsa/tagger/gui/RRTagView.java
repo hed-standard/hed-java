@@ -146,17 +146,18 @@ public class RRTagView extends JComponent {
 
 			}
 		});
-		if (key.isChildRequired() && values == null) {
-			if (key.isRequired()) {
-				label.setForeground(FontsAndColors.EVENT_TAG_REQUIRED);
-			} else {
-				label.setForeground(FontsAndColors.EVENT_TAG_RECOMMENDED);
-			}
-		}
 	}
 
 	private void setColors() {
-	    label.setForeground(FontsAndColors.TAG_FG_NORMAL);
+        if (key.isChildRequired() && values == null) {
+            if (key.isRequired()) {
+                label.setForeground(FontsAndColors.EVENT_TAG_REQUIRED);
+            } else {
+                label.setForeground(FontsAndColors.EVENT_TAG_RECOMMENDED);
+            }
+        }
+        else
+	    	label.setForeground(FontsAndColors.TAG_FG_NORMAL);
 		save.setNormalBackground(FontsAndColors.TRANSPARENT);
 		save.setNormalForeground(FontsAndColors.SOFT_BLUE);
 		save.setHoverBackground(FontsAndColors.TRANSPARENT);
@@ -175,7 +176,7 @@ public class RRTagView extends JComponent {
 		AbstractTagModel newTag = this.getNewValue();
 		if (this.takesValueTag != null) {
 			// Check if description has comma
-			if ("Event/Description".equals(newTag.getParentPath())) {
+			if (newTag != null && "Event/Description".equals(newTag.getParentPath())) {
 				if (newTag.getName().indexOf(',') != -1) {
 				    appView.showTaggerMessageDialog("Description should not contain commas","Ok", null, null);
 					inAddValue = true;
