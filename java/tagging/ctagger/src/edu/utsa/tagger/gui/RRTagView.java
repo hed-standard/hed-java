@@ -118,6 +118,8 @@ public class RRTagView extends JComponent {
 
 	private void setListeners() {
 		valueField.getJTextArea().getDocument().putProperty("filterNewlines", Boolean.TRUE);
+		valueField.getJTextArea().setLineWrap(true);
+		valueField.getJTextArea().setWrapStyleWord(true);
 		valueField.getJTextArea().getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "doNothing");
 		valueField.getJTextArea().getInputMap().put(KeyStroke.getKeyStroke("TAB"), "doNothing");
 		valueField.getJTextArea().addFocusListener(new FocusListener() {
@@ -219,7 +221,10 @@ public class RRTagView extends JComponent {
 		if (!key.isUnique() && values != null) {
 			numTags = values.size();
 		}
-		return BASE_SIZE + TAG_SIZE * numTags + TagEventEditView.HEIGHT * numEditTags;
+		if ("Event/Description".equals(key.getPath()))
+			return BASE_SIZE + TAG_SIZE + TAG_SIZE * numTags + TagEventEditView.HEIGHT * numEditTags;
+		else
+			return BASE_SIZE + TAG_SIZE * numTags + TagEventEditView.HEIGHT * numEditTags;
 	}
 	public AbstractTagModel getKey() {
 		return key;
@@ -268,7 +273,11 @@ public class RRTagView extends JComponent {
 			if (key.isUnique()) {
 				valueField.getJTextArea().setText(tagText);
 			}
-			add(valueField, new Constraint("top:" + top + " height:26 left:15 right:20"));
+			if ("Event/Description".equals(key.getPath())) {
+				add(valueField, new Constraint("top:" + top + " height:52 left:15 right:20"));
+			}
+			else
+				add(valueField, new Constraint("top:" + top + " height:26 left:15 right:20"));
 			add(cancel, new Constraint("top:5 height:20 right:20 width:45"));
 			add(save, new Constraint("top:5 height:20 right:70 width:35"));
 			SwingUtilities.invokeLater(new Runnable() {
@@ -281,7 +290,10 @@ public class RRTagView extends JComponent {
 		} else {
 			add(editView, new Constraint("top:" + top + " height:26 left:15 right:20"));
 		}
-		top += 29;
+		if ("Event/Description".equals(key.getPath()))
+			top += 57;
+		else
+			top += 29;
 		// Adds existing descendant tags to view
 		if (!key.isUnique() && values != null) {  // e.g. Event/Category
 			numEditTags = 0;
