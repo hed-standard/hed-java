@@ -1635,9 +1635,9 @@ public class TaggerView extends ConstraintContainer {
                 if (rrTagView != null) {
                     int y = Math.max(0, rrTagView.getY() - offset);
                     layout.scrollTo(y);
-                    if (tagEgtView != null) {
-                        tagEgtView.highlight();
-                    }
+//                    if (tagEgtView != null) {
+//                        tagEgtView.highlight();
+//                    }
                 }
             } else if (event.getEventLevelId() != lastSelectedGroup) {
                 GroupView groupView = event.getGroupViewByKey(lastSelectedGroup);
@@ -1645,16 +1645,16 @@ public class TaggerView extends ConstraintContainer {
                 if (groupView != null) {
                     int y = Math.max(0, groupView.getY() - offset);
                     layout.scrollTo(y);
-                    if (tagEgtView != null) {
-                        tagEgtView.highlight();
-                    }
+//                    if (tagEgtView != null) {
+//                        tagEgtView.highlight();
+//                    }
                 }
             } else {
                 TagEventView tagEgtView = event.getTagEgtViewByKey(tag);
                 if (tagEgtView != null) {
                     int y = Math.max(0, tagEgtView.getY() - offset);
                     layout.scrollTo(y);
-                    tagEgtView.highlight();
+//                    tagEgtView.highlight();
                 }
             }
         }
