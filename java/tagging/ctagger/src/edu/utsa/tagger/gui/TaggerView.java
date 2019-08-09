@@ -676,13 +676,6 @@ public class TaggerView extends ConstraintContainer {
         });
         menu.add(item);
 
-//        item = new JMenuItem("Open");
-//        item.addActionListener(new ActionListener() {
-//            public void actionPerformed(ActionEvent e) {
-//                TaggerView.this.open();
-//            }
-//        });
-//        menu.add(item);
         if (this.isStandAloneVersion) {
             menu.addSeparator();
             item = new JMenuItem("Clear");
@@ -694,13 +687,6 @@ public class TaggerView extends ConstraintContainer {
             menu.add(item);
         }
 
-//        item = new JMenuItem("Save");
-//        item.addActionListener(new ActionListener() {
-//            public void actionPerformed(ActionEvent e) {
-//                TaggerView.this.save();
-//            }
-//        });
-//        menu.add(item);
         menu.addSeparator();
         item = new JMenuItem("Exit");
         item.addActionListener(new ActionListener() {
@@ -1364,7 +1350,9 @@ public class TaggerView extends ConstraintContainer {
                     groupView.addTagEgtView(tag, tagEgtView);
                 }
 
-                this.eventsPanel.add(tagEgtView, new Constraint("top:" + top + " height:26 left:30 right:0"));
+                this.eventsPanel.add(tagEgtView, new Constraint("top:" + top + " height:26 left:30 right:40"));
+                this.eventsPanel.add(tagEgtView.getDelete(), new Constraint("top:" + top + " height:26 width:30 right:0"));
+                this.eventsPanel.setLayer(tagEgtView.getDelete(), 1);
                 top += 27;
                 if (guiTagModel.isInEdit()) {
                     TagEventEditView teev = guiTagModel.getTagEventEditView(taggedEvent);
@@ -1453,6 +1441,18 @@ public class TaggerView extends ConstraintContainer {
             taggedEvent.addRRTagView(tag, rrtv);
             size = rrtv.getConstraintHeight();
             this.eventsPanel.add(rrtv, new Constraint("top:" + top + " height:" + size));
+            if (rrtv.getKey().getName().equals("Category")) {
+                TaggerSet<AbstractTagModel> sets = rrtv.getValues();
+                if (sets != null && !sets.isEmpty()) {
+                    int y = top+rrtv.getTagSize()*2; // account for 2 lines: tag label and prompt
+                    for (AbstractTagModel tagModel : sets) {
+                        TagEventView tgEvtView = rrtv.getTagEgtViewByKey(tagModel);
+                        this.eventsPanel.add(tgEvtView.getDelete(), new Constraint("top:" + y + " height:" + rrtv.getTagSize() + " width:30 right:0"));
+                        this.eventsPanel.setLayer(tgEvtView.getDelete(), 1);
+                        y += rrtv.getTagSize();
+                    }
+                }
+            }
         }
 
         return top;

@@ -14,9 +14,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.font.TextAttribute;
 import java.awt.geom.Rectangle2D;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -227,6 +225,10 @@ public class RRTagView extends JComponent {
 	public AbstractTagModel getKey() {
 		return key;
 	}
+
+	public TaggerSet<AbstractTagModel> getValues() {
+	    return values;
+    }
 	/**
 	 * Finds the required/recommended tag chosen.
 	 *
@@ -282,7 +284,7 @@ public class RRTagView extends JComponent {
 		}
 		top += 29;
 		// Adds existing descendant tags to view
-		if (!key.isUnique() && values != null) {
+		if (!key.isUnique() && values != null) {  // e.g. Event/Category
 			numEditTags = 0;
 			for (AbstractTagModel valueTag : values) {
 				GuiTagModel gtm = (GuiTagModel) valueTag;
@@ -494,5 +496,7 @@ public class RRTagView extends JComponent {
 		}
 	}
 
-
+	public int getTagSize() {
+		return TAG_SIZE;
+	}
 }
