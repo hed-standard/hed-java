@@ -103,7 +103,7 @@ public class TaggerLoader {
         return returnString;
     }
 
-    public static String[] load(TaggerLoader loader) throws IOException {
+    public static String[] load(TaggerLoader loader, String tags, String events) throws IOException {
         String[] returnString = new String[]{loader.tagger.hedToString(), loader.checkFlags(1) ? loader.tagger.getJSONString() : loader.tagger.createTSVString()};
         return returnString;
     }
@@ -196,9 +196,9 @@ public class TaggerLoader {
         return this.title;
     }
 
-//    public synchronized String[] getXMLAndEvents() throws IOException {
-//        return load(this, this.tags, this.events);
-//    }
+    public synchronized String[] getXMLAndEvents() throws IOException {
+        return load(this, this.tags, this.events);
+    }
 
     public synchronized boolean isBack() {
         return this.back;
