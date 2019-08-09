@@ -145,20 +145,24 @@ public class TagEventView extends JComponent implements MouseListener {
 			appView.updateEventsPanel();
 			appView.scrollToEventTag(newTag);
 		} else {
-			appView.showTaggerMessageDialog(MessageConstants.TILDE_ERROR, "Okay", null, null);
+			appView.showTaggerMessageDialog(MessageConstants.TILDE_ERROR, "Ok", null, null);
 		}
 	}
 
 	@Override
 	public void mouseEntered(MouseEvent e) {
 		hover = true;
+		deleteTag.highlight = true;
 		repaint();
+		deleteTag.repaint();
 	}
 
 	@Override
 	public void mouseExited(MouseEvent e) {
 		hover = false;
+		deleteTag.highlight = false;
 		repaint();
+		deleteTag.repaint();
 	}
 
 	@Override
@@ -313,8 +317,7 @@ public class TagEventView extends JComponent implements MouseListener {
 			}
 
 			if (highlight) {
-				fg = FontsAndColors.EVENTTAG_FG_HOVER;
-				bg = FontsAndColors.EVENT_BG_PRESSED;
+				fg = FontsAndColors.BLUE_VERY_LIGHT;
 			}
 
 			if (bg != null) {

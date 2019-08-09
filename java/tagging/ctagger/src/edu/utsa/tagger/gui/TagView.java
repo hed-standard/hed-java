@@ -109,7 +109,7 @@ public class TagView extends JComponent implements MouseListener {
 				public void doAction() {
 					int delete = 0;
 					if (model.isCollapsable()) {
-						delete = appView.showTaggerMessageDialog(MessageConstants.TAG_DELETE_WARNING, "Okay", "Cancel",
+						delete = appView.showTaggerMessageDialog(MessageConstants.TAG_DELETE_WARNING, "Ok", "Cancel",
 								null);
 					}
 					if (delete == 0) {

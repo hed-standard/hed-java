@@ -175,8 +175,7 @@ public class RRTagView extends JComponent {
 			// Check if description has comma
 			if ("Event/Description".equals(newTag.getParentPath())) {
 				if (newTag.getName().indexOf(',') != -1) {
-					JOptionPane.showMessageDialog(appView.getFrame(), "Description should not contain commas.", "Input error",
-							JOptionPane.ERROR_MESSAGE);
+				    appView.showTaggerMessageDialog("Description should not contain commas","Ok", null, null);
 					inAddValue = true;
 					refreshView();
 					return;
@@ -450,7 +449,7 @@ public class RRTagView extends JComponent {
 				message = "Click to add tag";
 				isTagPrompt = true;
 			} else {
-				info = "(click to edit)";
+				info = "(Click to edit)";
 				if (takesValueTag != null) {
 					message = values.get(0).getName();
 				} else {

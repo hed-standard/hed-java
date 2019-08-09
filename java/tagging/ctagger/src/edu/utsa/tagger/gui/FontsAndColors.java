@@ -194,8 +194,8 @@ public abstract class FontsAndColors {
 			"Segoe UI Symbol").deriveFont(SMALL_FONT_SIZE);
 
 	public static Font contentFont = BASE_CONTENT_FONT;
-	public static Font headerFont = BASE_HEADER_FONT;
-	public static Font secondHeaderFont = BASE_MED_FONT;
+	public static Font headerFont = BASE_MED_FONT;
+	public static Font secondHeaderFont = BASE_HEADER_FONT;
 	public static Font symbolFont = BASE_SYMBOL_FONT;
 
 	private static Font loadFont(String path, String name) {

@@ -44,19 +44,19 @@ import edu.utsa.tagger.guisupport.XTextBox;
  */
 @SuppressWarnings("serial")
 public class TaggerView extends ConstraintContainer {
-    private XButton addEvent = new XButton("add event") {
+    private XButton addEvent = new XButton("Add event") {
         @Override
         public Font getFont() {
             return FontsAndColors.headerFont;
         }
     };
-    private XButton addGroup = new XButton("add group") {
+    private XButton addGroup = new XButton("Add group") {
         @Override
         public Font getFont() {
             return FontsAndColors.headerFont;
         }
     };
-    private XButton addTag = new XButton("add tag") {
+    private XButton addTag = new XButton("Add tag") {
         @Override
         public Font getFont() {
             return FontsAndColors.headerFont;
@@ -69,7 +69,7 @@ public class TaggerView extends ConstraintContainer {
     /**
      * Creates a collapse button.
      */
-    private XButton collapseAll = new XButton("collapse") {
+    private XButton collapseAll = new XButton("Collapse") {
         @Override
         public Font getFont() {
             return FontsAndColors.headerFont;
@@ -78,7 +78,7 @@ public class TaggerView extends ConstraintContainer {
     /**
      * Creates a collapse level label.
      */
-    private JLabel collapseLabel = new JLabel("level", JLabel.CENTER) {
+    private JLabel collapseLabel = new JLabel("Level", JLabel.CENTER) {
         @Override
         public Font getFont() {
             return FontsAndColors.headerFont;
@@ -94,7 +94,7 @@ public class TaggerView extends ConstraintContainer {
         }
     };
     private ContextMenu contextMenu;
-    private XButton deselectAll = new XButton("deselect all") {
+    private XButton deselectAll = new XButton("Deselect all") {
         @Override
         public Font getFont() {
             return FontsAndColors.headerFont;
@@ -104,13 +104,13 @@ public class TaggerView extends ConstraintContainer {
     private JLabel eventsTitle = new JLabel("Events") {
         @Override
         public Font getFont() {
-            return FontsAndColors.headerFont;
+            return FontsAndColors.secondHeaderFont;
         }
     };
     /**
      * Creates a expand button.
      */
-    private XButton expandAll = new XButton("expand") {
+    private XButton expandAll = new XButton("Expand") {
         @Override
         public Font getFont() {
             return FontsAndColors.headerFont;
@@ -122,7 +122,7 @@ public class TaggerView extends ConstraintContainer {
     private boolean isStandAloneVersion;
     private Notification notification = new Notification();
     private XButton done = createMenuButton("Done");
-    private XButton redo = new HistoryButton("redo", false);
+    private XButton redo = new HistoryButton("Redo", false);
     private JPanel searchResults = new JPanel() {
         @Override
         protected void paintComponent(Graphics g) {
@@ -163,10 +163,10 @@ public class TaggerView extends ConstraintContainer {
     private JLabel tagsTitle = new JLabel("Tags") {
         @Override
         public Font getFont() {
-            return FontsAndColors.headerFont;
+            return FontsAndColors.secondHeaderFont;
         }
     };
-    private XButton undo = new HistoryButton("undo", true);
+    private XButton undo = new HistoryButton("Undo", true);
     private XButton zoomIn = createMenuButton("+");
     private XButton zoomOut = createMenuButton("-");
     private JLabel zoomPercent = new JLabel("100%", JLabel.CENTER) {
@@ -1444,7 +1444,7 @@ public class TaggerView extends ConstraintContainer {
             if (rrtv.getKey().getName().equals("Category")) {
                 TaggerSet<AbstractTagModel> sets = rrtv.getValues();
                 if (sets != null && !sets.isEmpty()) {
-                    int y = top+rrtv.getTagSize()*2; // account for 2 lines: tag label and prompt
+                    int y = top+rrtv.getTagSize()*2; // account for 2 lines: tag label (Event/Category) and prompt ("Click to add tag")
                     for (AbstractTagModel tagModel : sets) {
                         TagEventView tgEvtView = rrtv.getTagEgtViewByKey(tagModel);
                         this.eventsPanel.add(tgEvtView.getDelete(), new Constraint("top:" + y + " height:" + rrtv.getTagSize() + " width:30 right:0"));

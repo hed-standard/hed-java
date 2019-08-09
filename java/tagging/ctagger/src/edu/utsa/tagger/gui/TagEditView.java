@@ -515,25 +515,25 @@ public class TagEditView extends ConstraintContainer {
 				try {
 					pos = Integer.parseInt(position.getJTextArea().getText());
 				} catch (NumberFormatException ex) {
-					appView.showTaggerMessageDialog(MessageConstants.TAG_POSITION_ERROR, "Okay", null, null);
+					appView.showTaggerMessageDialog(MessageConstants.TAG_POSITION_ERROR, "Ok", null, null);
 					return;
 				}
 			}
 			if (takesValue.isChecked() && !name.getJTextArea().getText().equals("#")) {
-				appView.showTaggerMessageDialog(MessageConstants.TAKES_VALUE_ERROR, "Okay", null, null);
+				appView.showTaggerMessageDialog(MessageConstants.TAKES_VALUE_ERROR, "Ok", null, null);
 				return;
 			}
 			String nameStr = name.getJTextArea().getText();
 			if (nameStr.contains("/")) {
-				appView.showTaggerMessageDialog(MessageConstants.TAG_NAME_INVALID, "Okay", null, null);
+				appView.showTaggerMessageDialog(MessageConstants.TAG_NAME_INVALID, "Ok", null, null);
 				return;
 			}
 			if (tagger.isDuplicate(tagModel.getParentPath() + "/" + nameStr, tagModel)) {
-				appView.showTaggerMessageDialog(MessageConstants.TAG_NAME_DUPLICATE, "Okay", null, null);
+				appView.showTaggerMessageDialog(MessageConstants.TAG_NAME_DUPLICATE, "Ok", null, null);
 				return;
 			}
 			if (required.isChecked() && recommended.isChecked()) {
-				appView.showTaggerMessageDialog(MessageConstants.TAG_RR_ERROR, "Okay", null, null);
+				appView.showTaggerMessageDialog(MessageConstants.TAG_RR_ERROR, "Ok", null, null);
 				return;
 			}
 
