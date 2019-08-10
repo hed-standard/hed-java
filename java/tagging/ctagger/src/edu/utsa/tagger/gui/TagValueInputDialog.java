@@ -121,6 +121,12 @@ public class TagValueInputDialog extends JDialog implements ActionListener,
             if (btnString1.equals(value) && !textField.getText().isEmpty()) { // user supposedly enter a value and hit ok
                 typedText = textField.getText();
                 TaggerView appView = eventEnterTagView.getAppView();
+                if (typedText.contains(",")) {
+                    inputFailed();
+                    appView.showTaggerMessageDialog(
+                            MessageConstants.TAG_COMMA_ERROR, "Ok", null, null);
+                    return;
+                }
                 if (guiTagModel.isNumeric()) {
                     String unitString = new String();
                     if (unitComboBox.getSelectedItem() != null) {

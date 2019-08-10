@@ -910,7 +910,7 @@ public class TaggerView extends ConstraintContainer {
 
     public int saveHEDDialog(int option) {
         boolean saveSuccess = true;
-        File saveFile = this.showFileChooserDialog("Save HED XML", "Save", "Save .xml file", "HED" + this.tagger.getHEDVersion(), "XML files", new String[]{"xml"});
+        File saveFile = this.showFileChooserSaveDialog("Save HED XML", "Save", "Save .xml file", "HED" + this.tagger.getHEDVersion(), "XML files", new String[]{"xml"});
         if (saveFile != null) {
             saveFile = this.addExtensionToFile(saveFile, "xml");
             saveSuccess = this.tagger.saveHED(saveFile);
@@ -920,7 +920,7 @@ public class TaggerView extends ConstraintContainer {
     }
 
     public int saveFieldMapDialog(int option) {
-        File fMapFile = this.showFileChooserDialog("Save field map", "Save", "Save .mat file", ".mat files", new String[]{"xml"});
+        File fMapFile = this.showFileChooserSaveDialog("Save field map", "Save", "Save .mat file", ".mat files", new String[]{"xml"});
         if (fMapFile != null) {
             this.loader.setFMapSaved(true);
             this.loader.setFMapPath(fMapFile.getAbsolutePath());
@@ -931,7 +931,7 @@ public class TaggerView extends ConstraintContainer {
 
     public int saveTaggerDataDialog(int option) {
         boolean saveSuccess = true;
-        File saveFile = this.showFileChooserDialog("Save Combined events + HED XML", "Save", "Save .xml file", "XML files", new String[]{"xml"});
+        File saveFile = this.showFileChooserSaveDialog("Save Combined events + HED XML", "Save", "Save .xml file", "XML files", new String[]{"xml"});
         if (saveFile != null) {
             saveFile = this.addExtensionToFile(saveFile, "xml");
             saveSuccess = this.tagger.saveEventsAndHED(saveFile);
@@ -942,7 +942,7 @@ public class TaggerView extends ConstraintContainer {
 
     public int saveTSVDialog(int option) {
         boolean saveSuccess = true;
-        File saveFile = this.showFileChooserDialog("Save Events, tab-delimited text", "Save", "Save .tsv file", "TSV files", new String[]{"tsv"});
+        File saveFile = this.showFileChooserSaveDialog("Save Events, tab-delimited text", "Save", "Save .tsv file", "TSV files", new String[]{"tsv"});
         if (saveFile != null) {
             saveFile = this.addExtensionToFile(saveFile, "tsv");
             saveSuccess = this.tagger.saveTSVFile(saveFile);
@@ -976,6 +976,81 @@ public class TaggerView extends ConstraintContainer {
         FileFilter imageFilter = new FileNameExtensionFilter(fileExtensionType, fileExtenstions);
         fileChooser.setFileFilter(imageFilter);
         int returnVal = fileChooser.showOpenDialog(this.frame);
+        if (returnVal == 0) {
+            File file = fileChooser.getSelectedFile();
+            return file;
+        } else {
+            return null;
+        }
+    }
+
+    public File showFileChooserSaveDialog(String dialogTitle, String approveButton, String approveButtonToolTip, String fileExtensionType, String[] fileExtenstions) {
+        JFileChooser fileChooser = new JFileChooser() {
+            @Override
+            public void approveSelection(){
+                File f = getSelectedFile();
+                if(f.exists() && getDialogType() == SAVE_DIALOG){
+                    int result = JOptionPane.showConfirmDialog(this,"The file exists, overwrite?","Existing file",JOptionPane.YES_NO_CANCEL_OPTION);
+                    switch(result){
+                        case JOptionPane.YES_OPTION:
+                            super.approveSelection();
+                            return;
+                        case JOptionPane.NO_OPTION:
+                            return;
+                        case JOptionPane.CLOSED_OPTION:
+                            return;
+                        case JOptionPane.CANCEL_OPTION:
+                            cancelSelection();
+                            return;
+                    }
+                }
+                super.approveSelection();
+            }
+        };
+        fileChooser.setDialogTitle(dialogTitle);
+        fileChooser.setApproveButtonText(approveButton);
+        fileChooser.setApproveButtonToolTipText(approveButtonToolTip);
+        FileFilter imageFilter = new FileNameExtensionFilter(fileExtensionType, fileExtenstions);
+        fileChooser.setFileFilter(imageFilter);
+        int returnVal = fileChooser.showSaveDialog(this.frame);
+        if (returnVal == 0) {
+            File file = fileChooser.getSelectedFile();
+            return file;
+        } else {
+            return null;
+        }
+    }
+
+    public File showFileChooserSaveDialog(String dialogTitle, String approveButton, String approveButtonToolTip, String defaultFile, String fileExtensionType, String[] fileExtenstions) {
+        JFileChooser fileChooser = new JFileChooser() {
+            @Override
+            public void approveSelection(){
+                File f = getSelectedFile();
+                if(f.exists() && getDialogType() == SAVE_DIALOG){
+                    int result = JOptionPane.showConfirmDialog(this,"The file exists, overwrite?","Existing file",JOptionPane.YES_NO_CANCEL_OPTION);
+                    switch(result){
+                        case JOptionPane.YES_OPTION:
+                            super.approveSelection();
+                            return;
+                        case JOptionPane.NO_OPTION:
+                            return;
+                        case JOptionPane.CLOSED_OPTION:
+                            return;
+                        case JOptionPane.CANCEL_OPTION:
+                            cancelSelection();
+                            return;
+                    }
+                }
+                super.approveSelection();
+            }
+        };
+        fileChooser.setDialogTitle(dialogTitle);
+        fileChooser.setSelectedFile(new File(defaultFile));
+        fileChooser.setApproveButtonText(approveButton);
+        fileChooser.setApproveButtonToolTipText(approveButtonToolTip);
+        FileFilter imageFilter = new FileNameExtensionFilter(fileExtensionType, fileExtenstions);
+        fileChooser.setFileFilter(imageFilter);
+        int returnVal = fileChooser.showSaveDialog(this.frame);
         if (returnVal == 0) {
             File file = fileChooser.getSelectedFile();
             return file;
