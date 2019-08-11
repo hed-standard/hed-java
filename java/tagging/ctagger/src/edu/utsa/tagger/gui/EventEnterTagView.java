@@ -165,7 +165,7 @@ public class EventEnterTagView extends JComponent {
         for (GuiTagModel tag : tagModels) {
             searchResults.add(new TagEnterSearchView(this, tag));
         }
-        searchResults.revalidate();
+        searchResults.repaint();
         searchResultsScrollPane.setVisible(true);
     }
 

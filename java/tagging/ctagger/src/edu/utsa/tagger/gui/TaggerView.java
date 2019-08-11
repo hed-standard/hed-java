@@ -1349,6 +1349,7 @@ public class TaggerView extends ConstraintContainer {
      */
     private void updateSearch() {
         searchResults.removeAll();
+        searchResults.revalidate();
         Set<GuiTagModel> tagModels = tagger.getSearchTags(searchTags.getJTextArea().getText());
         if (tagModels == null || tagModels.isEmpty()) {
             searchResultsScrollPane.setVisible(false);
@@ -1357,11 +1358,7 @@ public class TaggerView extends ConstraintContainer {
         for (GuiTagModel tag : tagModels) {
             searchResults.add(tag.getTagSearchView());
         }
-        searchResults.revalidate();
-        searchResultsScrollPane.getViewport().revalidate();
-//        splitPaneRight.setTopHeight(searchResultsScrollPane, 40.0, Unit.PX,
-//                searchResults.getPreferredSize().getHeight() / ConstraintLayout.scale, Unit.PX);
-        //splitPaneRight.setTopBottom(searchResultsScrollPane,40.0, Unit.PX, 1.0, Unit.PX);
+        searchResults.repaint();
         searchResultsScrollPane.setVisible(true);
     }
 
