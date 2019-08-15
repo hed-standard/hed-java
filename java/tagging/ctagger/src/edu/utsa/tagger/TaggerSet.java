@@ -34,7 +34,7 @@ public class TaggerSet<E extends Comparable<? super E>> implements SortedSet<E> 
 	 * Appends the specified element to the end of this ordered set if it was
 	 * not already contained in the set.
 	 * 
-	 * @param element
+	 * @param elem
 	 *            The element to append to the set.
 	 * @return True if the element was added to the end of the ordered set,
 	 *         false if not.

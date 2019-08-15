@@ -71,10 +71,6 @@ public class TagChooserDialog extends JDialog implements ITagDisplay {
 	 * Constructor sets up the contents of the dialog. The tag view will contain
 	 * the tags given as a parameter.
 	 * 
-	 * @param frame
-	 * @param appView
-	 * @param tagger
-	 * @param tags
 	 */
 
 	public void repaintTagScrollPane() {
@@ -96,13 +92,14 @@ public class TagChooserDialog extends JDialog implements ITagDisplay {
 		cancel = TaggerView.createMenuButton("Cancel");
 		cancel.addMouseListener(new CancelButtonListener());
 		bgPanel.setLayout(new ConstraintLayout());
-		bgPanel.setBackground(Color.white);
+		bgPanel.setBackground(FontsAndColors.DIALOG_BG);
 		bgPanel.setPreferredSize(new Dimension(400, 500));
 		tagScrollLayout = new ScrollLayout(tagScrollPane, tagPanel);
 		tagScrollPane.setLayout(tagScrollLayout);
 		tagPanel.setLayout(new ListLayout(1, 1, 0, 1));
-		tagPanel.setBackground(Color.white);
+		tagPanel.setBackground(FontsAndColors.DIALOG_BG);
 		message.setText(MESSAGE_TEXT);
+		message.setForeground(FontsAndColors.DIALOG_MESSAGE_FG);
 		bgPanel.add(message, new Constraint("top:0 height:20"));
 		bgPanel.add(tagScrollPane, new Constraint(
 				"top:20 height:430 left:0 right:0"));

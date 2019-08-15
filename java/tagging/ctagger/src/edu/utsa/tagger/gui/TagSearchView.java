@@ -47,10 +47,7 @@ public class TagSearchView extends JComponent implements MouseListener {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if (SwingUtilities.isLeftMouseButton(e)) {
-					tagger.openToClosest(model);
-					appView.cancelSearch();
-					appView.updateTags();
-					appView.scrollToTag(model);
+					mouseClickedEvent(tagger, appView);
 				}
 			}
 		});
@@ -140,7 +137,8 @@ public class TagSearchView extends JComponent implements MouseListener {
 			double x = getHeight() / 2;
 			double y = getHeight() * 0.75;
 
-			x = getHeight() * 3;
+//			x = getHeight() * 3;
+            x = 5;
 
 			g2d.setColor(fg);
 			g2d.setFont(font);
@@ -152,4 +150,32 @@ public class TagSearchView extends JComponent implements MouseListener {
 
 		g2d.setColor(new Color(200, 200, 200));
 	}
+
+	public void mouseClickedEvent(Tagger tagger, TaggerView appView) {
+		tagger.openToClosest(model);
+		appView.cancelSearch();
+		appView.updateTagsPanel();
+		appView.scrollToTag(model);
+	}
+
+	/* Getters and Setters */
+	public boolean getHover() {
+		return hover;
+	}
+
+	public boolean getPressed() {
+		return pressed;
+	}
+
+	public GuiTagModel getModel() {
+		return model;
+	}
+	public void setHover(boolean hover) {
+		this.hover = hover;
+	}
+
+	public void setPressed(boolean pressed) {
+		this.pressed = pressed;
+	}
+
 }

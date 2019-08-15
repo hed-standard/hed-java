@@ -15,7 +15,7 @@ public class TestGuiXml {
 	@Test
 	public void testGuiXml() throws FileNotFoundException, URISyntaxException {
 		String xmlData = TestUtilities.getResourceAsString(TestUtilities.XmlDataFile);
-		String result = TaggerLoader.load(xmlData, 0, 0, "Tagger Test - XML data", 2, new GuiModelFactory(), true, true);
+		String result = TaggerLoader.load(xmlData, TaggerLoader.USE_JSON, "Tagger Test - XML data", 2, new GuiModelFactory());
 		System.out.println(result);
 		assertTrue(result != null);
 	}

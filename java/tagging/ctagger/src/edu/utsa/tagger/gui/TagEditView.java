@@ -58,7 +58,142 @@ public class TagEditView extends ConstraintContainer {
 	private int top = 15;
 	private final TaggerView appView;
 	private final GuiTagModel tagModel;
+	final JLabel nameLabel = new JLabel("name (required)", JLabel.LEFT) {
+		@Override
+		public Font getFont() {
+			return FontsAndColors.contentFont;
+		}
+	};
 
+	final XScrollTextBox name = new XScrollTextBox(new XTextBox()) {
+		@Override
+		public Font getFont() {
+			return FontsAndColors.contentFont;
+		}
+	};
+
+	final JLabel descriptionLabel = new JLabel("description") {
+		@Override
+		public Font getFont() {
+			return FontsAndColors.contentFont;
+		}
+	};
+	private JLayeredPane descriptionScrollPane = new JLayeredPane();
+
+	ScrollLayout descriptionScrollLayout;
+	final XTextBox descriptionField = new XTextBox(3, 0) {
+		@Override
+		public Font getFont() {
+			return FontsAndColors.contentFont;
+		}
+	};
+
+	final JLabel childRequiredLabel = new JLabel("child required") {
+		@Override
+		public Font getFont() {
+			return FontsAndColors.contentFont;
+		}
+	};
+	final XCheckBox childRequired = new XCheckBox(Color.WHITE, Color.BLACK, Color.WHITE, Color.BLACK, Color.WHITE,
+			Color.BLACK);
+
+	final JLabel takesValueLabel = new JLabel("takes value") {
+		@Override
+		public Font getFont() {
+			return FontsAndColors.contentFont;
+		}
+	};
+	final XCheckBox takesValue = new XCheckBox(Color.WHITE, Color.BLACK, Color.WHITE, Color.BLACK, Color.WHITE,
+			Color.BLACK);
+
+	final JLabel isNumericLabel = new JLabel("is numeric") {
+		@Override
+		public Font getFont() {
+			return FontsAndColors.contentFont;
+		}
+	};
+	final XCheckBox isNumeric = new XCheckBox(Color.WHITE, Color.BLACK, Color.WHITE, Color.BLACK, Color.WHITE,
+			Color.BLACK);
+
+	final JLabel requiredLabel = new JLabel("required") {
+		@Override
+		public Font getFont() {
+			return FontsAndColors.contentFont;
+		}
+	};
+	final XCheckBox required = new XCheckBox(Color.WHITE, Color.BLACK, Color.WHITE, Color.BLACK, Color.WHITE,
+			Color.BLACK);
+
+	final JLabel recommendedLabel = new JLabel("recommended") {
+		@Override
+		public Font getFont() {
+			return FontsAndColors.contentFont;
+		}
+	};
+	final XCheckBox recommended = new XCheckBox(Color.WHITE, Color.BLACK, Color.WHITE, Color.BLACK, Color.WHITE,
+			Color.BLACK);;
+
+	final JLabel positionLabel = new JLabel("position") {
+		@Override
+		public Font getFont() {
+			return FontsAndColors.contentFont;
+		}
+	};
+	final XScrollTextBox position = new XScrollTextBox(new XTextBox()) {
+		@Override
+		public Font getFont() {
+			return FontsAndColors.contentFont;
+		}
+	};
+
+	final JLabel predicateTypeLabel = new JLabel("predicate type") {
+		@Override
+		public Font getFont() {
+			return FontsAndColors.contentFont;
+		}
+	};
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	final JComboBox predicateTypes = new JComboBox(new String[] {}) {
+
+	};
+
+    final JLabel unitClassesLabel = new JLabel("unit class") {
+		public Font getFont() {
+			return FontsAndColors.contentFont;
+		}
+	};
+
+	final JComboBox unitClasses = new JComboBox(new String[0]) {
+	};
+
+	final JLabel uniqueLabel = new JLabel("unique") {
+		@Override
+		public Font getFont() {
+			return FontsAndColors.contentFont;
+		}
+	};
+
+	final XCheckBox unique = new XCheckBox(Color.WHITE, Color.BLACK, Color.WHITE, Color.BLACK, Color.WHITE,
+			Color.BLACK);
+
+	final XButton saveButton = new XButton("save") {
+		@Override
+		public Font getFont() {
+			Map<TextAttribute, Integer> fontAttributes = new HashMap<TextAttribute, Integer>();
+			fontAttributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
+			return FontsAndColors.contentFont.deriveFont(fontAttributes);
+		}
+	};
+
+	final XButton cancelButton = new XButton("cancel") {
+		@Override
+		public Font getFont() {
+			Map<TextAttribute, Integer> fontAttributes = new HashMap<TextAttribute, Integer>();
+			fontAttributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
+			return FontsAndColors.contentFont.deriveFont(fontAttributes);
+		}
+	};
 	public TagEditView(Tagger tagger, TaggerView appView, GuiTagModel model) {
 		this.tagger = tagger;
 		this.appView = appView;
@@ -97,7 +232,8 @@ public class TagEditView extends ConstraintContainer {
 		add(isNumericLabel, new Constraint("top:" + top + " height:20 left:230 width:120"));
 		populatePredicateTypeComboBox();
 		add(predicateTypes, new Constraint("top:" + top + " height:20 left:415 width:120"));
-
+		this.populateUnitClassesComboBox();
+		this.add(this.unitClasses, new Constraint("top:" + this.top + " height:20 left:630 width:120"));
 		add(cancelButton, new Constraint("top:10 height:20 right:20 width:45"));
 		add(saveButton, new Constraint("top:10 height:20 right:70 width:35"));
 
@@ -301,6 +437,13 @@ public class TagEditView extends ConstraintContainer {
 		predicateTypes.setModel(new DefaultComboBoxModel(predicateTypeArray));
 	}
 
+
+	private void populateUnitClassesComboBox() {
+		String[] unitClassesArray = this.tagger.getUnitClasses();
+		Arrays.sort(unitClassesArray);
+		this.unitClasses.setModel(new DefaultComboBoxModel(unitClassesArray));
+	}
+
 	/**
 	 * Caret listener to allow automatic scrolling in the description field.
 	 */
@@ -367,172 +510,51 @@ public class TagEditView extends ConstraintContainer {
 	public void handleSave() {
 		if (saveButton.isEnabled()) {
 			int pos = -1;
+			String unitClass = this.unitClasses.isEnabled() ? this.unitClasses.getSelectedItem().toString() : "";
 			if (!position.getJTextArea().getText().isEmpty()) {
 				try {
 					pos = Integer.parseInt(position.getJTextArea().getText());
 				} catch (NumberFormatException ex) {
-					appView.showTaggerMessageDialog(MessageConstants.TAG_POSITION_ERROR, "Okay", null, null);
+					appView.showTaggerMessageDialog(MessageConstants.TAG_POSITION_ERROR, "Ok", null, null);
 					return;
 				}
 			}
 			if (takesValue.isChecked() && !name.getJTextArea().getText().equals("#")) {
-				appView.showTaggerMessageDialog(MessageConstants.TAKES_VALUE_ERROR, "Okay", null, null);
+				appView.showTaggerMessageDialog(MessageConstants.TAKES_VALUE_ERROR, "Ok", null, null);
 				return;
 			}
 			String nameStr = name.getJTextArea().getText();
 			if (nameStr.contains("/")) {
-				appView.showTaggerMessageDialog(MessageConstants.TAG_NAME_INVALID, "Okay", null, null);
+				appView.showTaggerMessageDialog(MessageConstants.TAG_NAME_INVALID, "Ok", null, null);
 				return;
 			}
 			if (tagger.isDuplicate(tagModel.getParentPath() + "/" + nameStr, tagModel)) {
-				appView.showTaggerMessageDialog(MessageConstants.TAG_NAME_DUPLICATE, "Okay", null, null);
+				appView.showTaggerMessageDialog(MessageConstants.TAG_NAME_DUPLICATE, "Ok", null, null);
 				return;
 			}
 			if (required.isChecked() && recommended.isChecked()) {
-				appView.showTaggerMessageDialog(MessageConstants.TAG_RR_ERROR, "Okay", null, null);
+				appView.showTaggerMessageDialog(MessageConstants.TAG_RR_ERROR, "Ok", null, null);
 				return;
 			}
-			tagger.editTag(tagModel, name.getJTextArea().getText(), descriptionField.getText(),
-					tagModel.isExtensionAllowed(), childRequired.isChecked(), takesValue.isChecked(),
-					isNumeric.isChecked(), required.isChecked(), recommended.isChecked(), unique.isChecked(), pos,
-					PredicateType.valueOf(predicateTypes.getSelectedItem().toString().toUpperCase()));
-			tagger.setHedEdited(true);
-			tagModel.setInEdit(false);
-			tagModel.setFirstEdit(false);
-			tagger.setChildToPropertyOf();
-			appView.updateTags();
-			appView.updateEventsPanel();
-			appView.scrollToTag(tagModel);
+
+            this.tagger.editTag(this.tagModel, this.name.getJTextArea().getText(), this.descriptionField.getText(), this.tagModel.isExtensionAllowed(), this.childRequired.isChecked(), this.takesValue.isChecked(), this.isNumeric.isChecked(), this.required.isChecked(), this.recommended.isChecked(), this.unique.isChecked(), pos, PredicateType.valueOf(this.predicateTypes.getSelectedItem().toString().toUpperCase()), unitClass);
+            this.tagModel.setInEdit(false);
+            this.tagModel.setFirstEdit(false);
+            this.tagger.setChildToPropertyOf();
+            this.appView.updateTagsPanel();
+            this.appView.scrollToTag(this.tagModel);
+            if (!this.tagger.getHEDExtended()) {
+                this.appView.showTaggerMessageDialog("The HED has been extended. Please specify the current version", (String)null, "OK", (String)null);
+                GuiTagModel hedTag = (GuiTagModel)this.tagger.getTagModel("HED/#");
+                hedTag.setInAddValue(true);
+                this.tagger.setHedExtended(true);
+                this.appView.updateTagsPanel();
+                this.appView.scrollToTagAddIn(hedTag);
+                this.appView.setPreviousTag(this.tagModel);
+			}
 		}
-	}
 
-	final JLabel nameLabel = new JLabel("name (required)", JLabel.LEFT) {
-		@Override
-		public Font getFont() {
-			return FontsAndColors.contentFont;
-		}
-	};
-
-	final XScrollTextBox name = new XScrollTextBox(new XTextBox()) {
-		@Override
-		public Font getFont() {
-			return FontsAndColors.contentFont;
-		}
-	};
-
-	final JLabel descriptionLabel = new JLabel("description") {
-		@Override
-		public Font getFont() {
-			return FontsAndColors.contentFont;
-		}
-	};
-	private JLayeredPane descriptionScrollPane = new JLayeredPane();
-
-	ScrollLayout descriptionScrollLayout;
-	final XTextBox descriptionField = new XTextBox(3, 0) {
-		@Override
-		public Font getFont() {
-			return FontsAndColors.contentFont;
-		}
-	};
-
-	final JLabel childRequiredLabel = new JLabel("child required") {
-		@Override
-		public Font getFont() {
-			return FontsAndColors.contentFont;
-		}
-	};
-	final XCheckBox childRequired = new XCheckBox(Color.WHITE, Color.BLACK, Color.WHITE, Color.BLACK, Color.WHITE,
-			Color.BLACK);
-
-	final JLabel takesValueLabel = new JLabel("takes value") {
-		@Override
-		public Font getFont() {
-			return FontsAndColors.contentFont;
-		}
-	};
-	final XCheckBox takesValue = new XCheckBox(Color.WHITE, Color.BLACK, Color.WHITE, Color.BLACK, Color.WHITE,
-			Color.BLACK);
-
-	final JLabel isNumericLabel = new JLabel("is numeric") {
-		@Override
-		public Font getFont() {
-			return FontsAndColors.contentFont;
-		}
-	};
-	final XCheckBox isNumeric = new XCheckBox(Color.WHITE, Color.BLACK, Color.WHITE, Color.BLACK, Color.WHITE,
-			Color.BLACK);
-
-	final JLabel requiredLabel = new JLabel("required") {
-		@Override
-		public Font getFont() {
-			return FontsAndColors.contentFont;
-		}
-	};
-	final XCheckBox required = new XCheckBox(Color.WHITE, Color.BLACK, Color.WHITE, Color.BLACK, Color.WHITE,
-			Color.BLACK);
-
-	final JLabel recommendedLabel = new JLabel("recommended") {
-		@Override
-		public Font getFont() {
-			return FontsAndColors.contentFont;
-		}
-	};
-	final XCheckBox recommended = new XCheckBox(Color.WHITE, Color.BLACK, Color.WHITE, Color.BLACK, Color.WHITE,
-			Color.BLACK);;
-
-	final JLabel positionLabel = new JLabel("position") {
-		@Override
-		public Font getFont() {
-			return FontsAndColors.contentFont;
-		}
-	};
-	final XScrollTextBox position = new XScrollTextBox(new XTextBox()) {
-		@Override
-		public Font getFont() {
-			return FontsAndColors.contentFont;
-		}
-	};
-
-	final JLabel predicateTypeLabel = new JLabel("predicate type") {
-		@Override
-		public Font getFont() {
-			return FontsAndColors.contentFont;
-		}
-	};
-
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	final JComboBox predicateTypes = new JComboBox(new String[] {}) {
-
-	};
-
-	final JLabel uniqueLabel = new JLabel("unique") {
-		@Override
-		public Font getFont() {
-			return FontsAndColors.contentFont;
-		}
-	};
-
-	final XCheckBox unique = new XCheckBox(Color.WHITE, Color.BLACK, Color.WHITE, Color.BLACK, Color.WHITE,
-			Color.BLACK);
-
-	final XButton saveButton = new XButton("save") {
-		@Override
-		public Font getFont() {
-			Map<TextAttribute, Integer> fontAttributes = new HashMap<TextAttribute, Integer>();
-			fontAttributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
-			return FontsAndColors.contentFont.deriveFont(fontAttributes);
-		}
-	};
-
-	final XButton cancelButton = new XButton("cancel") {
-		@Override
-		public Font getFont() {
-			Map<TextAttribute, Integer> fontAttributes = new HashMap<TextAttribute, Integer>();
-			fontAttributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
-			return FontsAndColors.contentFont.deriveFont(fontAttributes);
-		}
-	};
+    }
 
 	private void handleCancel() {
 		tagModel.setInEdit(false);
@@ -543,7 +565,7 @@ public class TagEditView extends ConstraintContainer {
 			}
 			tagger.deleteTag(tagModel);
 		}
-		appView.updateTags();
+		appView.updateTagsPanel();
 	}
 
 	@Override
@@ -572,30 +594,41 @@ public class TagEditView extends ConstraintContainer {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				name.getJTextArea().requestFocusInWindow();
-				name.getJTextArea().setText(tagModel.getName());
-				descriptionField.setText(tagModel.getDescription());
-				childRequired.setChecked(tagModel.isChildRequired());
-				isNumeric.setChecked(tagModel.isNumeric());
-				if (tagModel.isNumeric()) {
-					takesValue.setChecked(true);
-				} else {
-					takesValue.setChecked(tagModel.takesValue());
-				}
-				required.setChecked(tagModel.isRequired());
-				recommended.setChecked(tagModel.isRecommended());
-				unique.setChecked(tagModel.isUnique());
-				int pos = tagModel.getPosition();
-				if (pos >= 0) {
-					position.getJTextArea().setText(Integer.toString(pos));
-				} else {
-					position.getJTextArea().setText(new String());
-				}
-				predicateTypes.setSelectedItem(tagModel.getPredicateType().toString());
-				repaint();
-			}
-		});
+                TagEditView.this.name.getJTextArea().requestFocusInWindow();
+                TagEditView.this.name.getJTextArea().setText(TagEditView.this.tagModel.getName());
+                TagEditView.this.descriptionField.setText(TagEditView.this.tagModel.getDescription());
+                TagEditView.this.childRequired.setChecked(TagEditView.this.tagModel.isChildRequired());
+                TagEditView.this.isNumeric.setChecked(TagEditView.this.tagModel.isNumeric());
+                TagEditView.this.required.setChecked(TagEditView.this.tagModel.isRequired());
+                TagEditView.this.recommended.setChecked(TagEditView.this.tagModel.isRecommended());
+                TagEditView.this.unique.setChecked(TagEditView.this.tagModel.isUnique());
+                TagEditView.this.setPosition();
+                TagEditView.this.setTakesValue();
+                TagEditView.this.predicateTypes.setSelectedItem(TagEditView.this.tagModel.getPredicateType().toString());
+                TagEditView.this.unitClasses.setEnabled(TagEditView.this.tagModel.isNumeric());
+                TagEditView.this.unitClasses.setSelectedItem(TagEditView.this.tagModel.getUnitClass());
+                TagEditView.this.repaint();
+            }
+        });
+    }
 
-	}
+    private void setTakesValue() {
+        if (this.tagModel.isNumeric()) {
+            this.takesValue.setChecked(true);
+				} else {
+            this.takesValue.setChecked(this.tagModel.takesValue());
+        }
+
+    }
+
+    private void setPosition() {
+        int pos = this.tagModel.getPosition();
+        if (pos > 0) {
+            this.position.getJTextArea().setText(Integer.toString(pos));
+        } else {
+            this.position.getJTextArea().setText(new String());
+        }
+
+    }
 
 }

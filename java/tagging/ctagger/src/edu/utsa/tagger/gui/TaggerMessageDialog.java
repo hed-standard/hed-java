@@ -78,10 +78,11 @@ public class TaggerMessageDialog extends JDialog {
 		super(frame, true);
 
 		bgPanel.setLayout(new ConstraintLayout());
-		bgPanel.setBackground(FontsAndColors.BLUE_MEDIUM);
+		bgPanel.setBackground(FontsAndColors.DIALOG_BG);
 		bgPanel.setPreferredSize(new Dimension(400, 200));
 		messageLabel = new JLabel(message, JLabel.CENTER);
-		messageLabel.setFont(FontsAndColors.BASE_HEADER_FONT);
+		messageLabel.setFont(FontsAndColors.contentFont);
+		messageLabel.setForeground(FontsAndColors.DIALOG_MESSAGE_FG);
 		bgPanel.add(messageLabel, new Constraint(
 				"top:0 bottom:50 left:10 width:400"));
 		messageLabel.setText("<html>" + message + "</html>");
@@ -109,7 +110,7 @@ public class TaggerMessageDialog extends JDialog {
 		setLocationRelativeTo(frame);
 
 		this.addKeyListener(new KeyListener() {
-
+			private boolean enterPressed = false;
 			@Override
 			public void keyTyped(KeyEvent e) {
 				// TODO Auto-generated method stub
@@ -118,12 +119,14 @@ public class TaggerMessageDialog extends JDialog {
 
 			@Override
 			public void keyPressed(KeyEvent e) {
-
+				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+					enterPressed = true;
+				}
 			}
 
 			@Override
 			public void keyReleased(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+				if (enterPressed && e.getKeyCode() == KeyEvent.VK_ENTER) {
 					handlePressedButton(0);
 				}
 				if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {

@@ -358,7 +358,7 @@ public class AddValueView extends ConstraintContainer {
 		if (alternateView != null) {
 			alternateView.valueAdded(null);
 		}
-		appView.updateTags();
+		appView.updateTagsPanel();
 	}
 
 	private void handleValueInput() {
@@ -386,7 +386,7 @@ public class AddValueView extends ConstraintContainer {
 				alternateView.valueAdded(newTag);
 			} else {
 				gtm.requestToggleTag();
-				appView.updateTags();
+				appView.updateTagsPanel();
 				appView.updateEventsPanel();
 			}
 			appView.scrollToEventTag((GuiTagModel) newTag);

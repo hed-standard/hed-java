@@ -44,6 +44,8 @@ public class TagEventView extends JComponent implements MouseListener {
 	private boolean hover = false;;
 	private boolean pressed = false;
 	private boolean highlight = false;
+	private DeleteTagComponent deleteTag;
+
 
 	public TagEventView(Tagger tagger, TaggerView appView, Integer groupId, GuiTagModel model, boolean nameOnly) {
 		this.tagger = tagger;
@@ -55,6 +57,7 @@ public class TagEventView extends JComponent implements MouseListener {
 		} else {
 			text = model.getPath();
 		}
+		deleteTag = new DeleteTagComponent();
 		setLayout(null);
 		addMouseListener(this);
 		new ClickDragThreshold(this);
@@ -72,13 +75,12 @@ public class TagEventView extends JComponent implements MouseListener {
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		if (SwingUtilities.isLeftMouseButton(e)) {
-			// GuiTagModel tagMatch = (GuiTagModel) tagger.openToClosest(model);
-			appView.updateTags();
-			appView.scrollToTag(model);
+            this.appView.updateTagsPanel();
+            this.appView.scrollToTag(this.model);
 		} else if (SwingUtilities.isRightMouseButton(e)) {
-			Map<String, ContextMenuAction> map = new LinkedHashMap<String, ContextMenuAction>();
-			TaggedEvent taggedEvent = tagger.getEventByGroupId(groupId);
-			if (taggedEvent.getEventGroupId() != groupId) { // if select tag of 
+            Map<String, ContextMenuAction> map = new LinkedHashMap();
+            TaggedEvent taggedEvent = this.tagger.getEventByGroupId(this.groupId);
+            if (taggedEvent.getEventLevelId() != this.groupId) {
 				map.put("add ~ before", new ContextMenuAction() {
 					@Override
 					public void doAction() {
@@ -107,9 +109,8 @@ public class TagEventView extends JComponent implements MouseListener {
 			map.put("remove", new ContextMenuAction() {
 				@Override
 				public void doAction() {
-					// if label tag, turn into edit mode
 					if ("Event/Label/".equals(model.getParentPath())) {
-						TaggerSet<TaggedEvent> taggedEvents = tagger.getEgtSet();
+						TaggerSet<TaggedEvent> taggedEvents = tagger.getEventSet();
 						for (TaggedEvent taggedEvent : taggedEvents) {
 							if (taggedEvent.containsTagInGroup(groupId, model)) {
 								tagger.editEventCodeLabel(taggedEvent, model, taggedEvent.getEventModel().getCode(),
@@ -124,20 +125,6 @@ public class TagEventView extends JComponent implements MouseListener {
 					appView.updateEventsPanel();
 				}
 			});
-			map.put("remove all", new ContextMenuAction() {
-				@Override
-				public void doAction() {
-					Set<Integer> groupIds = appView.selectedGroups;
-					tagger.unassociate(model,groupIds);
-					appView.updateEventsPanel();
-				}
-			});
-			map.put("copy to", new ContextMenuAction() {
-				public void doAction() {
-					CopyToDialog dialog = new CopyToDialog(tagger,appView,model);
-					
-				}
-			});
 			appView.showContextMenu(map);
 		}
 	}
@@ -146,7 +133,7 @@ public class TagEventView extends JComponent implements MouseListener {
 		int numTildes = 0;
 		TaggedEvent taggedEvent = tagger.getEventByGroupId(groupId);
 		if (taggedEvent != null) {
-			numTildes = taggedEvent.findNumTildes(groupId);
+			numTildes = taggedEvent.findGroupTildeCount(groupId);
 		}
 		if (numTildes < MAX_GROUP_TILDES) {
 			GuiTagModel newTag = (GuiTagModel) tagger.getFactory().createAbstractTagModel(tagger);
@@ -158,20 +145,24 @@ public class TagEventView extends JComponent implements MouseListener {
 			appView.updateEventsPanel();
 			appView.scrollToEventTag(newTag);
 		} else {
-			appView.showTaggerMessageDialog(MessageConstants.TILDE_ERROR, "Okay", null, null);
+			appView.showTaggerMessageDialog(MessageConstants.TILDE_ERROR, "Ok", null, null);
 		}
 	}
 
 	@Override
 	public void mouseEntered(MouseEvent e) {
 		hover = true;
+		deleteTag.highlight = true;
 		repaint();
+		deleteTag.repaint();
 	}
 
 	@Override
 	public void mouseExited(MouseEvent e) {
 		hover = false;
+		deleteTag.highlight = false;
 		repaint();
+		deleteTag.repaint();
 	}
 
 	@Override
@@ -207,6 +198,7 @@ public class TagEventView extends JComponent implements MouseListener {
 
 		if (highlight) {
 			fg = FontsAndColors.EVENTTAG_FG_HOVER;
+			bg = FontsAndColors.EVENT_BG_PRESSED;
 		}
 
 		if (bg != null) {
@@ -248,10 +240,99 @@ public class TagEventView extends JComponent implements MouseListener {
 		});
 	}
 
-	/**
-	 * Getter GuiTagModel
-	 */
-	public GuiTagModel getModel() {
-		return model;
+	public DeleteTagComponent getDelete() {
+		return deleteTag;
+	}
+
+	private class DeleteTagComponent extends JComponent implements MouseListener{
+		boolean pressed;
+		boolean hover;
+		boolean highlight;
+
+		public DeleteTagComponent() {
+			setLayout(null);
+			addMouseListener(this);
+		}
+
+		@Override
+		public void mouseEntered(MouseEvent e) {
+			hover = true;
+			repaint();
+		}
+
+		@Override
+		public void mouseExited(MouseEvent e) {
+			hover = false;
+			repaint();
+		}
+
+		@Override
+		public void mousePressed(MouseEvent e) {
+			pressed = true;
+			repaint();
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent e) {
+			pressed = false;
+			repaint();
+		}
+
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			if (SwingUtilities.isLeftMouseButton(e)) {
+				if ("Event/Label/".equals(model.getParentPath())) {
+					TaggerSet<TaggedEvent> taggedEvents = tagger.getEventSet();
+					for (TaggedEvent taggedEvent : taggedEvents) {
+						if (taggedEvent.containsTagInGroup(groupId, model)) {
+							tagger.editEventCodeLabel(taggedEvent, model, taggedEvent.getEventModel().getCode(),
+									new String());
+						}
+					}
+				} else {
+					Set<Integer> groupIds = new LinkedHashSet<Integer>();
+					groupIds.add(groupId);
+					tagger.unassociate(model, groupIds);
+				}
+				appView.updateEventsPanel();
+			}
+		}
+
+		@Override
+		protected void paintComponent(Graphics g) {
+			Graphics2D g2d = (Graphics2D) g;
+			g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
+
+			Color bg;
+			Color fg;
+			Font font1 = FontsAndColors.contentFont;
+
+			bg = FontsAndColors.EVENTTAG_BG_NORMAL;
+			if (pressed && hover) {
+				fg = model.isMissing() ? FontsAndColors.EVENTTAG_FG_MISSING_PRESSED : FontsAndColors.EVENTTAG_FG_PRESSED;
+			} else if (!pressed && hover) {
+				fg = model.isMissing() ? FontsAndColors.EVENTTAG_FG_MISSING_HOVER : FontsAndColors.BLUE_DARK;
+			} else {
+				fg = model.isMissing() ? FontsAndColors.EVENTTAG_FG_MISSING_NORMAL : FontsAndColors.TRANSPARENT;
+			}
+
+			if (highlight) {
+				fg = FontsAndColors.BLUE_VERY_LIGHT;
+			}
+
+			if (bg != null) {
+				g2d.setColor(bg);
+				g2d.fill(SwingUtilities.calculateInnerArea(this, null));
+			}
+
+			if (fg != null) {
+				double x = 10 * ConstraintLayout.scale;
+				double y = g2d.getFontMetrics().getHeight();
+
+				g2d.setColor(fg);
+				g2d.setFont(font1);
+				g2d.drawString("x", (int) x, (int) y);
+			}
+		}
 	}
 }

@@ -15,8 +15,8 @@ public class TestGuiTdt {
 	public void test() throws IOException {
 		String hedXML = TestUtilities.getResourceAsString(TestUtilities.HedFileName);
 		String tdtData = TestUtilities.getResourceAsString(TestUtilities.DelimitedString);
-		String[] result = TaggerLoader.load(hedXML, tdtData, TaggerLoader.TAG_EDIT_ALL, 0, "Tagger Test - Tab-delimited Text data",
-				2, new GuiModelFactory(), true, true);
+		String[] result = TaggerLoader.load(hedXML, tdtData, TaggerLoader.EXTEND_ANYWHERE, "Tagger Test - Tab-delimited Text data",
+				2, new GuiModelFactory());
 		System.out.println(result[1]);
 		assertTrue(result != null);
 

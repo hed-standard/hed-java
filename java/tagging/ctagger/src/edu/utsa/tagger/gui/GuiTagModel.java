@@ -18,13 +18,15 @@ public class GuiTagModel extends AbstractTagModel {
 
 	// Highlight color to display for tag
 	public enum Highlight {
-		NONE, HIGHLIGHT_MATCH, HIGHLIGHT_CLOSE_MATCH, HIGHLIGHT_TAKES_VALUE, GREY_VERY_VERY_LIGHT, GREY_VERY_LIGHT, GREY_LIGHT, GREY_VERY_VERY_MEDIUM, GREY_VERY_MEDIUM, GREY_MEDIUM, GREY_DARK, GREY_VERY_DARK, GREY_VERY_VERY_DARK;
+		//NONE, HIGHLIGHT_MATCH, HIGHLIGHT_CLOSE_MATCH, HIGHLIGHT_TAKES_VALUE, GREY_VERY_VERY_LIGHT, GREY_VERY_LIGHT, GREY_LIGHT, GREY_VERY_VERY_MEDIUM, GREY_VERY_MEDIUM, GREY_MEDIUM, GREY_DARK, GREY_VERY_DARK, GREY_VERY_VERY_DARK;
+		NONE, HIGHLIGHT_MATCH, HIGHLIGHT_CLOSE_MATCH, HIGHLIGHT_TAKES_VALUE, BLUE_VERY_LIGHT, BLUE_1, BLUE_2, BLUE_3, BLUE_4, BLUE_5, BLUE_6, BLUE_7, BLUE_8;
 	};
 
 	private final Tagger tagger;
 	private TaggerView appView;
 	private TagView tagView;
 	private TagEditView tagEditView;
+    private AddValueView addValueView;
 	private TagChooserView tagChooserView;
 
 	private boolean inEdit;
@@ -51,7 +53,11 @@ public class GuiTagModel extends AbstractTagModel {
 	 * @return
 	 */
 	public AddValueView getAddValueView() {
-		return new AddValueView(tagger, appView, this);
+        if (this.addValueView == null) {
+            this.addValueView = new AddValueView(this.tagger, this.appView, this);
+        }
+
+        return this.addValueView;
 	}
 
 	/**
@@ -101,12 +107,12 @@ public class GuiTagModel extends AbstractTagModel {
 		return new RRTagView(tagger, appView, taggedEvent, this);
 	}
 
-	public TagEventEditView getTagEgtEditView(TaggedEvent taggedEvent) {
-		return new TagEventEditView(tagger, taggedEvent, this);
+    public TagEventEditView getTagEventEditView(TaggedEvent taggedEvent) {
+        return new TagEventEditView(this.tagger, taggedEvent, this);
 	}
 
-	public TagEventView getTagEgtView(int groupId) {
-		return new TagEventView(tagger, appView, groupId, this, false);
+    public TagEventView getTagEventView(int groupId) {
+        return new TagEventView(this.tagger, this.appView, groupId, this, false);
 	}
 
 	/**
@@ -155,34 +161,36 @@ public class GuiTagModel extends AbstractTagModel {
 	}
 
 	/**
-	 * Attempts to toggle this tag with the groups currently
+	 * Attempts to toggle this tag with the groups with the groups currently
 	 * selected for tagging.
 	 */
-	public void requestToggleTag() {
-		requestToggleTag(appView.selectedGroups);
+	public int requestToggleTag() {
+        return this.requestToggleTag(this.appView.getSelected());
 	}
 
 	/**
 	 * Attempts to toggle this tag with the groups with the given IDs.
 	 * 
 	 * @param groupIds
+	 *
+	 * @return 0 if sucess, -1 if failed
 	 */
-	public void requestToggleTag(Set<Integer> groupIds) {
+	public int requestToggleTag(Set<Integer> groupIds) {
 		if (groupIds.isEmpty()) {
 			appView.showTaggerMessageDialog(MessageConstants.NO_EVENT_SELECTED,
 					"Okay", null, null);
-			return;
+			return -1;
 		}
 		if (isChildRequired()) {
 			appView.showTaggerMessageDialog(
-					MessageConstants.SELECT_CHILD_ERROR, "Okay", null, null);
-			return;
+					MessageConstants.SELECT_CHILD_ERROR, "Ok", null, null);
+			return -1;
 		}
 		ToggleTagMessage message = tagger.toggleTag(this, groupIds);
 		if (message != null) {
 			if (message.rrError) {
 				appView.showTaggerMessageDialog(
-						MessageConstants.ASSOCIATE_RR_ERROR, "Okay", null, null);
+						MessageConstants.ASSOCIATE_RR_ERROR, "Ok", null, null);
 			} else if (message.descendants.size() > 0) {
 				appView.showDescendantDialog(message);
 			} else if (message.uniqueValues.size() > 0) {
@@ -191,8 +199,8 @@ public class GuiTagModel extends AbstractTagModel {
 				appView.showAncestorDialog(message);
 			}
 		}
-		appView.updateTags();
 		appView.updateEventsPanel();
+		return 0;
 	}
 
 	public void setAppView(TaggerView appView) {
@@ -231,6 +239,8 @@ public class GuiTagModel extends AbstractTagModel {
 	 * Updates whether the tag is missing from the hierarchy.
 	 */
 	public void updateMissing() {
-		tagger.updateMissing(this);
-	}
+        this.tagger.updateMissing(this);
+    }
+
+
 }
