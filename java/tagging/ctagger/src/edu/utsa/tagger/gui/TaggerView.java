@@ -447,7 +447,7 @@ public class TaggerView extends ConstraintContainer {
         this.tagsScrollPane.setLayout(this.tagsScrollLayout);
 
         this.splitPaneLeft.add(this.eventsTitle, new Constraint("top:0 height:50 left:10 width:100"));
-        this.splitPaneLeft.add(this.eventEnterTagView.getjTextArea(), new Constraint("top:12 height:26 left:130 right:100"));
+        this.splitPaneLeft.add(this.eventEnterTagView.getjTextAreaPanel(), new Constraint("top:12 height:26 left:130 right:100"));
         this.splitPaneLeft.add(this.eventEnterTagView.getSearchResultsScrollPane(), new Constraint("top:40 bottom:300 left:130 right:0"));
         this.splitPaneLeft.setLayer(this.eventEnterTagView.getSearchResultsScrollPane(), 1);
         this.splitPaneLeft.add(this.deselectAll, new Constraint("top:50 height:30 left:10 width:150"));

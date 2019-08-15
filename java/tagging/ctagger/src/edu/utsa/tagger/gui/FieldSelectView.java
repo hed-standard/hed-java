@@ -49,12 +49,12 @@ public class FieldSelectView extends JPanel {
 	private boolean isTagBox = false;
     private JLabel descriptionLabel = new JLabel(new String(), SwingConstants.CENTER);
     private JLabel primaryFieldLabel = new JLabel("Primary field: ", SwingConstants.CENTER);
-    private String primaryFieldDescription = "(double-click on field to change)";
+    private String primaryFieldDescription = "(to change, double-click the field name in the right panel)";
 	private JPanel parentPanel = new JPanel(new BorderLayout());
 	private JPanel northPanel = new JPanel(new BorderLayout());
 	private JPanel centerPanel = new JPanel(new BorderLayout());
 	private JPanel southPanel = new JPanel(new BorderLayout());
-    private JLabel tagBoxLabel = new JLabel("Tag these event fields");
+    private JLabel tagBoxLabel = new JLabel("Use these events fields for tagging");
     private JLabel ignoreBoxLabel = new JLabel("Ignore these event fields");
 	private JList<String> taggedListBox;
     private JList<String> ignoredListBox;
@@ -62,7 +62,7 @@ public class FieldSelectView extends JPanel {
 	private JButton removeAllButton = new JButton("<< Remove all");
 	private JButton addAllButton = new JButton("Add all >>");
 	private JButton cancelButton = new JButton("Cancel");
-	private JButton okayButton = new JButton("Okay");
+	private JButton okayButton = new JButton("Ok");
 	private String primaryField = new String();
 	private JFrame jFrame = new JFrame();
 	private FieldSelectLoader loader;
@@ -77,7 +77,7 @@ public class FieldSelectView extends JPanel {
         this.ignoredListBox = this.intializeJList(ignoredFields);
         this.taggedListBox = this.intializeJList(taggedFields);
         this.layoutComponents(ignoredFields, taggedFields);
-        this.primaryFieldLabel.setText("Primary field: " + primaryField + " " + this.primaryFieldDescription);
+        this.primaryFieldLabel.setText("<html>Primary field: <b>" + primaryField + "</b> " + this.primaryFieldDescription + "</html>");
 	}
 
 	/**
@@ -140,8 +140,9 @@ public class FieldSelectView extends JPanel {
 	 */
 	private JPanel createSouthPanel() {
 		JPanel buttonPanel = new JPanel(new BorderLayout());
+		buttonPanel.setBackground(FontsAndColors.BLUE_MEDIUM);
 		buttonPanel.add(Box.createRigidArea(new Dimension(350, 50)));
-		buttonPanel.add(primaryFieldLabel, BorderLayout.WEST);
+		buttonPanel.add(primaryFieldLabel, BorderLayout.CENTER);
 		buttonPanel.add(createSouthPanelButtons(), BorderLayout.EAST);
 		return buttonPanel;
 	}
@@ -154,11 +155,12 @@ public class FieldSelectView extends JPanel {
 	 */
 	private JPanel createSouthPanelButtons() {
 		JPanel buttonPanel = new JPanel();
+		buttonPanel.setBackground(FontsAndColors.BLUE_MEDIUM);
+		buttonPanel.add(this.cancelButton);
+//		buttonPanel.add(Box.createRigidArea(new Dimension(3, 0)));
 		buttonPanel.add(okayButton);
-		buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
-        buttonPanel.add(this.cancelButton);
-        Dimension d = this.cancelButton.getMaximumSize();
-        this.okayButton.setPreferredSize(new Dimension(d));
+//        Dimension d = this.cancelButton.getMaximumSize();
+//        this.okayButton.setPreferredSize(new Dimension(d));
 		return buttonPanel;
 	}
 
@@ -170,6 +172,7 @@ public class FieldSelectView extends JPanel {
 	 */
 	private JPanel createCenterPanelButtons() {
 		JPanel buttonPanel = new JPanel();
+		buttonPanel.setBackground(FontsAndColors.BLUE_MEDIUM);
 		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
 		buttonPanel.add(Box.createRigidArea(new Dimension(0, 50)));
 		transferButton.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -263,6 +266,10 @@ public class FieldSelectView extends JPanel {
 	 * Sets the colors for all of the components.
 	 */
 	private void setColors() {
+	    descriptionLabel.setForeground(FontsAndColors.BLUE_DARK);
+		ignoreBoxLabel.setForeground(FontsAndColors.BLUE_DARK);
+		primaryFieldLabel.setForeground(FontsAndColors.BLUE_DARK);
+		tagBoxLabel.setForeground(FontsAndColors.BLUE_DARK);
 		removeAllButton.setBackground(Color.gray);
 		removeAllButton.setOpaque(false);
 		addAllButton.setBackground(Color.gray);
@@ -319,6 +326,7 @@ public class FieldSelectView extends JPanel {
 	 */
 	private JPanel createPanelForListBoxWithLabel(JList<String> listBox, JLabel listBoxLabel, JButton transferButton) {
 		JPanel panel = new JPanel(new BorderLayout(0, 3));
+		panel.setBackground(FontsAndColors.BLUE_MEDIUM);
 		listBox.setVisibleRowCount(20);
 		panel.add(listBoxLabel, BorderLayout.NORTH);
 		JScrollPane scrollPaneForListBox = new JScrollPane(listBox);
@@ -367,7 +375,7 @@ public class FieldSelectView extends JPanel {
 	 */
 	private void updatePrimaryField() {
         this.checkPrimary();
-        this.primaryFieldLabel.setText("Primary field: " + this.primaryField + " " + this.primaryFieldDescription);
+        this.primaryFieldLabel.setText("<html>Primary field: <b>" + this.primaryField + "</b> " + this.primaryFieldDescription + "</html>");
 	}
 
 	/**

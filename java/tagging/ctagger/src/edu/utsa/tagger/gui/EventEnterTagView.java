@@ -1,8 +1,6 @@
 package edu.utsa.tagger.gui;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
@@ -31,6 +29,7 @@ public class EventEnterTagView extends JComponent {
     private TaggerView appView;
     private TaggedEvent taggedEvent;
     private JTextArea jTextArea;
+    private JScrollPane borderPanel;
     private JPanel searchResults = new JPanel() {
         @Override
         protected void paintComponent(Graphics g) {
@@ -51,6 +50,10 @@ public class EventEnterTagView extends JComponent {
         jTextArea = new JTextArea("Enter tag ...");
         jTextArea.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         this.jTextArea.getDocument().putProperty("filterNewlines", Boolean.TRUE);
+
+        borderPanel = new JScrollPane(jTextArea);
+        borderPanel.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+        borderPanel.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
         searchResults.setBackground(Color.WHITE);
         searchResults.setLayout(new ListLayout(0, 0, 0, 0));
@@ -103,6 +106,10 @@ public class EventEnterTagView extends JComponent {
         jTextArea = new JTextArea("Enter tag ...");
         jTextArea.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         this.jTextArea.getDocument().putProperty("filterNewlines", Boolean.TRUE);
+
+        borderPanel = new JScrollPane(jTextArea);
+        borderPanel.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+        borderPanel.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
         searchResults.setBackground(Color.WHITE);
         searchResults.setLayout(new ListLayout(0, 0, 0, 0));
@@ -253,6 +260,10 @@ public class EventEnterTagView extends JComponent {
         this.jTextArea.selectAll();
     }
 
+    public JScrollPane getjTextAreaPanel() {
+        return borderPanel;
+    }
+
     public JTextArea getjTextArea() {
         return jTextArea;
     }
@@ -275,5 +286,10 @@ public class EventEnterTagView extends JComponent {
 
     public TaggedEvent getTaggedEvent() {
         return taggedEvent;
+    }
+
+    @Override
+    public Font getFont() {
+        return FontsAndColors.contentFont;
     }
 }
