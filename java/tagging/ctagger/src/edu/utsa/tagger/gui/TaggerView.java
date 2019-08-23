@@ -1244,35 +1244,35 @@ public class TaggerView extends ConstraintContainer {
 
     private void historyScroll(HistoryItem item) {
         switch (item.type.ordinal()) {
-            case 2:
+            case 1:
                 this.scrollToTag(item.tagModel);
-            case 3:
+            case 2:
+            case 6:
             case 7:
-            case 8:
             default:
+                break;
+            case 3:
+                this.scrollToEvent(item.event);
                 break;
             case 4:
                 this.scrollToEvent(item.event);
                 break;
             case 5:
-                this.scrollToEvent(item.event);
-                break;
-            case 6:
                 this.scrollToEventGroup(item.event);
                 break;
-            case 9:
+            case 8:
                 this.scrollToTag(item.tagModel);
                 break;
-            case 10:
+            case 9:
                 this.scrollToEventTag((GuiTagModel) item.tagModel);
                 break;
-            case 11:
+            case 10:
                 this.scrollToEvent(item.event);
                 break;
-            case 12:
+            case 11:
                 this.scrollToEventTag((GuiTagModel) item.tagModel);
                 break;
-            case 13:
+            case 12:
                 this.scrollToEventTag((GuiTagModel) item.tagModel);
         }
 
@@ -2066,7 +2066,7 @@ public class TaggerView extends ConstraintContainer {
         return intArray;
     }
 
-    private class HistoryButton extends XButton implements MouseListener {
+    public class HistoryButton extends XButton {
         String hoverText;
         boolean undo;
 
@@ -2085,8 +2085,9 @@ public class TaggerView extends ConstraintContainer {
             return FontsAndColors.buttonFont;
         }
 
+        @Override
         public void mouseClicked(MouseEvent e) {
-            if (this.undo) {
+            if (undo) {
                 TaggerView.this.undoAction();
             } else {
                 TaggerView.this.redoAction();

@@ -27,7 +27,7 @@ public abstract class XButton extends JButton implements MouseListener {
 	
 	public XButton(String textArg) {
 		text = textArg;
-//		addMouseListener(this);
+		addMouseListener(this);
 	}
 	
 	public abstract Font getFont();
@@ -36,30 +36,31 @@ public abstract class XButton extends JButton implements MouseListener {
 		return text;
 	}
 	
-	@Override public void mouseClicked(MouseEvent e) {}
+	@Override public void mouseClicked(MouseEvent e) {
+	}
 
 	@Override public void mouseEntered(MouseEvent e) {
-		if (isEnabled()) {
-			hover = true;
-			repaint();
-		}
+//		if (isEnabled()) {
+//			hover = true;
+//			repaint();
+//		}
 	}
 
 	@Override public void mouseExited(MouseEvent e) {
-		hover = false;
-		repaint();
+//		hover = false;
+//		repaint();
 	}
 
 	@Override public void mousePressed(MouseEvent e) {
-		if (isEnabled()) {
-			pressed = true;
-			repaint();
-		}
+//		if (isEnabled()) {
+//			pressed = true;
+//			repaint();
+//		}
 	}
 
 	@Override public void mouseReleased(MouseEvent e) {
-		pressed = false;
-		repaint();
+//		pressed = false;
+//		repaint();
 	}
 	
 //	@Override protected void paintComponent(Graphics g) {

@@ -115,42 +115,42 @@ public class TaggerHistory {
             return null;
         } else {
             switch(item.type.ordinal()) {
-            case 1:
+            case 0:
                 this.redoClear(item);
-            case 2:
+            case 1:
                 this.redoAddTag(item);
                 break;
-            case 3:
+            case 2:
                 this.redoRemoveTag(item);
                 break;
-            case 4:
+            case 3:
                 this.redoAddEvent(item);
                 break;
-            case 5:
+            case 4:
                 this.redoRemoveEvent(item);
                 break;
-            case 6:
+            case 5:
                 this.redoAddGroup(item);
                 break;
-            case 7:
+            case 6:
                 this.redoAddGroups(item);
                 break;
-            case 8:
+            case 7:
                 this.redoRemoveGroup(item);
                 break;
-            case 9:
+            case 8:
                 this.redoTagEdited(item);
                 break;
-            case 10:
+            case 9:
                 this.redoTagPathEdited(item);
                 break;
-            case 11:
+            case 10:
                 this.redoEventEdited(item);
                 break;
-            case 12:
+            case 11:
                 this.redoAssociate(item);
                 break;
-            case 13:
+            case 12:
                 this.redoUnassociate(item);
             }
 
@@ -286,42 +286,42 @@ public class TaggerHistory {
             return null;
         } else {
             switch(item.type.ordinal()) {
-            case 1:
+            case 0:
                 this.undoClear(item);
-            case 2:
+            case 1:
                 this.undoAddTag(item);
                 break;
-            case 3:
+            case 2:
                 this.undoRemoveTag(item);
                 break;
-            case 4:
+            case 3:
                 this.undoAddEvent(item);
                 break;
-            case 5:
+            case 4:
                 this.undoRemoveEvent(item);
                 break;
-            case 6:
+            case 5:
                 this.undoAddGroup(item);
                 break;
-            case 7:
+            case 6:
                 this.undoAddGroups(item);
                 break;
-            case 8:
+            case 7:
                 this.undoRemoveGroup(item);
                 break;
-            case 9:
+            case 8:
                 this.undoTagEdited(item);
                 break;
-            case 10:
+            case 9:
                 this.undoTagPathEdited(item);
                 break;
-            case 11:
+            case 10:
                 this.undoEventEdited(item);
                 break;
-            case 12:
+            case 11:
                 this.undoAssociate(item);
                 break;
-            case 13:
+            case 12:
                 this.undoUnassociate(item);
             }
 
