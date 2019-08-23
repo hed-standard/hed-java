@@ -47,7 +47,7 @@ public class EventEnterTagView extends JComponent {
         this.tagger = tagger;
         this.appView = appView;
         /* Initialize GUI component */
-        jTextArea = new JTextArea("Enter tag ...");
+        jTextArea = new JTextArea("Search for tag to enter ...");
         jTextArea.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         this.jTextArea.getDocument().putProperty("filterNewlines", Boolean.TRUE);
 

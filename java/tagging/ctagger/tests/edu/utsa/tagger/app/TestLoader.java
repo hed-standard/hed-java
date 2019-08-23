@@ -18,7 +18,7 @@ public class TestLoader {
 		System.out.println("It should load the data from a delimited string " + "and HED XML");
 		String hedXml = TestUtilities.getResourceAsString(TestUtilities.HedFileName);
 		String events = TestUtilities.getResourceAsString(TestUtilities.DelimitedString);
-		String[] result = TaggerLoader.load(hedXml, events, TaggerLoader.EXTEND_ANYWHERE, "Test Tagger - Delimited String", 2);
+		String[] result = TaggerLoader.load(hedXml, events, TaggerLoader.EXTENSIONS_ALLOWED, "Test Tagger - Delimited String", 2);
 		assertNotNull(result);
 		assertEquals(hedXml, result[0]);
 		assertEquals(events, result[1]);

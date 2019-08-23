@@ -16,6 +16,7 @@ import java.util.Map;
 public abstract class FontsAndColors {
 
 	public static final float SMALL_FONT_SIZE = 14;
+	public static final float SMALLER_FONT_SIZE = 12;
 	public static final float MEDIUM_FONT_SIZE = 18;
 	public static final float LARGE_FONT_SIZE = 24;
 
@@ -184,6 +185,8 @@ public abstract class FontsAndColors {
 
 	public static final Color DASHEDBORDER = Color.BLACK;
 
+	public static final Font BASE_SMALL_FONT = new Font(
+			"Arial, Helvetica, sans-serif", Font.PLAIN, (int) SMALLER_FONT_SIZE);
 	public static final Font BASE_CONTENT_FONT = new Font(
 			"Arial, Helvetica, sans-serif", Font.PLAIN, (int) SMALL_FONT_SIZE);
 	public static final Font BASE_HEADER_FONT = new Font(
@@ -197,6 +200,7 @@ public abstract class FontsAndColors {
 	public static Font headerFont = BASE_MED_FONT;
 	public static Font secondHeaderFont = BASE_HEADER_FONT;
 	public static Font symbolFont = BASE_SYMBOL_FONT;
+	public static Font buttonFont = BASE_SMALL_FONT;
 
 	private static Font loadFont(String path, String name) {
 

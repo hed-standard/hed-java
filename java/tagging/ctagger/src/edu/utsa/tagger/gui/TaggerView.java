@@ -26,15 +26,7 @@ import edu.utsa.tagger.TaggerLoader;
 import edu.utsa.tagger.TaggerSet;
 import edu.utsa.tagger.ToggleTagMessage;
 import edu.utsa.tagger.gui.ContextMenu.ContextMenuAction;
-import edu.utsa.tagger.guisupport.Constraint;
-import edu.utsa.tagger.guisupport.ConstraintContainer;
-import edu.utsa.tagger.guisupport.ConstraintLayout;
-import edu.utsa.tagger.guisupport.ListLayout;
-import edu.utsa.tagger.guisupport.ScrollLayout;
-import edu.utsa.tagger.guisupport.VerticalSplitLayout;
-import edu.utsa.tagger.guisupport.XButton;
-import edu.utsa.tagger.guisupport.XScrollTextBox;
-import edu.utsa.tagger.guisupport.XTextBox;
+import edu.utsa.tagger.guisupport.*;
 
 /**
  * This class represents the main Tagger GUI view.
@@ -47,19 +39,19 @@ public class TaggerView extends ConstraintContainer {
     private XButton addEvent = new XButton("Add event") {
         @Override
         public Font getFont() {
-            return FontsAndColors.headerFont;
+            return FontsAndColors.buttonFont;
         }
     };
-    private XButton addGroup = new XButton("Add group") {
+    private XButton addGroup = new XButton("Add new tag group") {
         @Override
         public Font getFont() {
-            return FontsAndColors.headerFont;
+            return FontsAndColors.buttonFont;
         }
     };
     private XButton addTag = new XButton("Add tag") {
         @Override
         public Font getFont() {
-            return FontsAndColors.headerFont;
+            return FontsAndColors.buttonFont;
         }
     };
     private boolean autoCollapse = true;
@@ -72,16 +64,16 @@ public class TaggerView extends ConstraintContainer {
     private XButton collapseAll = new XButton("Collapse") {
         @Override
         public Font getFont() {
-            return FontsAndColors.headerFont;
+            return FontsAndColors.buttonFont;
         }
     };
     /**
      * Creates a collapse level label.
      */
-    private JLabel collapseLabel = new JLabel("Level", JLabel.CENTER) {
+    private JLabel collapseLabel = new JLabel("Show to Level", JLabel.CENTER) {
         @Override
         public Font getFont() {
-            return FontsAndColors.headerFont;
+            return FontsAndColors.BASE_CONTENT_FONT;
         }
     };
     /**
@@ -94,12 +86,18 @@ public class TaggerView extends ConstraintContainer {
         }
     };
     private ContextMenu contextMenu;
-    private XButton deselectAll = new XButton("Deselect all") {
+    private XCheckBox selectAllorNone = new XCheckBox(FontsAndColors.TRANSPARENT,FontsAndColors.BLUE_DARK, FontsAndColors.TRANSPARENT, FontsAndColors.BLUE_HOVER_MEDIUM, FontsAndColors.TRANSPARENT, FontsAndColors.BLUE_HOVER_MEDIUM) {
         @Override
         public Font getFont() {
             return FontsAndColors.headerFont;
         }
     };
+//    private JLabel deselectAllLabel = new JLabel("Deselect all") {
+//        @Override
+//        public Font getFont() {
+//            return FontsAndColors.headerFont;
+//        }
+//    };
     private JLayeredPane eventsScrollPane = new JLayeredPane();
     private JLabel eventsTitle = new JLabel("Events") {
         @Override
@@ -110,18 +108,17 @@ public class TaggerView extends ConstraintContainer {
     /**
      * Creates a expand button.
      */
-    private XButton expandAll = new XButton("Expand") {
-        @Override
-        public Font getFont() {
-            return FontsAndColors.headerFont;
-        }
-    };
+//    private XButton expandAll = new XButton("Expand") { @Override
+//        public Font getFont() {
+//            return FontsAndColors.headerFont;
+//        }
+//    };
     private JFrame frame;
     private JLabel hoverMessage = new JLabel();
     private TaggerLoader loader;
     private boolean isStandAloneVersion;
     private Notification notification = new Notification();
-    private XButton done = createMenuButton("Done");
+    private XButton ok = createMenuButton("Ok");
     private XButton redo = new HistoryButton("Redo", false);
     private JPanel searchResults = new JPanel() {
         @Override
@@ -167,14 +164,14 @@ public class TaggerView extends ConstraintContainer {
         }
     };
     private XButton undo = new HistoryButton("Undo", true);
-    private XButton zoomIn = createMenuButton("+");
-    private XButton zoomOut = createMenuButton("-");
-    private JLabel zoomPercent = new JLabel("100%", JLabel.CENTER) {
-        @Override
-        public Font getFont() {
-            return FontsAndColors.contentFont;
-        }
-    };
+//    private XButton zoomIn = createMenuButton("+");
+//    private XButton zoomOut = createMenuButton("-");
+//    private JLabel zoomPercent = new JLabel("100%", JLabel.CENTER) {
+//        @Override
+//        public Font getFont() {
+//            return FontsAndColors.contentFont;
+//        }
+//    };
 
     /**
      * Constructor creates the GUI and sets up functionality of the buttons
@@ -227,10 +224,11 @@ public class TaggerView extends ConstraintContainer {
     private void setColors() {
         this.setOpaque(true);
         this.setBackground(FontsAndColors.APP_BG);
+        this.hedTitle.setForeground(FontsAndColors.BLUE_DARK);
         this.cancel.setHoverForeground(FontsAndColors.BLUE_DARK);
-        this.done.setHoverForeground(FontsAndColors.BLUE_DARK);
-        this.zoomPercent.setFont(FontsAndColors.contentFont);
-        this.zoomPercent.setForeground(FontsAndColors.BLUE_VERY_LIGHT);
+        this.ok.setHoverForeground(FontsAndColors.BLUE_DARK);
+//        this.zoomPercent.setFont(FontsAndColors.contentFont);
+//        this.zoomPercent.setForeground(FontsAndColors.BLUE_VERY_LIGHT);
         this.eventsPanel.setOpaque(true);
         this.eventsPanel.setBackground(FontsAndColors.BLUE_2);
         this.tagsPanel.setBackground(FontsAndColors.BLUE_MEDIUM);
@@ -242,12 +240,12 @@ public class TaggerView extends ConstraintContainer {
         this.addEvent.setHoverForeground(FontsAndColors.BLUE_DARK);
         this.addEvent.setPressedBackground(FontsAndColors.TRANSPARENT);
         this.addEvent.setPressedForeground(FontsAndColors.BLUE_VERY_LIGHT);
-        this.deselectAll.setNormalBackground(FontsAndColors.TRANSPARENT);
-        this.deselectAll.setNormalForeground(FontsAndColors.BLUE_VERY_LIGHT);
-        this.deselectAll.setHoverBackground(FontsAndColors.TRANSPARENT);
-        this.deselectAll.setHoverForeground(FontsAndColors.BLUE_DARK);
-        this.deselectAll.setPressedBackground(FontsAndColors.TRANSPARENT);
-        this.deselectAll.setPressedForeground(FontsAndColors.BLUE_VERY_LIGHT);
+//        this.selectAllorNone.setNormalBackground(FontsAndColors.TRANSPARENT);
+//        this.selectAllorNone.setNormalForeground(FontsAndColors.BLUE_VERY_LIGHT);
+//        this.selectAllorNone.setHoverBackground(FontsAndColors.TRANSPARENT);
+//        this.selectAllorNone.setHoverForeground(FontsAndColors.BLUE_DARK);
+//        this.selectAllorNone.setPressedBackground(FontsAndColors.TRANSPARENT);
+//        this.selectAllorNone.setPressedForeground(FontsAndColors.BLUE_VERY_LIGHT);
         this.addGroup.setNormalBackground(FontsAndColors.TRANSPARENT);
         this.addGroup.setNormalForeground(FontsAndColors.BLUE_VERY_LIGHT);
         this.addGroup.setHoverBackground(FontsAndColors.TRANSPARENT);
@@ -261,21 +259,21 @@ public class TaggerView extends ConstraintContainer {
         this.addTag.setPressedBackground(FontsAndColors.TRANSPARENT);
         this.addTag.setPressedForeground(FontsAndColors.BLUE_VERY_LIGHT);
         this.collapseLabel.setBackground(FontsAndColors.TRANSPARENT);
-        this.collapseLabel.setForeground(FontsAndColors.BLUE_VERY_LIGHT);
+        this.collapseLabel.setForeground(FontsAndColors.BLUE_DARK);
         this.collapseAll.setNormalBackground(FontsAndColors.TRANSPARENT);
         this.collapseAll.setNormalForeground(FontsAndColors.BLUE_VERY_LIGHT);
         this.collapseAll.setHoverBackground(FontsAndColors.TRANSPARENT);
         this.collapseAll.setHoverForeground(FontsAndColors.BLUE_DARK);
         this.collapseAll.setPressedBackground(FontsAndColors.TRANSPARENT);
         this.collapseAll.setPressedForeground(FontsAndColors.BLUE_VERY_LIGHT);
-        this.expandAll.setNormalBackground(FontsAndColors.TRANSPARENT);
-        this.expandAll.setNormalForeground(FontsAndColors.BLUE_VERY_LIGHT);
-        this.expandAll.setHoverBackground(FontsAndColors.TRANSPARENT);
-        this.expandAll.setHoverForeground(FontsAndColors.BLUE_DARK);
-        this.expandAll.setPressedBackground(FontsAndColors.TRANSPARENT);
-        this.expandAll.setPressedForeground(FontsAndColors.BLUE_VERY_LIGHT);
-        this.zoomIn.setHoverForeground(FontsAndColors.BLUE_DARK);
-        this.zoomOut.setHoverForeground(FontsAndColors.BLUE_DARK);
+//        this.expandAll.setNormalBackground(FontsAndColors.TRANSPARENT);
+//        this.expandAll.setNormalForeground(FontsAndColors.BLUE_VERY_LIGHT);
+//        this.expandAll.setHoverBackground(FontsAndColors.TRANSPARENT);
+//        this.expandAll.setHoverForeground(FontsAndColors.BLUE_DARK);
+//        this.expandAll.setPressedBackground(FontsAndColors.TRANSPARENT);
+//        this.expandAll.setPressedForeground(FontsAndColors.BLUE_VERY_LIGHT);
+//        this.zoomIn.setHoverForeground(FontsAndColors.BLUE_DARK);
+//        this.zoomOut.setHoverForeground(FontsAndColors.BLUE_DARK);
         this.redo.setHoverForeground(FontsAndColors.BLUE_DARK);
         this.undo.setHoverForeground(FontsAndColors.BLUE_DARK);
         this.hoverMessage.setBackground(FontsAndColors.LIGHT_YELLOW);
@@ -285,7 +283,7 @@ public class TaggerView extends ConstraintContainer {
     private void setListeners() {
         this.collapseLevel.getJTextArea().setText(Integer.toString(this.loader.getInitialDepth()));
         this.collapseLevel.getJTextArea().getDocument().putProperty("filterNewlines", Boolean.TRUE);
-        this.done.addMouseListener(new MouseAdapter() {
+        this.ok.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 TaggerView.this.proceed(e);
                 TaggerView.this.loader.setBack(false);
@@ -298,19 +296,30 @@ public class TaggerView extends ConstraintContainer {
                 //TaggerView.this.loader.setBack(true);
             }
         });
-        this.zoomOut.addMouseListener(new MouseAdapter() {
+//        this.zoomOut.addMouseListener(new MouseAdapter() {
+//            public void mouseClicked(MouseEvent e) {
+//                TaggerView.this.zoomOut();
+//            }
+//        });
+//        this.zoomIn.addMouseListener(new MouseAdapter() {
+//            public void mouseClicked(MouseEvent e) {
+//                TaggerView.this.zoomIn();
+//            }
+//        });
+        this.selectAllorNone.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-                TaggerView.this.zoomOut();
-            }
-        });
-        this.zoomIn.addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent e) {
-                TaggerView.this.zoomIn();
-            }
-        });
-        this.deselectAll.addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent e) {
-                TaggerView.this.deselectAll();
+                if (selectAllorNone.isChecked()) {
+                    selectAllorNone.setNormalBg(FontsAndColors.BLUE_HOVER_MEDIUM);
+                    selectAllorNone.setNormalFg(FontsAndColors.BLUE_DARK);
+                    selectAllorNone.repaint();
+                    TaggerView.this.selectAll();
+                }
+                else {
+                    selectAllorNone.setNormalBg(FontsAndColors.TRANSPARENT);
+                    selectAllorNone.setNormalFg(FontsAndColors.BLUE_DARK);
+                    selectAllorNone.repaint();
+                    TaggerView.this.deselectAll();
+                }
             }
         });
         this.addGroup.addMouseListener(new MouseAdapter() {
@@ -363,11 +372,11 @@ public class TaggerView extends ConstraintContainer {
                 TaggerView.this.collapseAll();
             }
         });
-        this.expandAll.addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent e) {
-                TaggerView.this.expandAll();
-            }
-        });
+//        this.expandAll.addMouseListener(new MouseAdapter() {
+//            public void mouseClicked(MouseEvent e) {
+//                TaggerView.this.expandAll();
+//            }
+//        });
         this.notification.getToggleDetailsButton().addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 TaggerView.this.showNotification();
@@ -418,7 +427,7 @@ public class TaggerView extends ConstraintContainer {
         this.searchTags.getJTextArea().getDocument().putProperty("filterNewlines", Boolean.TRUE);
         this.searchTags.getJTextArea().getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "doNothing");
         this.searchTags.getJTextArea().getInputMap().put(KeyStroke.getKeyStroke("TAB"), "doNothing");
-        this.searchTags.getJTextArea().setText("Lookup tags ...");
+        this.searchTags.getJTextArea().setText("Search for existing tags ...");
         this.searchTags.getJTextArea().addFocusListener(new FocusListener() {
             public void focusGained(FocusEvent e) {
                 TaggerView.this.searchTags.getJTextArea().selectAll();
@@ -450,18 +459,18 @@ public class TaggerView extends ConstraintContainer {
         this.splitPaneLeft.add(this.eventEnterTagView.getjTextAreaPanel(), new Constraint("top:12 height:26 left:130 right:100"));
         this.splitPaneLeft.add(this.eventEnterTagView.getSearchResultsScrollPane(), new Constraint("top:40 bottom:300 left:130 right:0"));
         this.splitPaneLeft.setLayer(this.eventEnterTagView.getSearchResultsScrollPane(), 1);
-        this.splitPaneLeft.add(this.deselectAll, new Constraint("top:50 height:30 left:10 width:150"));
-        this.splitPaneLeft.add(this.addGroup, new Constraint("top:50 height:30 right:20 width:150"));
+        this.splitPaneLeft.add(this.selectAllorNone, new Constraint("top:50 height:30 left:1 width:20"));
+        this.splitPaneLeft.add(this.addGroup, new Constraint("top:50 height:30 left:27 width:140"));
         this.splitPaneLeft.add(this.eventsScrollPane, new Constraint("top:85 bottom:0 left:0 right:5"));
 
         this.splitPaneRight.add(this.tagsTitle, new Constraint("top:0 height:50 left:5 width:100"));
         this.splitPaneRight.add(this.searchTags, new Constraint("top:12 height:26 left:90 right:100"));
         this.splitPaneRight.add(this.searchResultsScrollPane, new Constraint("top:40 bottom:300 left:90 right:0"));
         this.splitPaneRight.setLayer(this.searchResultsScrollPane, 1);
-        this.splitPaneRight.add(this.collapseAll, new Constraint("top:52 height:30 left:85 width:100"));
-        this.splitPaneRight.add(this.expandAll, new Constraint("top:52 height:30 left:215 width:100"));
-        this.splitPaneRight.add(this.collapseLabel, new Constraint("top:50 height:30 left:315 width:115"));
-        this.splitPaneRight.add(this.collapseLevel, new Constraint("top:48 height:30 left:415 width:30"));
+//        this.splitPaneRight.add(this.expandAll, new Constraint("top:52 height:30 left:215 width:100"));
+        this.splitPaneRight.add(this.collapseLabel, new Constraint("top:50 height:30 left:55 width:200"));
+        this.splitPaneRight.add(this.collapseLevel, new Constraint("top:48 height:30 left:220 width:30"));
+        this.splitPaneRight.add(this.collapseAll, new Constraint("top:52 height:30 right:1 width:100"));
         this.splitPaneRight.add(this.tagsScrollPane, new Constraint("top:85 bottom:0 left:5 right:0"));
 
         this.add(this.notification, new Constraint("top:10 height:30 left:305 right:245"));
@@ -476,12 +485,12 @@ public class TaggerView extends ConstraintContainer {
         this.setLayer(this.shield, 2);
         this.shield.setVisible(false);
         this.add(this.hedTitle, new Constraint("top:0 height:50 left:450 width:150"));
-        this.add(this.undo, new Constraint("top:0 height:50 right:180 width:60"));
-        this.add(this.redo, new Constraint("top:0 height:50 right:120 width:60"));
-        this.add(this.zoomOut, new Constraint("top:0 height:50 right:80 width:30"));
-        this.add(this.zoomPercent, new Constraint("top:0 height:50 right:30 width:50"));
-        this.add(this.zoomIn, new Constraint("top:0 height:50 right:0 width:30"));
-        this.add(this.splitContainer, new Constraint("top:60 bottom:10 left:10 right:10"));
+        this.add(this.undo, new Constraint("top:0 height:30 right:10 width:80"));
+        this.add(this.redo, new Constraint("top:0 height:30 right:90 width:80"));
+//        this.add(this.zoomOut, new Constraint("top:0 height:50 right:80 width:30"));
+//        this.add(this.zoomPercent, new Constraint("top:0 height:50 right:30 width:50"));
+//        this.add(this.zoomIn, new Constraint("top:0 height:50 right:0 width:30"));
+        this.add(this.splitContainer, new Constraint("top:60 bottom:50 left:10 right:10"));
         int splitterPos = this.frame.getWidth() / 2;
         VerticalSplitLayout splitLayout = new VerticalSplitLayout(this.splitContainer, this.splitPaneLeft, this.splitPaneRight, splitterPos);
         this.splitContainer.setLayout(splitLayout);
@@ -696,32 +705,32 @@ public class TaggerView extends ConstraintContainer {
         });
         menu.add(item);
 
-        menu = new JMenu("Edit");
-        menuBar.add(menu);
-        item = new JMenuItem("Select All");
-        item.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                TaggerView.this.selectAll();
-            }
-        });
-        menu.add(item);
-        item = new JMenuItem("Deselect All");
-        item.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                TaggerView.this.deselectAll();
-            }
-        });
-        menu.add(item);
-        if (this.isStandAloneVersion) {
-            menu.addSeparator();
-            item = new JMenuItem("Delete");
-            item.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    TaggerView.this.deleteSelected();
-                }
-            });
-            menu.add(item);
-        }
+//        menu = new JMenu("Edit");
+//        menuBar.add(menu);
+//        item = new JMenuItem("Select All");
+//        item.addActionListener(new ActionListener() {
+//            public void actionPerformed(ActionEvent e) {
+//                TaggerView.this.selectAll();
+//            }
+//        });
+//        menu.add(item);
+//        item = new JMenuItem("Deselect All");
+//        item.addActionListener(new ActionListener() {
+//            public void actionPerformed(ActionEvent e) {
+//                TaggerView.this.deselectAll();
+//            }
+//        });
+//        menu.add(item);
+//        if (this.isStandAloneVersion) {
+//            menu.addSeparator();
+//            item = new JMenuItem("Delete");
+//            item.addActionListener(new ActionListener() {
+//                public void actionPerformed(ActionEvent e) {
+//                    TaggerView.this.deleteSelected();
+//                }
+//            });
+//            menu.add(item);
+//        }
 
         menu = new JMenu("View");
         menuBar.add(menu);
@@ -739,21 +748,21 @@ public class TaggerView extends ConstraintContainer {
             }
         });
         menu.add(item);
-        menu.addSeparator();
-        item = new JMenuItem("Zoom In");
-        item.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                TaggerView.this.zoomIn();
-            }
-        });
-        menu.add(item);
-        item = new JMenuItem("Zoom Out");
-        item.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                TaggerView.this.zoomOut();
-            }
-        });
-        menu.add(item);
+//        menu.addSeparator();
+//        item = new JMenuItem("Zoom In");
+//        item.addActionListener(new ActionListener() {
+//            public void actionPerformed(ActionEvent e) {
+//                TaggerView.this.zoomIn();
+//            }
+//        });
+//        menu.add(item);
+//        item = new JMenuItem("Zoom Out");
+//        item.addActionListener(new ActionListener() {
+//            public void actionPerformed(ActionEvent e) {
+//                TaggerView.this.zoomOut();
+//            }
+//        });
+//        menu.add(item);
         menu.addSeparator();
         item = new JMenuItem("Hide Required Tags");
         item.addActionListener(new ActionListener() {
@@ -1362,17 +1371,17 @@ public class TaggerView extends ConstraintContainer {
         searchResultsScrollPane.setVisible(true);
     }
 
-    private void zoomIn() {
-        ConstraintLayout.scale += 0.1D;
-        FontsAndColors.resizeFonts(ConstraintLayout.scale);
-        this.zoomPercent.setText((int) (ConstraintLayout.scale * 100.0D) + "%");
-    }
-
-    private void zoomOut() {
-        ConstraintLayout.scale -= 0.1D;
-        FontsAndColors.resizeFonts(ConstraintLayout.scale);
-        this.zoomPercent.setText((int) (ConstraintLayout.scale * 100.0D) + "%");
-    }
+//    private void zoomIn() {
+//        ConstraintLayout.scale += 0.1D;
+//        FontsAndColors.resizeFonts(ConstraintLayout.scale);
+//        this.zoomPercent.setText((int) (ConstraintLayout.scale * 100.0D) + "%");
+//    }
+//
+//    private void zoomOut() {
+//        ConstraintLayout.scale -= 0.1D;
+//        FontsAndColors.resizeFonts(ConstraintLayout.scale);
+//        this.zoomPercent.setText((int) (ConstraintLayout.scale * 100.0D) + "%");
+//    }
 
 
     /*** support methods for addComponents ***/
@@ -1380,13 +1389,13 @@ public class TaggerView extends ConstraintContainer {
         if (this.isStandAloneVersion) {
             this.splitPaneLeft.add(this.addEvent, new Constraint("top:0 height:50 right:10 width:115"));
         } else {
-            this.add(this.cancel, new Constraint("top:0 height:50 left:0 width:120"));
-            this.add(this.done, new Constraint("top:0 height:50 left:160 width:120"));
+            this.add(this.cancel, new Constraint("bottom:10 height:30 right:100 width:80"));
+            this.add(this.ok, new Constraint("bottom:10 height:30 right:10 width:80"));
             this.cancel.setEnabled(!this.loader.checkFlags(64));
         }
 
         if (this.tagger.getExtensionsAllowed()) {
-            this.splitPaneRight.add(this.addTag, new Constraint("top:12 height:26 right:0 width:80"));
+            this.splitPaneRight.add(this.addTag, new Constraint("top:12 height:26 right:1 width:80"));
         }
 
     }
@@ -1586,15 +1595,15 @@ public class TaggerView extends ConstraintContainer {
         XButton button = new XButton(label) {
             @Override
             public Font getFont() {
-                return FontsAndColors.headerFont;
+                return FontsAndColors.buttonFont;
             }
         };
-        button.setNormalBackground(FontsAndColors.MENU_NORMAL_BG);
-        button.setNormalForeground(FontsAndColors.MENU_NORMAL_FG);
-        button.setHoverBackground(FontsAndColors.MENU_HOVER_BG);
-        button.setHoverForeground(FontsAndColors.MENU_HOVER_FG);
-        button.setPressedBackground(FontsAndColors.MENU_PRESSED_BG);
-        button.setPressedForeground(FontsAndColors.MENU_PRESSED_FG);
+//        button.setNormalBackground(FontsAndColors.MENU_NORMAL_BG);
+//        button.setNormalForeground(FontsAndColors.MENU_NORMAL_FG);
+//        button.setHoverBackground(FontsAndColors.MENU_HOVER_BG);
+//        button.setHoverForeground(FontsAndColors.MENU_HOVER_FG);
+//        button.setPressedBackground(FontsAndColors.MENU_PRESSED_BG);
+//        button.setPressedForeground(FontsAndColors.MENU_PRESSED_FG);
 
         return button;
     }
@@ -2064,16 +2073,16 @@ public class TaggerView extends ConstraintContainer {
         public HistoryButton(String textArg, boolean undo) {
             super(textArg);
             this.undo = undo;
-            this.setNormalBackground(FontsAndColors.MENU_NORMAL_BG);
-            this.setNormalForeground(FontsAndColors.MENU_NORMAL_FG);
-            this.setHoverBackground(FontsAndColors.MENU_HOVER_BG);
-            this.setHoverForeground(FontsAndColors.MENU_HOVER_FG);
-            this.setPressedBackground(FontsAndColors.MENU_PRESSED_BG);
-            this.setPressedForeground(FontsAndColors.MENU_PRESSED_FG);
+//            this.setNormalBackground(FontsAndColors.MENU_NORMAL_BG);
+//            this.setNormalForeground(FontsAndColors.MENU_NORMAL_FG);
+//            this.setHoverBackground(FontsAndColors.MENU_HOVER_BG);
+//            this.setHoverForeground(FontsAndColors.MENU_HOVER_FG);
+//            this.setPressedBackground(FontsAndColors.MENU_PRESSED_BG);
+//            this.setPressedForeground(FontsAndColors.MENU_PRESSED_FG);
         }
 
         public Font getFont() {
-            return FontsAndColors.headerFont;
+            return FontsAndColors.buttonFont;
         }
 
         public void mouseClicked(MouseEvent e) {

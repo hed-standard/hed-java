@@ -305,7 +305,7 @@ public class TagEventView extends JComponent implements MouseListener {
 
 			Color bg;
 			Color fg;
-			Font font1 = FontsAndColors.contentFont;
+			Font font1 = FontsAndColors.BASE_MED_FONT;
 
 			bg = FontsAndColors.EVENTTAG_BG_NORMAL;
 			if (pressed && hover) {
@@ -313,7 +313,7 @@ public class TagEventView extends JComponent implements MouseListener {
 			} else if (!pressed && hover) {
 				fg = model.isMissing() ? FontsAndColors.EVENTTAG_FG_MISSING_HOVER : FontsAndColors.BLUE_DARK;
 			} else {
-				fg = model.isMissing() ? FontsAndColors.EVENTTAG_FG_MISSING_NORMAL : FontsAndColors.TRANSPARENT;
+				fg = model.isMissing() ? FontsAndColors.EVENTTAG_FG_MISSING_NORMAL : FontsAndColors.BLUE_VERY_LIGHT;
 			}
 
 			if (highlight) {
