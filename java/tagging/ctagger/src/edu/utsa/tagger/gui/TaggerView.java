@@ -164,6 +164,13 @@ public class TaggerView extends ConstraintContainer {
         }
     };
     private XButton undo = new HistoryButton("Undo", true);
+    boolean hasMissingTag = false;
+    private JLabel incompatibleTagWarning = new JLabel("Red tag(s) violate HED schema!") {
+        @Override
+        public Font getFont() {
+            return FontsAndColors.headerFont;
+        }
+    };
 //    private XButton zoomIn = createMenuButton("+");
 //    private XButton zoomOut = createMenuButton("-");
 //    private JLabel zoomPercent = new JLabel("100%", JLabel.CENTER) {
@@ -278,6 +285,8 @@ public class TaggerView extends ConstraintContainer {
         this.undo.setHoverForeground(FontsAndColors.BLUE_DARK);
         this.hoverMessage.setBackground(FontsAndColors.LIGHT_YELLOW);
         this.searchResults.setBackground(Color.WHITE);
+        this.incompatibleTagWarning.setForeground(FontsAndColors.RED_MEDIUM);
+        this.incompatibleTagWarning.setBackground(FontsAndColors.TRANSPARENT);
     }
 
     private void setListeners() {
@@ -538,6 +547,7 @@ public class TaggerView extends ConstraintContainer {
     }
 
     public void updateEventsPanel() {
+        hasMissingTag = false; // reset
         pruneSelectedGroups();
         eventsPanel.removeAll();
         int top = 0;
@@ -546,7 +556,16 @@ public class TaggerView extends ConstraintContainer {
             top = addEvents(taggedEvent, top);
             top = addRRTags(taggedEvent, top);
             top = addOtherTags(taggedEvent, top);
-//            top = addEventTagSearchPanel(taggedEvent, top);
+        }
+        // add warning to tagger view if there exists tag(s) that are not compatible with schema
+        if (hasMissingTag) {
+            if (incompatibleTagWarning.getParent() != this) {
+                this.add(incompatibleTagWarning, new Constraint("top:0 height:50 left:10 width:300"));
+            }
+        }
+        else {
+            if (incompatibleTagWarning.getParent() == this)
+                this.remove(incompatibleTagWarning);
         }
         validate();
         repaint();
@@ -1421,6 +1440,7 @@ public class TaggerView extends ConstraintContainer {
                 } while ((Integer) tagGroup.getKey() == taggedEvent.getEventLevelId() && this.tagger.isRRValue(tag) && this.tagger.isPrimary());
 
                 GuiTagModel guiTagModel = (GuiTagModel) tag;
+                if (guiTagModel.isMissing()) hasMissingTag = true;
                 guiTagModel.setAppView(this);
                 guiTagModel.updateMissing();
                 TagEventView tagEgtView = guiTagModel.getTagEventView((Integer) tagGroup.getKey());
