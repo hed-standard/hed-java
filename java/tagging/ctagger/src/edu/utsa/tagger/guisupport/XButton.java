@@ -121,4 +121,68 @@ public abstract class XButton extends JButton implements MouseListener {
 	public void setText(String textArg) {
 		text = textArg;
 	}
+
+	public boolean isHover() {
+		return hover;
+	}
+
+	public void setHover(boolean hover) {
+		this.hover = hover;
+	}
+
+	public boolean isPressed() {
+		return pressed;
+	}
+
+	public void setPressed(boolean pressed) {
+		this.pressed = pressed;
+	}
+
+	public Color getNormalBg() {
+		return normalBg;
+	}
+
+	public void setNormalBg(Color normalBg) {
+		this.normalBg = normalBg;
+	}
+
+	public Color getNormalFg() {
+		return normalFg;
+	}
+
+	public void setNormalFg(Color normalFg) {
+		this.normalFg = normalFg;
+	}
+
+	public Color getHoverBg() {
+		return hoverBg;
+	}
+
+	public void setHoverBg(Color hoverBg) {
+		this.hoverBg = hoverBg;
+	}
+
+	public Color getHoverFg() {
+		return hoverFg;
+	}
+
+	public void setHoverFg(Color hoverFg) {
+		this.hoverFg = hoverFg;
+	}
+
+	public Color getPressedBg() {
+		return pressedBg;
+	}
+
+	public void setPressedBg(Color pressedBg) {
+		this.pressedBg = pressedBg;
+	}
+
+	public Color getPressedFg() {
+		return pressedFg;
+	}
+
+	public void setPressedFg(Color pressedFg) {
+		this.pressedFg = pressedFg;
+	}
 }

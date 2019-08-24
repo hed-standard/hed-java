@@ -9,6 +9,7 @@ import java.awt.geom.Rectangle2D;
 import java.util.Set;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -17,9 +18,7 @@ import edu.utsa.tagger.Tagger;
 import edu.utsa.tagger.guisupport.ListLayout;
 
 /**
- * Search input field and search result display panel
- * Takes in the container (eventsPanel), tagger (for tag data), and constraint
- * (to match with the layout specification since constraint is created dynamically in the container scope)
+ * Panel for quickly search and enter tag to event through keyboard
  * @author Dung
  *
  */
@@ -29,7 +28,7 @@ public class EventEnterTagView extends JComponent {
     private TaggerView appView;
     private TaggedEvent taggedEvent;
     private JTextArea jTextArea;
-    private JScrollPane borderPanel;
+    private JScrollPane borderPanel; // containing jTextArea
     private JPanel searchResults = new JPanel() {
         @Override
         protected void paintComponent(Graphics g) {
@@ -41,19 +40,28 @@ public class EventEnterTagView extends JComponent {
     };
     private JScrollPane searchResultsScrollPane; // searchResults is put in a scrollable panel
     private int focusedResult = -1;
-    private TagView searchResult;
 
     public EventEnterTagView(Tagger tagger, TaggerView appView) {
         this.tagger = tagger;
         this.appView = appView;
         /* Initialize GUI component */
         jTextArea = new JTextArea("Search for tag to enter ...");
-        jTextArea.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        Border border = BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Color.BLACK, 1),
+                BorderFactory.createEmptyBorder(3, 3, 3, 3));
+        jTextArea.setBorder(border);
         this.jTextArea.getDocument().putProperty("filterNewlines", Boolean.TRUE);
 
-        borderPanel = new JScrollPane(jTextArea);
+        borderPanel = new JScrollPane(jTextArea) {
+            @Override
+            public Font getFont() {
+                return FontsAndColors.contentFont;
+            }
+        };
         borderPanel.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
         borderPanel.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        borderPanel.setBackground(FontsAndColors.BLUE_MEDIUM);
+        borderPanel.setBorder(null);
 
         searchResults.setBackground(Color.WHITE);
         searchResults.setLayout(new ListLayout(0, 0, 0, 0));
@@ -97,64 +105,6 @@ public class EventEnterTagView extends JComponent {
         setKeyListener();
 
     }
-
-    /* Constructor */
-    public EventEnterTagView(Tagger tagger, TaggedEvent taggedEvent) {
-        this.tagger = tagger;
-        this.taggedEvent = taggedEvent;
-        /* Initialize GUI component */
-        jTextArea = new JTextArea("Enter tag ...");
-        jTextArea.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        this.jTextArea.getDocument().putProperty("filterNewlines", Boolean.TRUE);
-
-        borderPanel = new JScrollPane(jTextArea);
-        borderPanel.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
-        borderPanel.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-
-        searchResults.setBackground(Color.WHITE);
-        searchResults.setLayout(new ListLayout(0, 0, 0, 0));
-
-        searchResultsScrollPane = new JScrollPane(searchResults);
-        searchResultsScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        searchResultsScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        searchResultsScrollPane.getVerticalScrollBar().setUnitIncrement(20);
-        searchResultsScrollPane.getHorizontalScrollBar().setUnitIncrement(20);
-        searchResultsScrollPane.setVisible(false);
-
-        /* Action listener */
-        this.jTextArea.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                updateSearch();
-            }
-
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                updateSearch();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                updateSearch();
-            }
-        });
-        this.jTextArea.addFocusListener(new FocusListener() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                selectAllText();
-            }
-
-            @Override
-            public void focusLost(FocusEvent e) {
-                searchResultsScrollPane.setVisible(false);
-                focusedResult = -1;
-            }
-        });
-
-        setKeyListener();
-
-    }
-
 
     /* Action methods */
     /**

@@ -177,23 +177,10 @@ public class TagEditView extends ConstraintContainer {
 	final XCheckBox unique = new XCheckBox(Color.WHITE, Color.BLACK, Color.WHITE, Color.BLACK, Color.WHITE,
 			Color.BLACK);
 
-	final XButton saveButton = new XButton("save") {
-		@Override
-		public Font getFont() {
-			Map<TextAttribute, Integer> fontAttributes = new HashMap<TextAttribute, Integer>();
-			fontAttributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
-			return FontsAndColors.contentFont.deriveFont(fontAttributes);
-		}
-	};
+	final TagEditOptionButton saveButton = new TagEditOptionButton("save");
 
-	final XButton cancelButton = new XButton("cancel") {
-		@Override
-		public Font getFont() {
-			Map<TextAttribute, Integer> fontAttributes = new HashMap<TextAttribute, Integer>();
-			fontAttributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
-			return FontsAndColors.contentFont.deriveFont(fontAttributes);
-		}
-	};
+	final TagEditOptionButton cancelButton = new TagEditOptionButton("cancel");
+
 	public TagEditView(Tagger tagger, TaggerView appView, GuiTagModel model) {
 		this.tagger = tagger;
 		this.appView = appView;
@@ -222,6 +209,7 @@ public class TagEditView extends ConstraintContainer {
 		add(recommended, new Constraint("top:" + top + " height:20 left:200 width:20"));
 		add(recommendedLabel, new Constraint("top:" + top + " height:20 left:230 width:120"));
 		add(predicateTypeLabel, new Constraint("top:" + top + " height:20 left:415 width:120"));
+		add(unitClassesLabel, new Constraint("top:" + this.top + " height:20 left:630 width:120"));
 		add(new JComponent() {
 		}, new Constraint("top:0 height:" + HEIGHT + " left:0 right:0"));
 
@@ -233,7 +221,7 @@ public class TagEditView extends ConstraintContainer {
 		populatePredicateTypeComboBox();
 		add(predicateTypes, new Constraint("top:" + top + " height:20 left:415 width:120"));
 		this.populateUnitClassesComboBox();
-		this.add(this.unitClasses, new Constraint("top:" + this.top + " height:20 left:630 width:120"));
+		this.add(this.unitClasses, new Constraint("top:" + this.top + " height:20 right:10 width:120"));
 		add(cancelButton, new Constraint("top:10 height:20 right:20 width:45"));
 		add(saveButton, new Constraint("top:10 height:20 right:70 width:35"));
 
@@ -317,9 +305,19 @@ public class TagEditView extends ConstraintContainer {
 		isNumeric.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				if (isNumeric.isChecked() && SwingUtilities.isLeftMouseButton(e)) {
-					takesValue.setChecked(true);
-					repaint();
+//				if (isNumeric.isChecked() && SwingUtilities.isLeftMouseButton(e)) {
+//					takesValue.setChecked(true);
+//					repaint();
+//				}
+//
+				if (SwingUtilities.isLeftMouseButton(e)) {
+					TagEditView.this.takesValue.setChecked(TagEditView.this.isNumeric.isChecked());
+					TagEditView.this.unitClasses.setEnabled(TagEditView.this.isNumeric.isChecked());
+					if (TagEditView.this.isNumeric.isChecked()) {
+						TagEditView.this.name.getJTextArea().setText("#");
+					}
+
+					TagEditView.this.repaint();
 				}
 			}
 		});
@@ -327,9 +325,18 @@ public class TagEditView extends ConstraintContainer {
 		takesValue.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				if (isNumeric.isChecked() && !takesValue.isChecked() && SwingUtilities.isLeftMouseButton(e)) {
-					isNumeric.setChecked(false);
-					repaint();
+//				if (isNumeric.isChecked() && !takesValue.isChecked() && SwingUtilities.isLeftMouseButton(e)) {
+//					isNumeric.setChecked(false);
+//					repaint();
+//				}
+				if (!TagEditView.this.takesValue.isChecked() && SwingUtilities.isLeftMouseButton(e)) {
+					TagEditView.this.isNumeric.setChecked(TagEditView.this.takesValue.isChecked());
+					TagEditView.this.unitClasses.setEnabled(TagEditView.this.takesValue.isChecked());
+					TagEditView.this.repaint();
+				}
+
+				if (TagEditView.this.takesValue.isChecked() && SwingUtilities.isLeftMouseButton(e)) {
+					TagEditView.this.name.getJTextArea().setText("#");
 				}
 			}
 		});
@@ -631,4 +638,70 @@ public class TagEditView extends ConstraintContainer {
 
     }
 
+
+	private class TagEditOptionButton extends XButton {
+	    public TagEditOptionButton(String text) {
+	    	super(text);
+		}
+		@Override
+		public Font getFont() {
+			Map<TextAttribute, Integer> fontAttributes = new HashMap<TextAttribute, Integer>();
+			fontAttributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
+			return FontsAndColors.contentFont.deriveFont(fontAttributes);
+		}
+
+		@Override protected void paintComponent(Graphics g) {
+
+			Graphics2D g2d = (Graphics2D) g;
+			g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
+
+			Color fg;
+			Color bg;
+
+			if (isPressed() && isHover()) {
+				bg = getPressedBg();
+				fg = getPressedFg();
+			} else if (!isPressed() && isHover()) {
+				bg = getHoverBg();
+				fg = getHoverFg();
+			} else {
+				bg = getNormalBg();
+				fg = getNormalFg();
+			}
+
+			g2d.setColor(bg);
+			g2d.fillRect(0, 0, getWidth(), getHeight());
+
+			double x = (getWidth() - g2d.getFontMetrics().stringWidth(getText())) / 2;
+			double y = getHeight() / 2 + g2d.getFontMetrics().getHeight() / 4;
+
+			g2d.setFont(getFont());
+			g2d.setColor(fg);
+			g2d.drawString(getText(), (int) x, (int) y);
+		}
+		@Override public void mouseEntered(MouseEvent e) {
+		if (isEnabled()) {
+			setHover(true);
+			repaint();
+		}
+		}
+
+		@Override public void mouseExited(MouseEvent e) {
+		setHover(false);
+		repaint();
+		}
+
+		@Override public void mousePressed(MouseEvent e) {
+		if (isEnabled()) {
+			setPressed(true);
+			repaint();
+		}
+		}
+
+		@Override public void mouseReleased(MouseEvent e) {
+		setPressed(false);
+		repaint();
+		}
+
+	}
 }

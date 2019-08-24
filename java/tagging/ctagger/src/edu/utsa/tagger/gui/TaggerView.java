@@ -468,9 +468,9 @@ public class TaggerView extends ConstraintContainer {
         this.splitPaneRight.add(this.searchResultsScrollPane, new Constraint("top:40 bottom:300 left:90 right:0"));
         this.splitPaneRight.setLayer(this.searchResultsScrollPane, 1);
 //        this.splitPaneRight.add(this.expandAll, new Constraint("top:52 height:30 left:215 width:100"));
-        this.splitPaneRight.add(this.collapseLabel, new Constraint("top:50 height:30 left:55 width:200"));
-        this.splitPaneRight.add(this.collapseLevel, new Constraint("top:48 height:30 left:220 width:30"));
-        this.splitPaneRight.add(this.collapseAll, new Constraint("top:52 height:30 right:1 width:100"));
+        this.splitPaneRight.add(this.collapseLabel, new Constraint("top:50 height:30 right:20 width:200"));
+        this.splitPaneRight.add(this.collapseLevel, new Constraint("top:48 height:30 right:25 width:30"));
+        this.splitPaneRight.add(this.collapseAll, new Constraint("top:52 height:30 right:250 width:100"));
         this.splitPaneRight.add(this.tagsScrollPane, new Constraint("top:85 bottom:0 left:5 right:0"));
 
         this.add(this.notification, new Constraint("top:10 height:30 left:305 right:245"));

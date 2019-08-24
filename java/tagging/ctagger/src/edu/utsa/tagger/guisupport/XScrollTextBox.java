@@ -1,5 +1,7 @@
 package edu.utsa.tagger.guisupport;
 
+import edu.utsa.tagger.gui.FontsAndColors;
+
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.text.Document;
@@ -14,6 +16,8 @@ public class XScrollTextBox extends JScrollPane {
 		this.jTextArea = jTextArea;
 		setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
 		setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		setBackground(FontsAndColors.BLUE_MEDIUM);
+		setBorder(null);
 	}
 
 	public JTextArea getJTextArea() {
