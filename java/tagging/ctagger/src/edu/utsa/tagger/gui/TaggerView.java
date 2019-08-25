@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -169,6 +170,19 @@ public class TaggerView extends ConstraintContainer {
         @Override
         public Font getFont() {
             return FontsAndColors.headerFont;
+        }
+    };
+
+    private XButton help = new XButton("Help") {
+        @Override
+        public Font getFont() {
+            return FontsAndColors.buttonFont;
+        }
+    };
+    private XButton strategyGuide = new XButton("Tagging Guide") {
+        @Override
+        public Font getFont() {
+            return FontsAndColors.buttonFont;
         }
     };
 //    private XButton zoomIn = createMenuButton("+");
@@ -444,6 +458,17 @@ public class TaggerView extends ConstraintContainer {
 
             public void focusLost(FocusEvent e) {
                 TaggerView.this.searchResultsScrollPane.setVisible(false);
+            }
+        });
+
+        this.help.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                new MiniBrowser("CTAGGER/HEDTools Manual", "https://github.com/hed-standard/hed-documentation");
+            }
+        });
+        this.strategyGuide.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                new MiniBrowser("Tagging Strategy Guide", "https://github.com/hed-standard/hed-documentation");
             }
         });
     }
@@ -1410,6 +1435,8 @@ public class TaggerView extends ConstraintContainer {
         } else {
             this.add(this.cancel, new Constraint("bottom:10 height:30 right:100 width:80"));
             this.add(this.ok, new Constraint("bottom:10 height:30 right:10 width:80"));
+            this.add(this.help, new Constraint("bottom:10 height:30 left:10 width:80"));
+            this.add(this.strategyGuide, new Constraint("bottom:10 height:30 left:100 width:120"));
             this.cancel.setEnabled(!this.loader.checkFlags(64));
         }
 
@@ -2133,6 +2160,32 @@ public class TaggerView extends ConstraintContainer {
         }
     }
 
+    private class DisplayWebDoc extends JFrame {
+        public DisplayWebDoc(String title, String link) {
+            super(title);
+
+            JEditorPane webpane = new JEditorPane();
+            webpane.setEditable(false);
+
+            try {
+                webpane.setPage(link);
+            }
+            catch (IOException e) {
+                webpane.setContentType("text/html");
+                webpane.setText("<html>Could not load " + title + "</html>");
+            }
+
+            JScrollPane scrollPane = new JScrollPane(webpane);
+
+            this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            this.getContentPane().add(scrollPane);
+            this.setPreferredSize(new Dimension(800,600));
+            this.pack();
+            this.setVisible(true);
+        }
+
+
+    }
     public class addGroupMenuListener implements ActionListener {
         public addGroupMenuListener() {
         }
