@@ -13,6 +13,7 @@ import java.awt.*;
 public class MiniBrowser extends JFrame {
     private final JFXPanel jfxPanel = new JFXPanel();
     private WebEngine engine;
+    WebView view;
 
     private String url;
 
@@ -23,25 +24,42 @@ public class MiniBrowser extends JFrame {
     }
 
     private void init() {
-        createScene();
+        try {
+            createScene();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
         JPanel panel = new JPanel();
         panel.add(jfxPanel);
         setPreferredSize(new Dimension(900, 810));
         getContentPane().add(panel);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
         pack();
         setVisible(true);
     }
 
     private void createScene() {
+        System.out.println("create");
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                WebView view = new WebView();
+                view = new WebView();
                 engine = view.getEngine();
                 engine.load(url);
                 jfxPanel.setScene(new Scene(view));
                 jfxPanel.setPreferredSize(new Dimension(900, 780));
+            }
+        });
+    }
+
+    public void load(String url) {
+        System.out.println("load");
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                engine.load(url);
+                jfxPanel.repaint();
             }
         });
     }

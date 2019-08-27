@@ -106,6 +106,7 @@ public class TaggerView extends ConstraintContainer {
             return FontsAndColors.secondHeaderFont;
         }
     };
+
     /**
      * Creates a expand button.
      */
@@ -185,6 +186,7 @@ public class TaggerView extends ConstraintContainer {
             return FontsAndColors.buttonFont;
         }
     };
+    private MiniBrowser browser;
 //    private XButton zoomIn = createMenuButton("+");
 //    private XButton zoomOut = createMenuButton("-");
 //    private JLabel zoomPercent = new JLabel("100%", JLabel.CENTER) {
@@ -463,12 +465,30 @@ public class TaggerView extends ConstraintContainer {
 
         this.help.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-                new MiniBrowser("CTAGGER/HEDTools Manual", "https://github.com/hed-standard/hed-documentation");
+                if (TaggerView.this.browser == null)
+                    browser = new MiniBrowser("CTAGGER/HEDTools Manual", "https://github.com/hed-standard/hed-documentation");
+                else {
+                    browser.setTitle("CTAGGER/HEDTools Manual");
+                    browser.load("https://github.com/hed-standard/hed-documentation");
+                    if (!browser.isVisible()) {
+                        browser.setVisible(true);
+                    }
+
+                }
+
             }
         });
         this.strategyGuide.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-                new MiniBrowser("Tagging Strategy Guide", "https://github.com/hed-standard/hed-documentation");
+                if (TaggerView.this.browser == null)
+                    browser = new MiniBrowser("Tagging Strategy Guide", "https://github.com/hed-standard/hed-documentation");
+                else {
+                    browser.setTitle("Tagging Strategy Guide");
+                    browser.load("https://github.com/hed-standard/hed-matlab/tree/master/EEGLABPlugin");
+                    if (!browser.isVisible()) {
+                        browser.setVisible(true);
+                    }
+                }
             }
         });
     }
