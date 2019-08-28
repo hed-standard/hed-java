@@ -1457,7 +1457,7 @@ public class TaggerView extends ConstraintContainer {
             this.add(this.ok, new Constraint("bottom:10 height:30 right:10 width:80"));
             this.add(this.help, new Constraint("bottom:10 height:30 left:10 width:80"));
             this.add(this.strategyGuide, new Constraint("bottom:10 height:30 left:100 width:120"));
-            this.cancel.setEnabled(!this.loader.checkFlags(64));
+//            this.cancel.setEnabled(!this.loader.checkFlags(64));
         }
 
         if (this.tagger.getExtensionsAllowed()) {
