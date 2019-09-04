@@ -13,8 +13,6 @@ import java.awt.event.MouseMotionListener;
 import javax.swing.JComponent;
 import javax.swing.JLayeredPane;
 
-import edu.utsa.tagger.gui.FontsAndColors;
-
 public class VerticalSplitLayout implements LayoutManager {
 	
 	@SuppressWarnings("serial")

@@ -20,10 +20,7 @@ import javax.swing.JPanel;
 
 import edu.utsa.tagger.EventModel;
 import edu.utsa.tagger.TaggedEvent;
-import edu.utsa.tagger.guisupport.Constraint;
-import edu.utsa.tagger.guisupport.ConstraintLayout;
-import edu.utsa.tagger.guisupport.ScrollLayout;
-import edu.utsa.tagger.guisupport.XButton;
+import edu.utsa.tagger.guisupport.*;
 
 /**
  * Dialog used to show a message to the user that references specific tags of

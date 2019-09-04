@@ -1,6 +1,5 @@
 package edu.utsa.tagger.gui;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
@@ -15,12 +14,7 @@ import javax.swing.JPanel;
 import edu.utsa.tagger.AbstractTagModel;
 import edu.utsa.tagger.Tagger;
 import edu.utsa.tagger.TaggerSet;
-import edu.utsa.tagger.guisupport.Constraint;
-import edu.utsa.tagger.guisupport.ConstraintLayout;
-import edu.utsa.tagger.guisupport.ITagDisplay;
-import edu.utsa.tagger.guisupport.ListLayout;
-import edu.utsa.tagger.guisupport.ScrollLayout;
-import edu.utsa.tagger.guisupport.XButton;
+import edu.utsa.tagger.guisupport.*;
 
 /**
  * Dialog used to choose a tag from a subset of the tag hierarchy.

@@ -91,9 +91,6 @@ public class DropShadowBorder implements Border {
         this.showRightShadow = showRightShadow;
     }
     
-    /**
-     * @inheritDoc
-     */
     public Insets getBorderInsets(Component c) {
         int top = showTopShadow ? lineWidth + shadowSize : lineWidth;
         int left = showLeftShadow ? lineWidth + shadowSize : lineWidth;
@@ -233,9 +230,6 @@ public class DropShadowBorder implements Border {
         return ret;
     }
     
-    /**
-     * @inheritDoc
-     */
     public boolean isBorderOpaque() {
         return false;
     }
@@ -256,9 +250,6 @@ public class DropShadowBorder implements Border {
         return showTopShadow;
     }
     
-    /**
-     * @inheritDoc
-     */
     public void paintBorder(Component c, Graphics graphics, int x, int y, int width, int height) {
         /*
          * 1) Get images for this border

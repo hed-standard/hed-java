@@ -30,13 +30,7 @@ import javax.swing.event.DocumentListener;
 
 import edu.utsa.tagger.AbstractTagModel;
 import edu.utsa.tagger.Tagger;
-import edu.utsa.tagger.guisupport.Constraint;
-import edu.utsa.tagger.guisupport.ConstraintContainer;
-import edu.utsa.tagger.guisupport.ConstraintLayout;
-import edu.utsa.tagger.guisupport.ITagDisplay;
-import edu.utsa.tagger.guisupport.XButton;
-import edu.utsa.tagger.guisupport.XScrollTextBox;
-import edu.utsa.tagger.guisupport.XTextBox;
+import edu.utsa.tagger.guisupport.*;
 
 /**
  * View allowing the user to add a value to a tag that takes values.
@@ -276,7 +270,7 @@ public class AddValueView extends ConstraintContainer {
 		top += 30;
 		// Add warning when /HED is in add value to warn user save new HED schema to disk
 		if (tagModel.getParentPath().equals("HED")) {
-			JLabel warningLabel = new JLabel("Warning: 'File > Save HED schema' to save to disk", JLabel.LEFT) {
+			JLabel warningLabel = new JLabel("Warning: Use 'File > Save HED schema' to save to disk", JLabel.LEFT) {
 				@Override
 				public Font getFont() {
 					return FontsAndColors.contentFont;

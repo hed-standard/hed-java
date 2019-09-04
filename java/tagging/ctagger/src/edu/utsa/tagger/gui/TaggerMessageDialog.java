@@ -1,6 +1,5 @@
 package edu.utsa.tagger.gui;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -14,6 +13,7 @@ import javax.swing.JPanel;
 
 import edu.utsa.tagger.guisupport.Constraint;
 import edu.utsa.tagger.guisupport.ConstraintLayout;
+import edu.utsa.tagger.guisupport.FontsAndColors;
 import edu.utsa.tagger.guisupport.XButton;
 
 /**

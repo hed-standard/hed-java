@@ -28,6 +28,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.basic.BasicArrowButton;
 
 import edu.utsa.tagger.FieldOrderLoader;
+import edu.utsa.tagger.guisupport.MessageConstants;
 
 /**
  * This class creates a GUI that allows the user to select which fields to
@@ -56,10 +57,7 @@ public class FieldOrderView extends JPanel {
 	 *            A FieldSelectLoader loader object.
 	 * @param frameTitle
 	 *            The title of the frame.
-	 * @param excluded
-	 *            An array of strings containing the excluded fields.
-	 * @param tagged
-	 *            An array of strings containing the tagged fields.
+	 * @param fields
 	 */
 	public FieldOrderView(FieldOrderLoader loader, String frameTitle, String[] fields) {
 		this.loader = loader;
@@ -87,8 +85,6 @@ public class FieldOrderView extends JPanel {
 	 * 
 	 * @param excluded
 	 *            An array of strings containing the excluded fields.
-	 * @param tagged
-	 *            An array of strings containing the tagged fields.
 	 */
 	private void layoutComponents(String[] excluded) {
 		setListeners();
@@ -160,11 +156,6 @@ public class FieldOrderView extends JPanel {
 	 * 
 	 * @param listBox
 	 *            The list box that is added to the panel.
-	 * @param listBoxLabel
-	 *            The label of the list box.
-	 * @param jButton
-	 *            The button to transfer all of the elements in the list box to
-	 *            the other list box.
 	 * @return
 	 */
 	private JPanel createPanelForListBoxWithLabel(JList<String> listBox) {
@@ -266,7 +257,7 @@ public class FieldOrderView extends JPanel {
 	 * 
 	 * @param jList
 	 *            The JList whose elements are shifted up one position.
-	 * @param indices
+	 * @param indexes
 	 *            The indices whose elements are shifted up one position.
 	 */
 	private void shiftUpElements(JList<String> jList, List<Integer> indexes) {

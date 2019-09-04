@@ -26,6 +26,8 @@ import edu.utsa.tagger.TaggerSet;
 import edu.utsa.tagger.gui.ContextMenu.ContextMenuAction;
 import edu.utsa.tagger.guisupport.ClickDragThreshold;
 import edu.utsa.tagger.guisupport.ConstraintLayout;
+import edu.utsa.tagger.guisupport.FontsAndColors;
+import edu.utsa.tagger.guisupport.MessageConstants;
 
 /**
  * View used to display a tag in the events panel.

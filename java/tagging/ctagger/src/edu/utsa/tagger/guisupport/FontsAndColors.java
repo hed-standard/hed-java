@@ -1,4 +1,4 @@
-package edu.utsa.tagger.gui;
+package edu.utsa.tagger.guisupport;
 
 import java.awt.Color;
 import java.awt.Font;

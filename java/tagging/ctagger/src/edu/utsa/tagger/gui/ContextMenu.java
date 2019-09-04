@@ -16,6 +16,7 @@ import javax.swing.JPanel;
 import edu.utsa.tagger.guisupport.ClickDragThreshold;
 import edu.utsa.tagger.guisupport.Constraint;
 import edu.utsa.tagger.guisupport.ConstraintLayout;
+import edu.utsa.tagger.guisupport.FontsAndColors;
 
 /**
  * This class represents the view for a Context Menu.

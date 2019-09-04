@@ -1,6 +1,4 @@
-package edu.utsa.tagger.gui;
-
-import edu.utsa.tagger.guisupport.XButton;
+package edu.utsa.tagger.guisupport;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;

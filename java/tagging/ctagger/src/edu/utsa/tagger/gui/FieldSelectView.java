@@ -35,6 +35,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.plaf.basic.BasicArrowButton;
 
 import edu.utsa.tagger.FieldSelectLoader;
+import edu.utsa.tagger.guisupport.FontsAndColors;
 
 /**
  * This class creates a GUI that allows the user to select which fields to

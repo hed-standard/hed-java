@@ -7,6 +7,7 @@ import edu.utsa.tagger.TaggedEvent;
 import edu.utsa.tagger.Tagger;
 import edu.utsa.tagger.ToggleTagMessage;
 import edu.utsa.tagger.guisupport.ITagDisplay;
+import edu.utsa.tagger.guisupport.MessageConstants;
 
 /**
  * This class represents a tag, including information used by the GUI.

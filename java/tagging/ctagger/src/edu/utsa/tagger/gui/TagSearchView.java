@@ -16,6 +16,7 @@ import javax.swing.SwingUtilities;
 
 import edu.utsa.tagger.Tagger;
 import edu.utsa.tagger.guisupport.ClickDragThreshold;
+import edu.utsa.tagger.guisupport.FontsAndColors;
 
 /**
  * View used to display a tag as a search result.

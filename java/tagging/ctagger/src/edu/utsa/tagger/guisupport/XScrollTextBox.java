@@ -1,7 +1,5 @@
 package edu.utsa.tagger.guisupport;
 
-import edu.utsa.tagger.gui.FontsAndColors;
-
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.text.Document;

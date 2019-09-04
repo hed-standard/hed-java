@@ -244,8 +244,6 @@ public class Events {
 	 * Updates the counts for any new tags found when comparing the original
 	 * events string with the updated events string.
 	 * 
-	 * @param dbCon
-	 *            a connection the database
 	 * @param originalEventString
 	 *            the original event string in Json or non-Json format
 	 * @param newEventString

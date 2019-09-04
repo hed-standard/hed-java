@@ -1,4 +1,4 @@
-package edu.utsa.tagger.gui;
+package edu.utsa.tagger.guisupport;
 
 /**
  * This class contains various messages displayed throughout the Tagger GUI.

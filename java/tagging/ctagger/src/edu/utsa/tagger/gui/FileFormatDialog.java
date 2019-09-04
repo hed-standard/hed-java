@@ -14,6 +14,7 @@ import javax.swing.JPanel;
 
 import edu.utsa.tagger.guisupport.Constraint;
 import edu.utsa.tagger.guisupport.ConstraintLayout;
+import edu.utsa.tagger.guisupport.FontsAndColors;
 import edu.utsa.tagger.guisupport.XButton;
 
 /**

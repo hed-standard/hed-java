@@ -15,6 +15,7 @@ import javax.swing.event.DocumentListener;
 
 import edu.utsa.tagger.TaggedEvent;
 import edu.utsa.tagger.Tagger;
+import edu.utsa.tagger.guisupport.FontsAndColors;
 import edu.utsa.tagger.guisupport.ListLayout;
 
 /**
