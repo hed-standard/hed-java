@@ -62,7 +62,7 @@ public class TaggerView extends ConstraintContainer {
     /**
      * Creates a collapse button.
      */
-    private XButton collapseAll = new XButton("Collapse") {
+    private XButton collapseAll = new XButton("Level 1") {
         @Override
         public Font getFont() {
             return FontsAndColors.buttonFont;
@@ -100,7 +100,7 @@ public class TaggerView extends ConstraintContainer {
 //        }
 //    };
     private JLayeredPane eventsScrollPane = new JLayeredPane();
-    private JLabel eventsTitle = new JLabel("Events") {
+    private JLabel eventsTitle = new JLabel("<html>Data<br>Events</html>") {
         @Override
         public Font getFont() {
             return FontsAndColors.secondHeaderFont;
@@ -158,8 +158,11 @@ public class TaggerView extends ConstraintContainer {
     private ScrollLayout eventsScrollLayout;
     private JLayeredPane splitContainer = new JLayeredPane();
     private JLayeredPane tagsScrollPane = new JLayeredPane();
-    private JLabel hedTitle = new JLabel("HED version :");
-    private JLabel tagsTitle = new JLabel("Tags") {
+    private JLabel hedTitle = new JLabel("HED schema:") {
+        @Override
+        public Font getFont() { return FontsAndColors.contentFont;}
+    };
+    private JLabel tagsTitle = new JLabel("<html>Schema<br>Tags</html>") {
         @Override
         public Font getFont() {
             return FontsAndColors.secondHeaderFont;
@@ -220,7 +223,7 @@ public class TaggerView extends ConstraintContainer {
     }
 
     public void updateHEDVersion() {
-        this.hedTitle.setText("HED version : " + this.tagger.getHEDVersion());
+        this.hedTitle.setText("HED schema : " + this.tagger.getHEDVersion());
     }
 
     public void createLayout(String title) {
@@ -512,19 +515,19 @@ public class TaggerView extends ConstraintContainer {
         this.splitPaneLeft.add(this.eventEnterTagView.getjTextAreaPanel(), new Constraint("top:12 height:26 left:130 right:100"));
         this.splitPaneLeft.add(this.eventEnterTagView.getSearchResultsScrollPane(), new Constraint("top:40 bottom:300 left:130 right:0"));
         this.splitPaneLeft.setLayer(this.eventEnterTagView.getSearchResultsScrollPane(), 1);
-        this.splitPaneLeft.add(this.selectAllorNone, new Constraint("top:50 height:30 left:1 width:20"));
-        this.splitPaneLeft.add(this.addGroup, new Constraint("top:50 height:30 left:27 width:140"));
-        this.splitPaneLeft.add(this.eventsScrollPane, new Constraint("top:85 bottom:0 left:0 right:5"));
+        this.splitPaneLeft.add(this.selectAllorNone, new Constraint("top:55 height:30 left:1 width:20"));
+        this.splitPaneLeft.add(this.addGroup, new Constraint("top:55 height:30 left:27 width:140"));
+        this.splitPaneLeft.add(this.eventsScrollPane, new Constraint("top:90 bottom:0 left:0 right:5"));
 
-        this.splitPaneRight.add(this.tagsTitle, new Constraint("top:0 height:50 left:5 width:100"));
-        this.splitPaneRight.add(this.searchTags, new Constraint("top:12 height:26 left:90 right:100"));
-        this.splitPaneRight.add(this.searchResultsScrollPane, new Constraint("top:40 bottom:300 left:90 right:0"));
+        this.splitPaneRight.add(this.tagsTitle, new Constraint("top:0 height:57 left:5 width:100"));
+        this.splitPaneRight.add(this.searchTags, new Constraint("top:12 height:26 left:110 right:100"));
+        this.splitPaneRight.add(this.searchResultsScrollPane, new Constraint("top:40 bottom:300 left:110 right:0"));
         this.splitPaneRight.setLayer(this.searchResultsScrollPane, 1);
 //        this.splitPaneRight.add(this.expandAll, new Constraint("top:52 height:30 left:215 width:100"));
-        this.splitPaneRight.add(this.collapseLabel, new Constraint("top:50 height:30 right:20 width:200"));
-        this.splitPaneRight.add(this.collapseLevel, new Constraint("top:48 height:30 right:25 width:30"));
-        this.splitPaneRight.add(this.collapseAll, new Constraint("top:52 height:30 right:250 width:100"));
-        this.splitPaneRight.add(this.tagsScrollPane, new Constraint("top:85 bottom:0 left:5 right:0"));
+        this.splitPaneRight.add(this.collapseLabel, new Constraint("top:55 height:30 right:20 width:200"));
+        this.splitPaneRight.add(this.collapseLevel, new Constraint("top:53 height:30 right:25 width:30"));
+        this.splitPaneRight.add(this.collapseAll, new Constraint("top:57 height:30 right:250 width:100"));
+        this.splitPaneRight.add(this.tagsScrollPane, new Constraint("top:90 bottom:0 left:5 right:0"));
 
         this.add(this.notification, new Constraint("top:10 height:30 left:305 right:245"));
         this.setLayer(this.notification, 1);
@@ -537,13 +540,13 @@ public class TaggerView extends ConstraintContainer {
         this.add(this.shield);
         this.setLayer(this.shield, 2);
         this.shield.setVisible(false);
-        this.add(this.hedTitle, new Constraint("top:0 height:50 left:450 width:150"));
+        this.add(this.hedTitle, new Constraint("top:30 height:26 right:10 width:150"));
         this.add(this.undo, new Constraint("top:0 height:30 right:10 width:80"));
         this.add(this.redo, new Constraint("top:0 height:30 right:90 width:80"));
 //        this.add(this.zoomOut, new Constraint("top:0 height:50 right:80 width:30"));
 //        this.add(this.zoomPercent, new Constraint("top:0 height:50 right:30 width:50"));
 //        this.add(this.zoomIn, new Constraint("top:0 height:50 right:0 width:30"));
-        this.add(this.splitContainer, new Constraint("top:60 bottom:50 left:10 right:10"));
+        this.add(this.splitContainer, new Constraint("top:55 bottom:50 left:10 right:10"));
         int splitterPos = this.frame.getWidth() / 2;
         VerticalSplitLayout splitLayout = new VerticalSplitLayout(this.splitContainer, this.splitPaneLeft, this.splitPaneRight, splitterPos);
         this.splitContainer.setLayout(splitLayout);
@@ -1462,7 +1465,8 @@ public class TaggerView extends ConstraintContainer {
         }
 
         if (this.tagger.getExtensionsAllowed()) {
-            this.splitPaneRight.add(this.addTag, new Constraint("top:12 height:26 right:1 width:80"));
+//            this.add(this.redo, new Constraint("top:0 height:30 right:90 width:80"));
+            this.add(this.addTag, new Constraint("top:0 height:30 right:170 width:80"));
         }
 
     }

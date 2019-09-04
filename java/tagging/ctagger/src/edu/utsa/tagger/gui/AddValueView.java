@@ -263,13 +263,29 @@ public class AddValueView extends ConstraintContainer {
 		setLabelBackgroundColors();
 		setLabelForegroundColors();
 		addLabelListeners();
+		valueLabel.setForeground(FontsAndColors.EDITTAG_FG);
 		valueField.getJTextArea().getDocument()
 				.addDocumentListener(new ValueFieldListener());
+		if (tagModel.getParentPath().equals("HED"))
+			valueLabel.setText("Name of new HED schema");
 		add(valueLabel, new Constraint("top:" + top
-				+ " height:20 left:15 width:50"));
+				+ " height:20 left:15 width:200"));
 		top += 25;
 		add(valueField, new Constraint("top:" + top
 				+ " height:26 left:15 width:200"));
+		top += 30;
+		// Add warning when /HED is in add value to warn user save new HED schema to disk
+		if (tagModel.getParentPath().equals("HED")) {
+			JLabel warningLabel = new JLabel("Warning: 'File > Save HED schema' to save to disk", JLabel.LEFT) {
+				@Override
+				public Font getFont() {
+					return FontsAndColors.contentFont;
+				}
+			};
+			warningLabel.setBackground(FontsAndColors.TRANSPARENT);
+			warningLabel.setForeground(FontsAndColors.RED_MEDIUM);
+			add(warningLabel, new Constraint("top:" + top + " height:27 left:15 width:500"));
+		}
 	}
 
 	private void addButtons() {

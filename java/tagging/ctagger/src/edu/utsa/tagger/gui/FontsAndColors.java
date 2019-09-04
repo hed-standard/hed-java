@@ -127,7 +127,8 @@ public abstract class FontsAndColors {
 	public static final Color SEARCHTAG_BG_SELECTED = Color.WHITE;
 	public static final Color SEARCHTAG_FG_SELECTED = SOFT_BLUE;
 
-	public static final Color EDITTAG_BG = LIGHT_YELLOW;
+	public static final Color EDITTAG_BG = BLUE_VERY_LIGHT;
+	public static final Color EDITTAG_FG = BLUE_DARK;
 	public static final Color EDITTAG_BORDER = new Color(215, 215, 50);
 
 	public static final Color EVENT_BG_NORMAL = BLUE_VERY_LIGHT;
