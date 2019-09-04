@@ -166,14 +166,13 @@ public class TaggerView extends ConstraintContainer {
         }
     };
     private XButton undo = new HistoryButton("Undo", true);
-    boolean hasMissingTag = false;
-    private JLabel incompatibleTagWarning = new JLabel("Red tag(s) violate HED schema!") {
+    int hasMissingTag = 0;
+    private JLabel incompatibleTagWarning = new JLabel("Red tags violate HED schema!") {
         @Override
         public Font getFont() {
             return FontsAndColors.headerFont;
         }
     };
-
     private XButton help = new XButton("Help") {
         @Override
         public Font getFont() {
@@ -592,7 +591,7 @@ public class TaggerView extends ConstraintContainer {
     }
 
     public void updateEventsPanel() {
-        hasMissingTag = false; // reset
+        hasMissingTag = 0; // reset
         pruneSelectedGroups();
         eventsPanel.removeAll();
         int top = 0;
@@ -603,7 +602,9 @@ public class TaggerView extends ConstraintContainer {
             top = addOtherTags(taggedEvent, top);
         }
         // add warning to tagger view if there exists tag(s) that are not compatible with schema
-        if (hasMissingTag) {
+        if (hasMissingTag > 0) {
+            if (hasMissingTag == 1)
+                incompatibleTagWarning.setText("Red tag violate HED schema!");
             if (incompatibleTagWarning.getParent() != this) {
                 this.add(incompatibleTagWarning, new Constraint("top:0 height:50 left:10 width:300"));
             }
@@ -1487,7 +1488,6 @@ public class TaggerView extends ConstraintContainer {
                 } while ((Integer) tagGroup.getKey() == taggedEvent.getEventLevelId() && this.tagger.isRRValue(tag) && this.tagger.isPrimary());
 
                 GuiTagModel guiTagModel = (GuiTagModel) tag;
-                if (guiTagModel.isMissing()) hasMissingTag = true;
                 guiTagModel.setAppView(this);
                 guiTagModel.updateMissing();
                 TagEventView tagEgtView = guiTagModel.getTagEventView((Integer) tagGroup.getKey());
@@ -1498,8 +1498,13 @@ public class TaggerView extends ConstraintContainer {
                     groupView.addTagEgtView(tag, tagEgtView);
                 }
 
-                this.eventsPanel.add(tagEgtView, new Constraint("top:" + top + " height:26 left:30 right:40"));
-                this.eventsPanel.add(tagEgtView.getDelete(), new Constraint("top:" + top + " height:26 width:30 right:0"));
+                this.eventsPanel.add(tagEgtView, new Constraint("top:" + top + " height:26 left:30 right:40")); // show on GUI
+                if (guiTagModel.isMissing()) {
+                    hasMissingTag++;
+                    this.eventsPanel.add(tagEgtView.getMaskForMissingTag(), new Constraint("top:" + top + " height:26 left:30 right:40")); // add mask of correct part of the missing tag
+                    this.eventsPanel.setLayer(tagEgtView.getMaskForMissingTag(),1);
+                }
+                this.eventsPanel.add(tagEgtView.getDelete(), new Constraint("top:" + top + " height:26 width:30 right:0")); //add delete 'X' button associated with this tag
                 this.eventsPanel.setLayer(tagEgtView.getDelete(), 1);
                 top += 27;
                 if (guiTagModel.isInEdit()) {

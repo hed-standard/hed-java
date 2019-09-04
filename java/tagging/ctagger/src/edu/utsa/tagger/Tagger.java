@@ -1073,6 +1073,22 @@ public class Tagger {
         return tag;
     }
 
+    /**
+     * Get ancestor of given tagPath
+     * @param tagPath
+     * @return
+     */
+    public AbstractTagModel getTagAncestor(String tagPath) {
+        if (tagPath == null || tagPath.isEmpty()) return null;
+
+        AbstractTagModel ancestor = null;
+        for (AbstractTagModel tag : tags) {
+            if (tagPath.toUpperCase().startsWith(tag.getPath().toUpperCase()))
+                ancestor = tag;
+        }
+        return ancestor;
+    }
+
     public IFactory getFactory() {
         return this.factory;
     }

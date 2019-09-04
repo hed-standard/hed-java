@@ -19,6 +19,7 @@ import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
+import edu.utsa.tagger.AbstractTagModel;
 import edu.utsa.tagger.TaggedEvent;
 import edu.utsa.tagger.Tagger;
 import edu.utsa.tagger.TaggerSet;
@@ -45,7 +46,7 @@ public class TagEventView extends JComponent implements MouseListener {
 	private boolean pressed = false;
 	private boolean highlight = false;
 	private DeleteTagComponent deleteTag;
-
+	private MaskForMissingTag maskForMissingTag;
 
 	public TagEventView(Tagger tagger, TaggerView appView, Integer groupId, GuiTagModel model, boolean nameOnly) {
 		this.tagger = tagger;
@@ -58,6 +59,8 @@ public class TagEventView extends JComponent implements MouseListener {
 			text = model.getPath();
 		}
 		deleteTag = new DeleteTagComponent();
+		if (model.isMissing())
+			maskForMissingTag = new MaskForMissingTag();
 		setLayout(null);
 		addMouseListener(this);
 		new ClickDragThreshold(this);
@@ -244,6 +247,10 @@ public class TagEventView extends JComponent implements MouseListener {
 		return deleteTag;
 	}
 
+	public MaskForMissingTag getMaskForMissingTag() {
+		return maskForMissingTag;
+	}
+
 	private class DeleteTagComponent extends JComponent implements MouseListener{
 		boolean pressed;
 		boolean hover;
@@ -252,6 +259,7 @@ public class TagEventView extends JComponent implements MouseListener {
 		public DeleteTagComponent() {
 			setLayout(null);
 			addMouseListener(this);
+			setToolTipText("Click 'X' to remove tag");
 		}
 
 		@Override
@@ -334,5 +342,59 @@ public class TagEventView extends JComponent implements MouseListener {
 				g2d.drawString("x", (int) x, (int) y);
 			}
 		}
+
+	}
+	private class MaskForMissingTag extends JComponent {
+		private String path;
+		public MaskForMissingTag() {
+			AbstractTagModel ancestorTag = tagger.getTagAncestor(model.getPath());
+			if (ancestorTag == null)
+				path = "";
+			else
+				path = ancestorTag.getPath();
+		}
+		public String getPath() {
+			return path;
+		}
+		@Override
+		protected void paintComponent(Graphics g) {
+
+			Graphics2D g2d = (Graphics2D) g;
+			g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
+
+			Color bg;
+			Color fg;
+			Font font1 = FontsAndColors.contentFont;
+
+			bg = FontsAndColors.EVENTTAG_BG_NORMAL;
+//				if (pressed && hover) {
+//					fg = model.isMissing() ? FontsAndColors.EVENTTAG_FG_MISSING_PRESSED : FontsAndColors.EVENTTAG_FG_PRESSED;
+//				} else if (!pressed && hover) {
+//					fg = model.isMissing() ? FontsAndColors.EVENTTAG_FG_MISSING_HOVER : FontsAndColors.EVENTTAG_FG_HOVER;
+//				} else {
+			fg = FontsAndColors.EVENTTAG_FG_NORMAL;
+//				}
+
+//				if (highlight) {
+//					fg = FontsAndColors.EVENTTAG_FG_HOVER;
+//					bg = FontsAndColors.EVENT_BG_PRESSED;
+//				}
+
+			if (bg != null) {
+				g2d.setColor(bg);
+				g2d.fill(SwingUtilities.calculateInnerArea(this, null));
+			}
+
+			if (fg != null) {
+				double x = 10 * ConstraintLayout.scale;
+				double y = g2d.getFontMetrics().getHeight();
+
+				g2d.setColor(fg);
+				g2d.setFont(font1);
+				g2d.drawString(path + " ", (int) x, (int) y);
+			}
+
+		}
+
 	}
 }
