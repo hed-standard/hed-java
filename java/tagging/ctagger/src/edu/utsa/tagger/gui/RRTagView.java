@@ -54,7 +54,7 @@ public class RRTagView extends JComponent {
 	private TaggerSet<AbstractTagModel> values;
     private HashMap<AbstractTagModel, TagEventView> tagEventViews;
 	private boolean inAddValue = false;
-	private XButton save = new XButton("save") {
+	private TagEditOptionButton save = new TagEditOptionButton("save") {
 		@Override
 		public Font getFont() {
 			Map<TextAttribute, Integer> fontAttributes = new HashMap<TextAttribute, Integer>();
@@ -63,7 +63,7 @@ public class RRTagView extends JComponent {
 		}
 	};
 
-	private XButton cancel = new XButton("cancel") {
+	private TagEditOptionButton cancel = new TagEditOptionButton("cancel") {
 		@Override
 		public Font getFont() {
 			Map<TextAttribute, Integer> fontAttributes = new HashMap<TextAttribute, Integer>();

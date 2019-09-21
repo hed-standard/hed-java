@@ -113,6 +113,7 @@ public class EventEnterTagView extends JComponent {
      * search bar.
      */
     private void updateSearch() {
+        focusedResult = -1;
         searchResults.removeAll();
         searchResults.revalidate();
         Set<GuiTagModel> tagModels = tagger.getSearchTags(jTextArea.getText());
@@ -144,48 +145,44 @@ public class EventEnterTagView extends JComponent {
                     JScrollBar vertical = searchResultsScrollPane.getVerticalScrollBar();
                     switch (event.getKeyCode()) {
                         case KeyEvent.VK_DOWN:
-                            if (focusedResult > -1) {
-                                searchResult = ((TagEnterSearchView)searchResults.getComponent(focusedResult));  // old component
-                                searchResult.setHover(false);
+                            if (searchResults.getComponentCount() > 0) {
+                                if (focusedResult > -1) {
+                                    searchResult = ((TagEnterSearchView) searchResults.getComponent(focusedResult));  // old component
+                                    searchResult.setHover(false);
+                                }
+                                if (focusedResult == searchResults.getComponentCount() - 1)
+                                    focusedResult = searchResults.getComponentCount() - 1;
+                                else
+                                    focusedResult++;
+                                searchResult = ((TagEnterSearchView) searchResults.getComponent(focusedResult));  // new component
+                                searchResult.setHover(true);
+                                if (focusedResult > 0)
+                                    vertical.setValue(vertical.getValue() + vertical.getUnitIncrement());
+                                searchResults.repaint();
+                                break;
                             }
-                            if (focusedResult == searchResults.getComponentCount()-1)
-                                focusedResult = searchResults.getComponentCount()-1;
-                            else
-                                focusedResult++;
-                            searchResult = ((TagEnterSearchView)searchResults.getComponent(focusedResult));  // new component
-                            searchResult.setHover(true);
-                            if (focusedResult > 0)
-                                vertical.setValue(vertical.getValue()+vertical.getUnitIncrement());
-                            searchResults.repaint();
-                            break;
                         case KeyEvent.VK_UP:
-                            if (focusedResult > -1) {
-                                searchResult = ((TagEnterSearchView)searchResults.getComponent(focusedResult));  // old component
-                                searchResult.setHover(false);
-                            }
-                            if (focusedResult <= 0) // first key press or reach beginning
-                                focusedResult = 0;
-                            else{
-                                vertical.setValue(vertical.getValue() - vertical.getUnitIncrement());
-                                focusedResult--;
-                            }
-                            searchResult = ((TagEnterSearchView)searchResults.getComponent(focusedResult));  // new component
-                            searchResult.setHover(true);
+                            if (searchResults.getComponentCount() > 0) {
+                                if (focusedResult > -1) {
+                                    searchResult = ((TagEnterSearchView) searchResults.getComponent(focusedResult));  // old component
+                                    searchResult.setHover(false);
+                                }
+                                if (focusedResult <= 0) // first key press or reach beginning
+                                    focusedResult = 0;
+                                else {
+                                    vertical.setValue(vertical.getValue() - vertical.getUnitIncrement());
+                                    focusedResult--;
+                                }
+                                searchResult = ((TagEnterSearchView) searchResults.getComponent(focusedResult));  // new component
+                                searchResult.setHover(true);
 
-                            searchResults.repaint();
-                            break;
+                                searchResults.repaint();
+                                break;
+                            }
                         case KeyEvent.VK_ENTER:
                             if (focusedResult > -1 && focusedResult < searchResults.getComponentCount()) {
                                 searchResult = (TagEnterSearchView)searchResults.getComponent(focusedResult);
                                 searchResult.mouseClickedEvent(tagger,appView);
-//                                GuiTagModel model = searchResult.getModel();
-//                                if (model.takesValue()) {
-//                                    TagValueInputDialog dialog = new TagValueInputDialog(EventEnterTagView.this, searchResult);
-//                                    dialog.setVisible(true);
-//                                }
-//                                else {
-//                                    searchResult.addTagToEvent();
-//                                }
                             }
                             break;
                     }
@@ -221,6 +218,10 @@ public class EventEnterTagView extends JComponent {
 
     public JScrollPane getSearchResultsScrollPane() {
         return searchResultsScrollPane;
+    }
+
+    public void setSearchResultsScrollPane(JPanel searchResultsScrollPane1) {
+
     }
 
     public TaggerView getAppView() {

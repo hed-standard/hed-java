@@ -148,7 +148,7 @@ public class TagEditView extends ConstraintContainer {
 
 	};
 
-    final JLabel unitClassesLabel = new JLabel("unit class") {
+    final JLabel unitClassesLabel = new JLabel("- unit class: ") {
 		public Font getFont() {
 			return FontsAndColors.contentFont;
 		}
@@ -188,30 +188,30 @@ public class TagEditView extends ConstraintContainer {
 		add(descriptionScrollPane, new Constraint("top:" + top + " height:45 left:15 right:20"));
 		top += 50;
 		add(childRequired, new Constraint("top:" + top + " height:20 left:15 width:20"));
-		add(childRequiredLabel, new Constraint("top:" + top + " height:20 left:40 width:120"));
-		add(takesValue, new Constraint("top:" + top + " height:20 left:200 width:20"));
-		add(takesValueLabel, new Constraint("top:" + top + " height:20 left:230 width:120"));
-		add(positionLabel, new Constraint("top:" + top + " height:20 left:415 width:120"));
-		add(position, new Constraint("top:" + top + " height:26 left:475 width:40"));
+		add(childRequiredLabel, new Constraint("top:" + top + " height:20 left:35 width:120"));
+		add(takesValue, new Constraint("top:" + top + " height:20 left:150 width:20"));
+		add(takesValueLabel, new Constraint("top:" + top + " height:20 left:170 width:120"));
+		add(predicateTypeLabel, new Constraint("top:" + top + " height:20 left:340 width:120"));
+//		add(positionLabel, new Constraint("top:" + top + " height:20 left:415 width:120"));
+//		add(position, new Constraint("top:" + top + " height:26 left:475 width:40"));
 		top += 25;
 		add(required, new Constraint("top:" + top + " height:20 left:15 width:20"));
-		add(requiredLabel, new Constraint("top:" + top + " height:20 left:40 width:120"));
-		add(recommended, new Constraint("top:" + top + " height:20 left:200 width:20"));
-		add(recommendedLabel, new Constraint("top:" + top + " height:20 left:230 width:120"));
-		add(predicateTypeLabel, new Constraint("top:" + top + " height:20 left:415 width:120"));
-		add(unitClassesLabel, new Constraint("top:" + this.top + " height:20 left:630 width:120"));
+		add(requiredLabel, new Constraint("top:" + top + " height:20 left:35 width:120"));
+		add(recommended, new Constraint("top:" + top + " height:20 left:150 width:20"));
+		add(recommendedLabel, new Constraint("top:" + top + " height:20 left:170 width:120"));
+		populatePredicateTypeComboBox();
+		add(predicateTypes, new Constraint("top:" + top + " height:20 right:20 width:120"));
 		add(new JComponent() {
 		}, new Constraint("top:0 height:" + HEIGHT + " left:0 right:0"));
 
 		top += 25;
 		add(unique, new Constraint("top:" + top + " height:20 left:15 width:20"));
-		add(uniqueLabel, new Constraint("top:" + top + " height:20 left:40 width:120"));
-		add(isNumeric, new Constraint("top:" + top + " height:20 left:200 width:20"));
-		add(isNumericLabel, new Constraint("top:" + top + " height:20 left:230 width:120"));
-		populatePredicateTypeComboBox();
-		add(predicateTypes, new Constraint("top:" + top + " height:20 left:415 width:120"));
+		add(uniqueLabel, new Constraint("top:" + top + " height:20 left:35 width:120"));
+		add(isNumeric, new Constraint("top:" + top + " height:20 left:150 width:20"));
+		add(isNumericLabel, new Constraint("top:" + top + " height:20 left:170 width:120"));
+		add(unitClassesLabel, new Constraint("top:" + this.top + " height:20 left:245 width:100"));
 		this.populateUnitClassesComboBox();
-		this.add(this.unitClasses, new Constraint("top:" + this.top + " height:20 right:10 width:120"));
+		this.add(this.unitClasses, new Constraint("top:" + this.top + " height:20 right:20 width:120"));
 		add(cancelButton, new Constraint("top:10 height:20 right:20 width:45"));
 		add(saveButton, new Constraint("top:10 height:20 right:70 width:35"));
 
@@ -227,6 +227,17 @@ public class TagEditView extends ConstraintContainer {
 		descriptionField.getInputMap().put(KeyStroke.getKeyStroke("TAB"), "doNothing");
 		descriptionField.getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "doNothing");
 		childRequiredLabel.setBackground(FontsAndColors.EDITTAG_BG);
+
+		unitClasses.setVisible(false);
+		unitClassesLabel.setVisible(false);
+
+		childRequiredLabel.setToolTipText("One of its descendant must be selected to tag an event");
+		takesValueLabel.setToolTipText("User must provide a string input for this tag to use it");
+		isNumericLabel.setToolTipText("User must provide a numerical value for this tag to use it");
+		requiredLabel.setToolTipText("User must specify value for each instance of the event field being tagged");
+		recommendedLabel.setToolTipText("This tag is recommended for each instance of the event field being tagged but not required");
+		uniqueLabel.setToolTipText("Only one of this tag or its descendants can be used within a single tag group or event");
+		predicateTypeLabel.setToolTipText("(advanced option) used to facilitate mapping to OWL or RDF");
 
 		position.getJTextArea().getDocument().putProperty("filterNewlines", Boolean.TRUE);
 		position.getJTextArea().getInputMap().put(KeyStroke.getKeyStroke("TAB"), "doNothing");
@@ -302,6 +313,8 @@ public class TagEditView extends ConstraintContainer {
 //
 				if (SwingUtilities.isLeftMouseButton(e)) {
 					TagEditView.this.takesValue.setChecked(TagEditView.this.isNumeric.isChecked());
+					TagEditView.this.unitClasses.setVisible(TagEditView.this.isNumeric.isChecked());
+					TagEditView.this.unitClassesLabel.setVisible(TagEditView.this.isNumeric.isChecked());
 					TagEditView.this.unitClasses.setEnabled(TagEditView.this.isNumeric.isChecked());
 					if (TagEditView.this.isNumeric.isChecked()) {
 						TagEditView.this.name.getJTextArea().setText("#");
@@ -574,7 +587,7 @@ public class TagEditView extends ConstraintContainer {
 		double scale = ConstraintLayout.scale;
 
 		g2d.setColor(FontsAndColors.EDITTAG_BG);
-		int indent = tagModel.getDepth() + 3;
+		int indent = tagModel.getDepth() + 1;
 		g2d.fill(new Polygon(
 				new int[] { (int) (scale * 24 * indent), (int) (scale * 24 * indent + scale * 10),
 						(int) (scale * 24 * indent + scale * 20) },

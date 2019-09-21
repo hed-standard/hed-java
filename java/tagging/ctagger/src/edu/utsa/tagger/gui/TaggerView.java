@@ -49,12 +49,12 @@ public class TaggerView extends ConstraintContainer {
             return FontsAndColors.buttonFont;
         }
     };
-    private XButton addTag = new XButton("Add tag") {
-        @Override
-        public Font getFont() {
-            return FontsAndColors.buttonFont;
-        }
-    };
+//    private XButton addTag = new XButton("Add tag") {
+//        @Override
+//        public Font getFont() {
+//            return FontsAndColors.buttonFont;
+//        }
+//    };
     private boolean autoCollapse = true;
     private int autoCollapseDepth;
     //private XButton exit = createMenuButton("go exit");
@@ -277,12 +277,12 @@ public class TaggerView extends ConstraintContainer {
         this.addGroup.setHoverForeground(FontsAndColors.BLUE_DARK);
         this.addGroup.setPressedBackground(FontsAndColors.TRANSPARENT);
         this.addGroup.setPressedForeground(FontsAndColors.BLUE_VERY_LIGHT);
-        this.addTag.setNormalBackground(FontsAndColors.TRANSPARENT);
-        this.addTag.setNormalForeground(FontsAndColors.BLUE_VERY_LIGHT);
-        this.addTag.setHoverBackground(FontsAndColors.TRANSPARENT);
-        this.addTag.setHoverForeground(FontsAndColors.BLUE_DARK);
-        this.addTag.setPressedBackground(FontsAndColors.TRANSPARENT);
-        this.addTag.setPressedForeground(FontsAndColors.BLUE_VERY_LIGHT);
+//        this.addTag.setNormalBackground(FontsAndColors.TRANSPARENT);
+//        this.addTag.setNormalForeground(FontsAndColors.BLUE_VERY_LIGHT);
+//        this.addTag.setHoverBackground(FontsAndColors.TRANSPARENT);
+//        this.addTag.setHoverForeground(FontsAndColors.BLUE_DARK);
+//        this.addTag.setPressedBackground(FontsAndColors.TRANSPARENT);
+//        this.addTag.setPressedForeground(FontsAndColors.BLUE_VERY_LIGHT);
         this.collapseLabel.setBackground(FontsAndColors.TRANSPARENT);
         this.collapseLabel.setForeground(FontsAndColors.BLUE_DARK);
         this.collapseAll.setNormalBackground(FontsAndColors.TRANSPARENT);
@@ -419,11 +419,11 @@ public class TaggerView extends ConstraintContainer {
                 TaggerView.this.addEvent();
             }
         });
-        this.addTag.addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent e) {
-                TaggerView.this.addTag();
-            }
-        });
+//        this.addTag.addMouseListener(new MouseAdapter() {
+//            public void mouseClicked(MouseEvent e) {
+//                TaggerView.this.addTag();
+//            }
+//        });
         this.searchTags.getJTextArea().getDocument().addDocumentListener(new DocumentListener() {
             public void insertUpdate(DocumentEvent e) {
                 TaggerView.this.updateSearch();
@@ -486,7 +486,7 @@ public class TaggerView extends ConstraintContainer {
                     browser = new MiniBrowser("Tagging Strategy Guide", "https://github.com/hed-standard/hed-documentation");
                 else {
                     browser.setTitle("Tagging Strategy Guide");
-                    browser.load("https://github.com/hed-standard/hed-matlab/tree/master/EEGLABPlugin");
+                    browser.load("https://github.com/hed-standard/hed-documentation");
                     if (!browser.isVisible()) {
                         browser.setVisible(true);
                     }
@@ -684,15 +684,15 @@ public class TaggerView extends ConstraintContainer {
             subMenu.add(subItem);
         }
 
-        if (this.tagger.getExtensionsAllowed()) {
-            subItem = new JMenuItem("Tag");
-            subItem.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    TaggerView.this.addTag();
-                }
-            });
-            subMenu.add(subItem);
-        }
+//        if (this.tagger.getExtensionsAllowed()) {
+//            subItem = new JMenuItem("Tag");
+//            subItem.addActionListener(new ActionListener() {
+//                public void actionPerformed(ActionEvent e) {
+//                    TaggerView.this.addTag();
+//                }
+//            });
+//            subMenu.add(subItem);
+//        }
         menu.add(subMenu);
 
         menu.addSeparator();
@@ -1212,16 +1212,16 @@ public class TaggerView extends ConstraintContainer {
         }
     }
 
-    private void addTag() {
-        AbstractTagModel newTag = this.tagger.addNewTag((AbstractTagModel) null, new String());
-        GuiTagModel newGuiTag = (GuiTagModel) newTag;
-        if (newGuiTag != null) {
-            newGuiTag.setFirstEdit(true);
-            this.updateTagsPanel();
-            this.scrollToTag(newTag);
-        }
-
-    }
+//    private void addTag() {
+//        AbstractTagModel newTag = this.tagger.addNewTag((AbstractTagModel) null, new String());
+//        GuiTagModel newGuiTag = (GuiTagModel) newTag;
+//        if (newGuiTag != null) {
+//            newGuiTag.setFirstEdit(true);
+//            this.updateTagsPanel();
+//            this.scrollToTag(newTag);
+//        }
+//
+//    }
 
     private void askBeforeClose() {
         String message = "Are you sure you want to exit?";
@@ -1464,10 +1464,10 @@ public class TaggerView extends ConstraintContainer {
 //            this.cancel.setEnabled(!this.loader.checkFlags(64));
         }
 
-        if (this.tagger.getExtensionsAllowed()) {
-//            this.add(this.redo, new Constraint("top:0 height:30 right:90 width:80"));
-            this.add(this.addTag, new Constraint("top:0 height:30 right:170 width:80"));
-        }
+//        if (this.tagger.getExtensionsAllowed()) {
+////            this.add(this.redo, new Constraint("top:0 height:30 right:90 width:80"));
+//            this.add(this.addTag, new Constraint("top:0 height:30 right:170 width:80"));
+//        }
 
     }
 
@@ -2189,32 +2189,7 @@ public class TaggerView extends ConstraintContainer {
         }
     }
 
-    private class DisplayWebDoc extends JFrame {
-        public DisplayWebDoc(String title, String link) {
-            super(title);
 
-            JEditorPane webpane = new JEditorPane();
-            webpane.setEditable(false);
-
-            try {
-                webpane.setPage(link);
-            }
-            catch (IOException e) {
-                webpane.setContentType("text/html");
-                webpane.setText("<html>Could not load " + title + "</html>");
-            }
-
-            JScrollPane scrollPane = new JScrollPane(webpane);
-
-            this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            this.getContentPane().add(scrollPane);
-            this.setPreferredSize(new Dimension(800,600));
-            this.pack();
-            this.setVisible(true);
-        }
-
-
-    }
     public class addGroupMenuListener implements ActionListener {
         public addGroupMenuListener() {
         }

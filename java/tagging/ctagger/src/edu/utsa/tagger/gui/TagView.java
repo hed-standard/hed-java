@@ -237,11 +237,19 @@ public class TagView extends JComponent implements MouseListener {
 		}
 
 		g2d.setFont(font);
-		g2d.drawString(model.getName() + " ", (int) x, (int) y);
+		String name = null;
+//		if (tagger.getExtensionsAllowed())
+//			name = model.isExtensionAllowed() ? model.getName() + " (extension allowed - right click to add)" : model.getName();
+//		else
+			name = model.getName();
+		g2d.drawString(name + " ", (int) x, (int) y);
 
 		String info = null;
 		if (model.isChildRequired()) {
 			info = "(child required)";
+		}
+		if (tagger.getExtensionsAllowed() && model.isExtensionAllowed()) {
+			info = info == null ? "(extension allowed)" : info + " (extension allowed)";
 		}
 
 		if (info != null) {

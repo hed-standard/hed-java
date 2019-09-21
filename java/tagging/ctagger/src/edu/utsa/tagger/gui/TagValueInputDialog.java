@@ -9,15 +9,12 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Arrays;
 
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JOptionPane;
-import javax.swing.JTextField;
+import javax.swing.*;
 
 import edu.utsa.tagger.AbstractTagModel;
 import edu.utsa.tagger.Tagger;
 import edu.utsa.tagger.guisupport.ConstraintLayout;
+import edu.utsa.tagger.guisupport.FontsAndColors;
 import edu.utsa.tagger.guisupport.MessageConstants;
 
 /**
@@ -47,9 +44,7 @@ public class TagValueInputDialog extends JDialog implements ActionListener,
         this.tagEnterSearchView = enteredTag;
 
         bgPanel.setLayout(new ConstraintLayout());
-        bgPanel.setBackground(Color.white);
         bgPanel.setPreferredSize(new Dimension(400, 200));
-
         // message display
         populateUnitsComboBox();
         textField = new JTextField(20);
@@ -73,7 +68,10 @@ public class TagValueInputDialog extends JDialog implements ActionListener,
                 options,
                 options[0]);
 
+        setComponentsColor(bgPanel);
         setContentPane(bgPanel);
+        getContentPane().setBackground(FontsAndColors.BLUE_MEDIUM);
+        getContentPane().setForeground(FontsAndColors.BLUE_DARK);
 
         pack();
         setLocationRelativeTo(eventEnterTagView.getAppView().getFrame());
@@ -90,6 +88,22 @@ public class TagValueInputDialog extends JDialog implements ActionListener,
 
         //Register an event handler that reacts to option pane state changes.
         bgPanel.addPropertyChangeListener(this); // cuz implement Property Change Listener
+    }
+
+    private void setComponentsColor(Container c){
+
+        Component[] m = c.getComponents();
+
+        for(int i = 0; i < m.length; i++){
+
+            if(m[i].getClass().getName() == "javax.swing.JPanel") {
+                m[i].setBackground(FontsAndColors.BLUE_MEDIUM);
+                m[i].setForeground(FontsAndColors.BLUE_DARK);
+            }
+
+            if(c.getClass().isInstance(m[i]));
+            setComponentsColor((Container)m[i]);
+        }
     }
 
     /** This method handles events for the text field. */

@@ -31,6 +31,7 @@ import javax.swing.event.DocumentListener;
 import edu.utsa.tagger.AbstractTagModel;
 import edu.utsa.tagger.Tagger;
 import edu.utsa.tagger.guisupport.*;
+import org.junit.Test;
 
 /**
  * View allowing the user to add a value to a tag that takes values.
@@ -268,18 +269,18 @@ public class AddValueView extends ConstraintContainer {
 		add(valueField, new Constraint("top:" + top
 				+ " height:26 left:15 width:200"));
 		top += 30;
-		// Add warning when /HED is in add value to warn user save new HED schema to disk
-		if (tagModel.getParentPath().equals("HED")) {
-			JLabel warningLabel = new JLabel("Warning: Use 'File > Save HED schema' to save to disk", JLabel.LEFT) {
-				@Override
-				public Font getFont() {
-					return FontsAndColors.contentFont;
-				}
-			};
-			warningLabel.setBackground(FontsAndColors.TRANSPARENT);
-			warningLabel.setForeground(FontsAndColors.RED_MEDIUM);
-			add(warningLabel, new Constraint("top:" + top + " height:27 left:15 width:500"));
-		}
+//		// Add warning when /HED is in add value to warn user save new HED schema to disk
+//		if (tagModel.getParentPath().equals("HED")) {
+//			JLabel warningLabel = new JLabel("Warning: Use 'File > Save HED schema' to save to disk", JLabel.LEFT) {
+//				@Override
+//				public Font getFont() {
+//					return FontsAndColors.contentFont;
+//				}
+//			};
+//			warningLabel.setBackground(FontsAndColors.TRANSPARENT);
+//			warningLabel.setForeground(FontsAndColors.RED_MEDIUM);
+//			add(warningLabel, new Constraint("top:" + top + " height:27 left:15 width:500"));
+//		}
 	}
 
 	private void addButtons() {
@@ -301,7 +302,8 @@ public class AddValueView extends ConstraintContainer {
 		okButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				handleValueInput();
+				if (okButton.isEnabled())
+					handleValueInput();
 			}
 		});
 
@@ -386,39 +388,37 @@ public class AddValueView extends ConstraintContainer {
 	}
 
 	private void handleValueInput() {
-        if (this.okButton.isEnabled()) {
-            String valueStr = this.valueField.getJTextArea().getText();
-            if (this.tagModel.isNumeric()) {
-                String unitString = "";
-                if (this.units.getSelectedItem() != null) {
-                    unitString = this.units.getSelectedItem().toString();
-                }
-
-                valueStr = this.validateNumericValue(valueStr.trim(), unitString);
-                if (valueStr.isEmpty()) {
-                    this.appView.showTaggerMessageDialog(MessageConstants.TAG_UNIT_ERROR, "OK", null, (String)null);
-                    return;
-				}
-            }
-
-            AbstractTagModel transientTag = this.tagger.createTransientTagModel(this.tagModel, valueStr);
-            this.tagModel.setInAddValue(false);
-            if (this.tagger.isHEDVersionTag(this.tagModel)) {
-                this.handleHEDTag(transientTag);
-                return;
-            }
-
-
-            if (this.alternateView != null) {
-                this.alternateView.valueAdded(transientTag);
-			} else {
-                GuiTagModel gtm = (GuiTagModel)transientTag;
-                gtm.setAppView(this.appView);
-				gtm.requestToggleTag();
-                this.appView.updateTagsPanel();
-                this.appView.updateEventsPanel();
-                this.appView.scrollToEventTag((GuiTagModel)transientTag);
+		String valueStr = this.valueField.getJTextArea().getText();
+		if (this.tagModel.isNumeric()) {
+			String unitString = "";
+			if (this.units.getSelectedItem() != null) {
+				unitString = this.units.getSelectedItem().toString();
 			}
+
+			valueStr = this.validateNumericValue(valueStr.trim(), unitString);
+			if (valueStr.isEmpty()) {
+				this.appView.showTaggerMessageDialog(MessageConstants.TAG_UNIT_ERROR, "OK", null, (String)null);
+				return;
+			}
+		}
+
+		AbstractTagModel transientTag = this.tagger.createTransientTagModel(this.tagModel, valueStr);
+		this.tagModel.setInAddValue(false);
+		if (this.tagger.isHEDVersionTag(this.tagModel)) {
+			this.handleHEDTag(transientTag);
+			return;
+		}
+
+
+		if (this.alternateView != null) {
+			this.alternateView.valueAdded(transientTag);
+		} else {
+			GuiTagModel gtm = (GuiTagModel)transientTag;
+			gtm.setAppView(this.appView);
+			gtm.requestToggleTag();
+			this.appView.updateTagsPanel();
+			this.appView.updateEventsPanel();
+			this.appView.scrollToEventTag((GuiTagModel)transientTag);
 		}
 	}
 
@@ -437,7 +437,7 @@ public class AddValueView extends ConstraintContainer {
 	 *            A numerical value
 	 * @param unit
 	 *            Unit The unit associated with numerical value
-	 * @return Null if invalid, numerical value with unit appended if valid
+	 * @return Empty string if invalid, numerical value with unit appended if valid
 	 */
 	private String validateNumericValue(String numericValue, String unit) {
         if (numericValue.matches("^(\\.?[0-9]+)*$")) {
