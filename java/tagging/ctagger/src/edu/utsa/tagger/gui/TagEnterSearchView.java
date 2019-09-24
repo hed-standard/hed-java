@@ -43,11 +43,10 @@ public class TagEnterSearchView extends TagSearchView {
     }
 
     /**
-     * Add tag to the event associated with this eventEnterTagView
-     * and any selected group that the event contains
+     * Add tag to the selected events (and groups)
      */
-    public void addTagToEvent(GuiTagModel tagModel) {
-        if (tagModel.requestToggleTag() == 0) {
+    public void addTagToEvent(GuiTagModel tagModel, Set<Integer> eventIDs) {
+        if (tagModel.requestToggleTag(eventIDs) == 0) {
             eventEnterTagView.getAppView().scrollToEventTag(getModel());
             eventEnterTagView.getAppView().getEventEnterTagView().getjTextArea().transferFocusBackward();
             eventEnterTagView.getAppView().getEventEnterTagView().getjTextArea().setText("Enter tag ...");
