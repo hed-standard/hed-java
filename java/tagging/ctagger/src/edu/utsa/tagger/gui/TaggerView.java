@@ -178,13 +178,13 @@ public class TaggerView extends ConstraintContainer {
             return FontsAndColors.headerFont;
         }
     };
-    private XButton help = new XButton("Help") {
+    private XButton help = new XButton("User manual") {
         @Override
         public Font getFont() {
             return FontsAndColors.buttonFont;
         }
     };
-    private XButton strategyGuide = new XButton("Tagging Guide") {
+    private XButton strategyGuide = new XButton("Tagging guide") {
         @Override
         public Font getFont() {
             return FontsAndColors.buttonFont;
@@ -469,7 +469,7 @@ public class TaggerView extends ConstraintContainer {
 
         this.help.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-                if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                if (!Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
                     try {
                         Desktop.getDesktop().browse(new URI("http://www.hedtags.org/hed-docs/pdf/HEDToolsUserManual.pdf"));
                     } catch (IOException ex) {
@@ -477,6 +477,9 @@ public class TaggerView extends ConstraintContainer {
                     } catch (URISyntaxException ex) {
                         ex.printStackTrace();
                     }
+                }
+                else {
+                    showTaggerMessageDialog("Unable to open in system browser. Access instead at: <br>http://www.hedtags.org/hed-docs","Ok",null,null);
                 }
             }
         });
@@ -490,6 +493,9 @@ public class TaggerView extends ConstraintContainer {
                     } catch (URISyntaxException ex) {
                         ex.printStackTrace();
                     }
+                }
+                else {
+                    showTaggerMessageDialog("Unable to open in system browser. Access instead at: <br>http://www.hedtags.org/hed-docs","Ok",null,null);
                 }
             }
         });
@@ -541,8 +547,8 @@ public class TaggerView extends ConstraintContainer {
         this.setLayer(this.shield, 2);
         this.shield.setVisible(false);
         this.add(this.hedTitle, new Constraint("top:30 height:26 right:10 width:150"));
-        this.add(this.undo, new Constraint("top:0 height:30 right:10 width:80"));
-        this.add(this.redo, new Constraint("top:0 height:30 right:90 width:80"));
+        this.add(this.redo, new Constraint("top:0 height:30 right:10 width:80"));
+        this.add(this.undo, new Constraint("top:0 height:30 right:90 width:80"));
 //        this.add(this.zoomOut, new Constraint("top:0 height:50 right:80 width:30"));
 //        this.add(this.zoomPercent, new Constraint("top:0 height:50 right:30 width:50"));
 //        this.add(this.zoomIn, new Constraint("top:0 height:50 right:0 width:30"));
@@ -1459,8 +1465,8 @@ public class TaggerView extends ConstraintContainer {
         } else {
             this.add(this.cancel, new Constraint("bottom:10 height:30 right:100 width:80"));
             this.add(this.ok, new Constraint("bottom:10 height:30 right:10 width:80"));
-            this.add(this.help, new Constraint("bottom:10 height:30 left:10 width:80"));
-            this.add(this.strategyGuide, new Constraint("bottom:10 height:30 left:100 width:120"));
+            this.add(this.help, new Constraint("bottom:10 height:30 left:10 width:110"));
+            this.add(this.strategyGuide, new Constraint("bottom:10 height:30 left:120 width:120"));
 //            this.cancel.setEnabled(!this.loader.checkFlags(64));
         }
 
