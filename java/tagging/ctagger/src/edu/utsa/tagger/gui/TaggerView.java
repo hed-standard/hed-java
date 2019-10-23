@@ -5,6 +5,8 @@ import java.awt.event.*;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -188,7 +190,6 @@ public class TaggerView extends ConstraintContainer {
             return FontsAndColors.buttonFont;
         }
     };
-    private MiniBrowser browser;
 //    private XButton zoomIn = createMenuButton("+");
 //    private XButton zoomOut = createMenuButton("-");
 //    private JLabel zoomPercent = new JLabel("100%", JLabel.CENTER) {
@@ -457,38 +458,37 @@ public class TaggerView extends ConstraintContainer {
         this.searchTags.getJTextArea().setText("Search for existing tags ...");
         this.searchTags.getJTextArea().addFocusListener(new FocusListener() {
             public void focusGained(FocusEvent e) {
-                TaggerView.this.searchTags.getJTextArea().selectAll();
+                TaggerView.this.searchTags.getJTextArea().setText("");
             }
 
             public void focusLost(FocusEvent e) {
+                TaggerView.this.searchTags.getJTextArea().setText("Search for existing tags ...");
                 TaggerView.this.searchResultsScrollPane.setVisible(false);
             }
         });
 
         this.help.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-                if (TaggerView.this.browser == null)
-                    browser = new MiniBrowser("CTAGGER/HEDTools Manual", "https://github.com/hed-standard/hed-documentation");
-                else {
-                    browser.setTitle("CTAGGER/HEDTools Manual");
-                    browser.load("https://github.com/hed-standard/hed-documentation");
-                    if (!browser.isVisible()) {
-                        browser.setVisible(true);
+                if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                    try {
+                        Desktop.getDesktop().browse(new URI("http://www.hedtags.org/hed-docs/pdf/HEDToolsUserManual.pdf"));
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    } catch (URISyntaxException ex) {
+                        ex.printStackTrace();
                     }
-
                 }
-
             }
         });
         this.strategyGuide.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-                if (TaggerView.this.browser == null)
-                    browser = new MiniBrowser("Tagging Strategy Guide", "https://github.com/hed-standard/hed-documentation");
-                else {
-                    browser.setTitle("Tagging Strategy Guide");
-                    browser.load("https://github.com/hed-standard/hed-documentation");
-                    if (!browser.isVisible()) {
-                        browser.setVisible(true);
+                if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                    try {
+                        Desktop.getDesktop().browse(new URI("http://www.hedtags.org/hed-docs/pdf/HEDTaggingStrategyGuide.pdf"));
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    } catch (URISyntaxException ex) {
+                        ex.printStackTrace();
                     }
                 }
             }
@@ -1471,7 +1471,7 @@ public class TaggerView extends ConstraintContainer {
 
     }
 
-    /*** support methods for updateEventsPanel ***/
+    /*** support methods for updateEventsPanel. Add groups and other tags ***/
     private int addOtherTags(TaggedEvent taggedEvent, int top) {
         Iterator var4 = taggedEvent.getTagGroups().entrySet().iterator();
 

@@ -518,7 +518,7 @@ public class Tagger {
             tagModel.setDescription(tagXmlModel.getDescription());
             tagModel.setChildRequired(tagXmlModel.isChildRequired());
             tagModel.setTakesValue(tagXmlModel.takesValue());
-            tagModel.setExtensionAllowed(tagXmlModel.isExtensionAllowed());
+            tagModel.setExtensionAllowed(tagXmlModel.isExtensionAllowed() || (parentTag != null && parentTag.isExtensionAllowed()));
             tagModel.setRecommended(tagXmlModel.isRecommended());
             tagModel.setRequired(tagXmlModel.isRequired());
             tagModel.setUnique(tagXmlModel.isUnique());
@@ -1081,11 +1081,14 @@ public class Tagger {
     public AbstractTagModel getTagAncestor(String tagPath) {
         if (tagPath == null || tagPath.isEmpty()) return null;
 
+        long start = System.nanoTime();
         AbstractTagModel ancestor = null;
         for (AbstractTagModel tag : tags) {
             if (tagPath.toUpperCase().startsWith(tag.getPath().toUpperCase()))
                 ancestor = tag;
         }
+        long end = System.nanoTime();
+        System.out.println("Elapsed time for getting missing tags' ancestor: " + (end-start));
         return ancestor;
     }
 
@@ -2025,7 +2028,7 @@ public class Tagger {
     private TagXmlModel tagsToModel() {
         Iterator<AbstractTagModel> iter = this.tags.iterator();
         TagXmlModel tagsModel = new TagXmlModel();
-        this.tagsToXmlModelHelper(new String(), tagsModel, iter);
+        this.tagsToXmlModelHelper("", tagsModel, iter);
         return tagsModel;
     }
 

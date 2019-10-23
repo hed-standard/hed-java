@@ -123,7 +123,8 @@ public class TagView extends JComponent implements MouseListener {
 				}
 			});
 		}
-		appView.showContextMenu(map);
+        if (map.size() > 0)
+			appView.showContextMenu(map);
 	}
 
 	@Override
@@ -270,6 +271,9 @@ public class TagView extends JComponent implements MouseListener {
 	public void update() {
 		if (model.takesValue() || model.isNumeric()) {
 			toolTip = MessageConstants.TAKES_VALUE;
+		}
+		else {
+			toolTip = model.getDescription();
 		}
 		setToolTipText(toolTip);
 	}

@@ -41,12 +41,13 @@ public class EventEnterTagView extends JComponent {
     };
     private JScrollPane searchResultsScrollPane; // searchResults is put in a scrollable panel
     private int focusedResult = -1;
+    private String searchBoxPrompt = "Search for tag to enter ...";
 
     public EventEnterTagView(Tagger tagger, TaggerView appView) {
         this.tagger = tagger;
         this.appView = appView;
         /* Initialize GUI component */
-        jTextArea = new JTextArea("Search for tag to enter ...");
+        jTextArea = new JTextArea(searchBoxPrompt);
         Border border = BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Color.BLACK, 1),
                 BorderFactory.createEmptyBorder(3, 3, 3, 3));
@@ -93,13 +94,12 @@ public class EventEnterTagView extends JComponent {
         this.jTextArea.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
-                selectAllText();
+                textAreaFocusGained();
             }
 
             @Override
             public void focusLost(FocusEvent e) {
-                searchResultsScrollPane.setVisible(false);
-                focusedResult = -1;
+                textAreaFocusLost();
             }
         });
 
@@ -204,8 +204,14 @@ public class EventEnterTagView extends JComponent {
         this.jTextArea.setText(new String());
     }
 
-    private void selectAllText() {
-        this.jTextArea.selectAll();
+    private void textAreaFocusGained() {
+        this.jTextArea.setText("");//.selectAll();
+    }
+
+    private void textAreaFocusLost() {
+        this.jTextArea.setText(searchBoxPrompt);
+        searchResultsScrollPane.setVisible(false);
+        focusedResult = -1;
     }
 
     public JScrollPane getjTextAreaPanel() {

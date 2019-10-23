@@ -26,6 +26,7 @@ import javax.swing.Timer;
 import edu.utsa.tagger.AbstractTagModel;
 import edu.utsa.tagger.TaggedEvent;
 import edu.utsa.tagger.Tagger;
+import edu.utsa.tagger.ToggleTagMessage;
 import edu.utsa.tagger.gui.ContextMenu.ContextMenuAction;
 import edu.utsa.tagger.guisupport.*;
 import edu.utsa.tagger.guisupport.XCheckBox.StateListener;
@@ -148,6 +149,40 @@ public class GroupView extends JComponent implements MouseListener,
                     TaggedEvent taggedEvent = GroupView.tagger.getEventByGroupId(GroupView.this.id);
                     int numTags = taggedEvent.getNumTagsInGroup(GroupView.this.id);
                     GroupView.this.addTilde(numTags);
+				}
+			});
+			map.put("duplicate group", new ContextMenuAction() {
+				@Override
+				public void doAction() {
+				    // Create new group
+					TaggedEvent taggedEvent = GroupView.tagger.getEventByGroupId(GroupView.this.id);
+					int groupId = tagger.addNewGroup(taggedEvent);
+					HashSet<Integer> idSet = new HashSet<>();
+					idSet.add(groupId);
+
+					// Copy tags
+                    for (AbstractTagModel tagModel : tagEventViews.keySet()) {
+						AbstractTagModel duplicateTag = tagger.getFactory().createAbstractTagModel(tagger);
+						duplicateTag.setPath(tagModel.getPath());
+						GuiTagModel gtm = (GuiTagModel) duplicateTag;
+						gtm.setAppView(appView);
+						ToggleTagMessage message = tagger.toggleTag(gtm, idSet);
+						if (message != null) {
+							if (message.rrError) {
+								appView.showTaggerMessageDialog(
+										MessageConstants.ASSOCIATE_RR_ERROR, "Ok", null, null);
+							} else if (message.descendants.size() > 0) {
+								appView.showDescendantDialog(message);
+							} else if (message.uniqueValues.size() > 0) {
+								appView.showUniqueDialog(message);
+							} else {
+								appView.showAncestorDialog(message);
+							}
+						}
+					}
+
+					appView.updateEventsPanel();
+					appView.scrollToNewGroup(taggedEvent, groupId);
 				}
 			});
 			map.put("remove group", new ContextMenuAction() {
