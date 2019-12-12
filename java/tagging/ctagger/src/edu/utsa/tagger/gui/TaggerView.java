@@ -469,9 +469,9 @@ public class TaggerView extends ConstraintContainer {
 
         this.help.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-                if (!Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
                     try {
-                        Desktop.getDesktop().browse(new URI("http://www.hedtags.org/hed-docs/pdf/HEDToolsUserManual.pdf"));
+                        Desktop.getDesktop().browse(new URI("http://www.hedtags.org/hed-docs/docs/HEDToolsUserManual.pdf"));
                     } catch (IOException ex) {
                         ex.printStackTrace();
                     } catch (URISyntaxException ex) {
@@ -487,7 +487,7 @@ public class TaggerView extends ConstraintContainer {
             public void mouseClicked(MouseEvent e) {
                 if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
                     try {
-                        Desktop.getDesktop().browse(new URI("http://www.hedtags.org/hed-docs/pdf/HEDTaggingStrategyGuide.pdf"));
+                        Desktop.getDesktop().browse(new URI("http://www.hedtags.org/hed-docs/docs/HEDTaggingStrategyGuide.pdf"));
                     } catch (IOException ex) {
                         ex.printStackTrace();
                     } catch (URISyntaxException ex) {
