@@ -9,7 +9,7 @@ import java.util.Scanner;
 
 public abstract class TestUtilities {
 
-	public static final String HedFileName = "data/HED.xml";
+	public static final String HedFileName = "data/HEDLatest.xml";
 	public static final String HedRequiredRecommended = 
 			"data/testHedRequired.xml";
 	public static final String JsonEventsArrays = 

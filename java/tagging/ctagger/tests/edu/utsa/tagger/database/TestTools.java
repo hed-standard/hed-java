@@ -46,8 +46,7 @@ public class TestTools {
 
 	/**
 	 * Removes all information from all tables of the TagsDB database
-	 * 
-	 * @return an integer representing the number of records deleted
+	 * @param dbCon
 	 */
 	public static void clearDB(Connection dbCon) {
 		try {
@@ -65,7 +64,6 @@ public class TestTools {
 	 * 
 	 * @param dbCon
 	 *            a Connection to the TagsDB database
-	 * @return an integer representing the number of records deleted
 	 * @throws Exception
 	 *             Exception when database DELETE fails
 	 */

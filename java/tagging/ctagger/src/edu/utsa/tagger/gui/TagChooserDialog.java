@@ -1,6 +1,5 @@
 package edu.utsa.tagger.gui;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
@@ -15,12 +14,7 @@ import javax.swing.JPanel;
 import edu.utsa.tagger.AbstractTagModel;
 import edu.utsa.tagger.Tagger;
 import edu.utsa.tagger.TaggerSet;
-import edu.utsa.tagger.guisupport.Constraint;
-import edu.utsa.tagger.guisupport.ConstraintLayout;
-import edu.utsa.tagger.guisupport.ITagDisplay;
-import edu.utsa.tagger.guisupport.ListLayout;
-import edu.utsa.tagger.guisupport.ScrollLayout;
-import edu.utsa.tagger.guisupport.XButton;
+import edu.utsa.tagger.guisupport.*;
 
 /**
  * Dialog used to choose a tag from a subset of the tag hierarchy.
@@ -71,10 +65,6 @@ public class TagChooserDialog extends JDialog implements ITagDisplay {
 	 * Constructor sets up the contents of the dialog. The tag view will contain
 	 * the tags given as a parameter.
 	 * 
-	 * @param frame
-	 * @param appView
-	 * @param tagger
-	 * @param tags
 	 */
 
 	public void repaintTagScrollPane() {
@@ -96,13 +86,14 @@ public class TagChooserDialog extends JDialog implements ITagDisplay {
 		cancel = TaggerView.createMenuButton("Cancel");
 		cancel.addMouseListener(new CancelButtonListener());
 		bgPanel.setLayout(new ConstraintLayout());
-		bgPanel.setBackground(Color.white);
+		bgPanel.setBackground(FontsAndColors.DIALOG_BG);
 		bgPanel.setPreferredSize(new Dimension(400, 500));
 		tagScrollLayout = new ScrollLayout(tagScrollPane, tagPanel);
 		tagScrollPane.setLayout(tagScrollLayout);
 		tagPanel.setLayout(new ListLayout(1, 1, 0, 1));
-		tagPanel.setBackground(Color.white);
+		tagPanel.setBackground(FontsAndColors.DIALOG_BG);
 		message.setText(MESSAGE_TEXT);
+		message.setForeground(FontsAndColors.DIALOG_MESSAGE_FG);
 		bgPanel.add(message, new Constraint("top:0 height:20"));
 		bgPanel.add(tagScrollPane, new Constraint(
 				"top:20 height:430 left:0 right:0"));

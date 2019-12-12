@@ -16,6 +16,7 @@ import javax.swing.SwingUtilities;
 
 import edu.utsa.tagger.Tagger;
 import edu.utsa.tagger.guisupport.ClickDragThreshold;
+import edu.utsa.tagger.guisupport.FontsAndColors;
 
 /**
  * View used to display a tag as a search result.
@@ -47,15 +48,12 @@ public class TagSearchView extends JComponent implements MouseListener {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if (SwingUtilities.isLeftMouseButton(e)) {
-					tagger.openToClosest(model);
-					appView.cancelSearch();
-					appView.updateTags();
-					appView.scrollToTag(model);
+					mouseClickedEvent(tagger, appView);
 				}
 			}
 		});
 	}
-
+	
 	@Override
 	public Dimension getPreferredSize() {
 		return new Dimension(0, (int) (FontsAndColors.contentFont.getSize2D() * 1.5));
@@ -119,7 +117,8 @@ public class TagSearchView extends JComponent implements MouseListener {
 			double x = getHeight() / 2;
 			double y = getHeight() * 0.75;
 
-			x = getHeight() * 3;
+//			x = getHeight() * 3;
+            x = 5;
 
 			g2d.setColor(fg);
 			g2d.setFont(font);
@@ -131,4 +130,32 @@ public class TagSearchView extends JComponent implements MouseListener {
 
 		g2d.setColor(new Color(200, 200, 200));
 	}
+
+	public void mouseClickedEvent(Tagger tagger, TaggerView appView) {
+		tagger.openToClosest(model);
+		appView.cancelSearch();
+		appView.updateTagsPanel();
+		appView.scrollToTag(model);
+	}
+
+	/* Getters and Setters */
+	public boolean getHover() {
+		return hover;
+	}
+
+	public boolean getPressed() {
+		return pressed;
+	}
+
+	public GuiTagModel getModel() {
+		return model;
+	}
+	public void setHover(boolean hover) {
+		this.hover = hover;
+	}
+
+	public void setPressed(boolean pressed) {
+		this.pressed = pressed;
+	}
+
 }

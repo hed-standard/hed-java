@@ -30,13 +30,8 @@ import javax.swing.event.DocumentListener;
 
 import edu.utsa.tagger.AbstractTagModel;
 import edu.utsa.tagger.Tagger;
-import edu.utsa.tagger.guisupport.Constraint;
-import edu.utsa.tagger.guisupport.ConstraintContainer;
-import edu.utsa.tagger.guisupport.ConstraintLayout;
-import edu.utsa.tagger.guisupport.ITagDisplay;
-import edu.utsa.tagger.guisupport.XButton;
-import edu.utsa.tagger.guisupport.XScrollTextBox;
-import edu.utsa.tagger.guisupport.XTextBox;
+import edu.utsa.tagger.guisupport.*;
+import org.junit.Test;
 
 /**
  * View allowing the user to add a value to a tag that takes values.
@@ -54,6 +49,58 @@ public class AddValueView extends ConstraintContainer {
 	private final GuiTagModel tagModel;
 	private boolean highlight = false;
 	private final ITagDisplay alternateView;
+	private final TagEditOptionButton okButton = new TagEditOptionButton("OK") {
+		@Override
+		public Font getFont() {
+			Map<TextAttribute, Integer> fontAttributes = new HashMap<TextAttribute, Integer>();
+			fontAttributes.put(TextAttribute.UNDERLINE,
+					TextAttribute.UNDERLINE_ON);
+			return FontsAndColors.contentFont.deriveFont(fontAttributes);
+		}
+	};
+
+	final XScrollTextBox valueField = new XScrollTextBox(new XTextBox()) {
+		@Override
+		public Font getFont() {
+			return FontsAndColors.contentFont;
+		}
+	};
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	final JComboBox units = new JComboBox(new String[] {}) {
+
+	};
+
+	final JLabel unitsLabel = new JLabel("units", JLabel.LEFT) {
+		@Override
+		public Font getFont() {
+			return FontsAndColors.contentFont;
+		}
+	};
+
+	final TagEditOptionButton cancelButton = new TagEditOptionButton("Cancel") {
+		@Override
+		public Font getFont() {
+			Map<TextAttribute, Integer> fontAttributes = new HashMap<TextAttribute, Integer>();
+			fontAttributes.put(TextAttribute.UNDERLINE,
+					TextAttribute.UNDERLINE_ON);
+			return FontsAndColors.contentFont.deriveFont(fontAttributes);
+		}
+	};
+
+	final JLabel valueLabel = new JLabel("value", JLabel.LEFT) {
+		@Override
+		public Font getFont() {
+			return FontsAndColors.contentFont;
+		}
+	};
+
+	ActionListener taskPerformer = new ActionListener() {
+		public void actionPerformed(ActionEvent evt) {
+			highlight = false;
+			repaint();
+		}
+	};
 
 	public AddValueView(Tagger tagger, TaggerView appView,
 			ITagDisplay alternateView, GuiTagModel guiTagModel) {
@@ -61,6 +108,15 @@ public class AddValueView extends ConstraintContainer {
 		this.appView = appView;
 		this.tagModel = guiTagModel;
 		this.alternateView = alternateView;
+		addGuiComponents();
+	}
+
+	public AddValueView(final Tagger tagger, final TaggerView appView,
+						final GuiTagModel guiTagModel) {
+		this.tagger = tagger;
+		this.appView = appView;
+		this.tagModel = guiTagModel;
+		this.alternateView = null;
 		addGuiComponents();
 	}
 
@@ -91,44 +147,6 @@ public class AddValueView extends ConstraintContainer {
 			}
 		}
 
-	}
-
-	private final XButton okButton = new XButton("OK") {
-		@Override
-		public Font getFont() {
-			Map<TextAttribute, Integer> fontAttributes = new HashMap<TextAttribute, Integer>();
-			fontAttributes.put(TextAttribute.UNDERLINE,
-					TextAttribute.UNDERLINE_ON);
-			return FontsAndColors.contentFont.deriveFont(fontAttributes);
-		}
-	};
-
-	final XScrollTextBox valueField = new XScrollTextBox(new XTextBox()) {
-		@Override
-		public Font getFont() {
-			return FontsAndColors.contentFont;
-		}
-	};
-
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	final JComboBox units = new JComboBox(new String[] {}) {
-
-	};
-
-	final JLabel unitsLabel = new JLabel("units", JLabel.LEFT) {
-		@Override
-		public Font getFont() {
-			return FontsAndColors.contentFont;
-		}
-	};
-
-	public AddValueView(final Tagger tagger, final TaggerView appView,
-			final GuiTagModel guiTagModel) {
-		this.tagger = tagger;
-		this.appView = appView;
-		this.tagModel = guiTagModel;
-		this.alternateView = null;
-		addGuiComponents();
 	}
 
 	@Override
@@ -203,24 +221,6 @@ public class AddValueView extends ConstraintContainer {
 		add(new JComponent() {
 		}, new Constraint("top:0 height:" + unitHeight + " left:0 right:0"));
 	}
-
-	final XButton cancelButton = new XButton("Cancel") {
-		@Override
-		public Font getFont() {
-			Map<TextAttribute, Integer> fontAttributes = new HashMap<TextAttribute, Integer>();
-			fontAttributes.put(TextAttribute.UNDERLINE,
-					TextAttribute.UNDERLINE_ON);
-			return FontsAndColors.contentFont.deriveFont(fontAttributes);
-		}
-	};
-
-	final JLabel valueLabel = new JLabel("value", JLabel.LEFT) {
-		@Override
-		public Font getFont() {
-			return FontsAndColors.contentFont;
-		}
-	};
-
 	private void addGuiComponents() {
 		addContainer();
 		addLabels();
@@ -233,7 +233,11 @@ public class AddValueView extends ConstraintContainer {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				valueField.getJTextArea().requestFocusInWindow();
+                if (AddValueView.this.tagger.isHEDVersionTag(AddValueView.this.tagModel)) {
+                    AddValueView.this.valueField.getJTextArea().setText(AddValueView.this.tagger.getHEDVersion());
+                }
+
+                AddValueView.this.valueField.getJTextArea().requestFocusInWindow();
 			}
 		});
 	}
@@ -254,13 +258,29 @@ public class AddValueView extends ConstraintContainer {
 		setLabelBackgroundColors();
 		setLabelForegroundColors();
 		addLabelListeners();
+		valueLabel.setForeground(FontsAndColors.EDITTAG_FG);
 		valueField.getJTextArea().getDocument()
 				.addDocumentListener(new ValueFieldListener());
+		if (tagModel.getParentPath().equals("HED"))
+			valueLabel.setText("Name of new HED schema");
 		add(valueLabel, new Constraint("top:" + top
-				+ " height:20 left:15 width:50"));
+				+ " height:20 left:15 width:200"));
 		top += 25;
 		add(valueField, new Constraint("top:" + top
 				+ " height:26 left:15 width:200"));
+		top += 30;
+//		// Add warning when /HED is in add value to warn user save new HED schema to disk
+//		if (tagModel.getParentPath().equals("HED")) {
+//			JLabel warningLabel = new JLabel("Warning: Use 'File > Save HED schema' to save to disk", JLabel.LEFT) {
+//				@Override
+//				public Font getFont() {
+//					return FontsAndColors.contentFont;
+//				}
+//			};
+//			warningLabel.setBackground(FontsAndColors.TRANSPARENT);
+//			warningLabel.setForeground(FontsAndColors.RED_MEDIUM);
+//			add(warningLabel, new Constraint("top:" + top + " height:27 left:15 width:500"));
+//		}
 	}
 
 	private void addButtons() {
@@ -282,7 +302,8 @@ public class AddValueView extends ConstraintContainer {
 		okButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				handleValueInput();
+				if (okButton.isEnabled())
+					handleValueInput();
 			}
 		});
 
@@ -354,43 +375,59 @@ public class AddValueView extends ConstraintContainer {
 	}
 
 	private void handleCancel() {
-		tagModel.setInAddValue(false);
-		if (alternateView != null) {
-			alternateView.valueAdded(null);
+        this.tagModel.setInAddValue(false);
+        if (this.tagger.isHEDVersionTag(this.tagModel)) {
+            this.appView.updateTagsPanel();
+            this.appView.scrollToPreviousTag();
+        } else {
+			if (this.alternateView != null) {
+				this.alternateView.valueAdded((AbstractTagModel) null);
+			}
+			appView.updateTagsPanel();
 		}
-		appView.updateTags();
 	}
 
 	private void handleValueInput() {
-		if (okButton.isEnabled()) {
-			String valueStr = valueField.getJTextArea().getText();
-			valueField.getJTextArea().setText(new String());
-			if (tagModel.isNumeric()) {
-				String unitString = new String();
-				if (units.getSelectedItem() != null) {
-					unitString = units.getSelectedItem().toString();
-				}
-				valueStr = validateNumericValue(valueStr.trim(), unitString);
-				if (valueStr == null) {
-					appView.showTaggerMessageDialog(
-							MessageConstants.TAG_UNIT_ERROR, "Okay", null, null);
-					return;
-				}
+		String valueStr = this.valueField.getJTextArea().getText();
+		if (this.tagModel.isNumeric()) {
+			String unitString = "";
+			if (this.units.getSelectedItem() != null) {
+				unitString = this.units.getSelectedItem().toString();
 			}
-			AbstractTagModel newTag = tagger.createTransientTagModel(tagModel,
-					valueStr);
-			GuiTagModel gtm = (GuiTagModel) newTag;
-			gtm.setAppView(appView);
-			tagModel.setInAddValue(false);
-			if (alternateView != null) {
-				alternateView.valueAdded(newTag);
-			} else {
-				gtm.requestToggleTag();
-				appView.updateTags();
-				appView.updateEventsPanel();
+
+			valueStr = this.validateNumericValue(valueStr.trim(), unitString);
+			if (valueStr.isEmpty()) {
+				this.appView.showTaggerMessageDialog(MessageConstants.TAG_UNIT_ERROR, "OK", null, (String)null);
+				return;
 			}
-			appView.scrollToEventTag((GuiTagModel) newTag);
 		}
+
+		AbstractTagModel transientTag = this.tagger.createTransientTagModel(this.tagModel, valueStr);
+		this.tagModel.setInAddValue(false);
+		if (this.tagger.isHEDVersionTag(this.tagModel)) {
+			this.handleHEDTag(transientTag);
+			return;
+		}
+
+
+		if (this.alternateView != null) {
+			this.alternateView.valueAdded(transientTag);
+		} else {
+			GuiTagModel gtm = (GuiTagModel)transientTag;
+			gtm.setAppView(this.appView);
+			gtm.requestToggleTag();
+			this.appView.updateTagsPanel();
+			this.appView.updateEventsPanel();
+			this.appView.scrollToEventTag((GuiTagModel)transientTag);
+		}
+	}
+
+	private void handleHEDTag(AbstractTagModel tag) {
+		this.tagger.setHedExtended(true);
+		this.tagger.setHEDVersion(tag.getName());
+		this.appView.updateHEDVersion();
+		this.appView.updateTagsPanel();
+		this.appView.scrollToPreviousTag();
 	}
 
 	/**
@@ -400,23 +437,16 @@ public class AddValueView extends ConstraintContainer {
 	 *            A numerical value
 	 * @param unit
 	 *            Unit The unit associated with numerical value
-	 * @return Null if invalid, numerical value with unit appended if valid
+	 * @return Empty string if invalid, numerical value with unit appended if valid
 	 */
 	private String validateNumericValue(String numericValue, String unit) {
-		if (numericValue.matches("^[0-9]+(\\.[0-9]+)?$")
-				|| numericValue.matches("^\\.[0-9]+$"))
-			numericValue = numericValue + " " + unit;
-		else
-			numericValue = null;
-		return numericValue;
-	}
-
-	ActionListener taskPerformer = new ActionListener() {
-		public void actionPerformed(ActionEvent evt) {
-			highlight = false;
-			repaint();
+        if (numericValue.matches("^(\\.?[0-9]+)*$")) {
+            return unit.isEmpty() ? numericValue : numericValue + " " + unit;
+        } else {
+            return "";
 		}
-	};
+    }
+
 
 	/**
 	 * Updates the information shown in the view to match the underlying tag

@@ -14,6 +14,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.Box;
@@ -34,6 +35,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.plaf.basic.BasicArrowButton;
 
 import edu.utsa.tagger.FieldSelectLoader;
+import edu.utsa.tagger.guisupport.FontsAndColors;
 
 /**
  * This class creates a GUI that allows the user to select which fields to
@@ -46,21 +48,22 @@ import edu.utsa.tagger.FieldSelectLoader;
 public class FieldSelectView extends JPanel {
 
 	private boolean isTagBox = false;
-	private JLabel descriptionLabel = new JLabel(new String(), SwingConstants.CENTER);
-	private JLabel primaryFieldLabel = new JLabel("Primary field: ", SwingConstants.CENTER);
+    private JLabel descriptionLabel = new JLabel(new String(), SwingConstants.CENTER);
+    private JLabel primaryFieldLabel = new JLabel("Primary field: ", SwingConstants.CENTER);
+    private String primaryFieldDescription = "(to change, double-click the field name in the right panel)";
 	private JPanel parentPanel = new JPanel(new BorderLayout());
 	private JPanel northPanel = new JPanel(new BorderLayout());
 	private JPanel centerPanel = new JPanel(new BorderLayout());
 	private JPanel southPanel = new JPanel(new BorderLayout());
-	private JLabel tagBoxLabel = new JLabel("Tag fields");
-	private JLabel excludeBoxLabel = new JLabel("Exclude fields");
+    private JLabel tagBoxLabel = new JLabel("Use these events fields for tagging");
+    private JLabel ignoreBoxLabel = new JLabel("Ignore these event fields");
 	private JList<String> taggedListBox;
-	private JList<String> excludedListBox;
+    private JList<String> ignoredListBox;
 	private JButton transferButton = new JButton("<< Transfer >>");
 	private JButton removeAllButton = new JButton("<< Remove all");
 	private JButton addAllButton = new JButton("Add all >>");
 	private JButton cancelButton = new JButton("Cancel");
-	private JButton okayButton = new JButton("Okay");
+	private JButton okayButton = new JButton("Ok");
 	private String primaryField = new String();
 	private JFrame jFrame = new JFrame();
 	private FieldSelectLoader loader;
@@ -68,26 +71,14 @@ public class FieldSelectView extends JPanel {
 	private BasicArrowButton rightUpButton = new BasicArrowButton(BasicArrowButton.NORTH);
 	private BasicArrowButton rightDownButton = new BasicArrowButton(BasicArrowButton.SOUTH);
 
-	/**
-	 * 
-	 * @param loader
-	 *            A FieldSelectLoader loader object.
-	 * @param frameTitle
-	 *            The title of the frame.
-	 * @param excluded
-	 *            An array of strings containing the excluded fields.
-	 * @param tagged
-	 *            An array of strings containing the tagged fields.
-	 */
-	public FieldSelectView(FieldSelectLoader loader, String frameTitle, String[] excluded, String[] tagged,
-			String primaryField) {
+    public FieldSelectView(FieldSelectLoader loader, String frameTitle, String[] ignoredFields, String[] taggedFields, String primaryField) {
 		this.loader = loader;
 		this.frameTitle = frameTitle;
 		this.primaryField = primaryField;
-		excludedListBox = intializeJList(excluded);
-		taggedListBox = intializeJList(tagged);
-		layoutComponents(excluded, tagged);
-		primaryFieldLabel.setText("Primary field: " + primaryField);
+        this.ignoredListBox = this.intializeJList(ignoredFields);
+        this.taggedListBox = this.intializeJList(taggedFields);
+        this.layoutComponents(ignoredFields, taggedFields);
+        this.primaryFieldLabel.setText("<html>Primary field: <b>" + primaryField + "</b> " + this.primaryFieldDescription + "</html>");
 	}
 
 	/**
@@ -97,33 +88,33 @@ public class FieldSelectView extends JPanel {
 	 *            The elements that is used to initialize a JList.
 	 */
 	private JList<String> intializeJList(String[] elements) {
-		if (elements != null)
-			return new JList<String>(elements);
-		return new JList<String>();
+        if (elements != null) {
+            Arrays.sort(elements);
+            return new JList(elements);
+        } else {
+            return new JList();
+        }
 	}
-
 	/**
 	 * Layout the components of the GUI.
-	 * 
-	 * @param excluded
+	 *
+	 * @param ignoredFields
 	 *            An array of strings containing the excluded fields.
-	 * @param tagged
+	 * @param taggedFields
 	 *            An array of strings containing the tagged fields.
 	 */
-	private void layoutComponents(String[] excluded, String[] tagged) {
-		setListeners();
-		setColors();
-		northPanel.add(descriptionLabel);
-		centerPanel.add(createPanelForListBoxWithLabel(excludedListBox, excludeBoxLabel, addAllButton),
-				BorderLayout.WEST);
-		centerPanel.add(createCenterPanelButtons(), BorderLayout.CENTER);
-		centerPanel.add(createPanelForListBoxWithLabel(taggedListBox, tagBoxLabel, removeAllButton, rightUpButton,
-				rightDownButton), BorderLayout.EAST);
-		southPanel.add(createSouthPanel());
-		parentPanel.add(northPanel, BorderLayout.NORTH);
-		parentPanel.add(centerPanel, BorderLayout.CENTER);
-		parentPanel.add(southPanel, BorderLayout.SOUTH);
-		createFrame(parentPanel);
+    private void layoutComponents(String[] ignoredFields, String[] taggedFields) {
+        this.setListeners();
+        this.setColors();
+        this.northPanel.add(this.descriptionLabel);
+        this.centerPanel.add(this.createPanelForListBoxWithLabel(this.ignoredListBox, this.ignoreBoxLabel, this.addAllButton), "West");
+        this.centerPanel.add(this.createCenterPanelButtons(), "Center");
+        this.centerPanel.add(this.createPanelForListBoxWithLabel(this.taggedListBox, this.tagBoxLabel, this.removeAllButton), "East");
+        this.southPanel.add(this.createSouthPanel());
+        this.parentPanel.add(this.northPanel, "North");
+        this.parentPanel.add(this.centerPanel, "Center");
+        this.parentPanel.add(this.southPanel, "South");
+        this.createFrame(this.parentPanel);
 	}
 
 	/**
@@ -150,8 +141,9 @@ public class FieldSelectView extends JPanel {
 	 */
 	private JPanel createSouthPanel() {
 		JPanel buttonPanel = new JPanel(new BorderLayout());
+		buttonPanel.setBackground(FontsAndColors.BLUE_MEDIUM);
 		buttonPanel.add(Box.createRigidArea(new Dimension(350, 50)));
-		buttonPanel.add(primaryFieldLabel, BorderLayout.WEST);
+		buttonPanel.add(primaryFieldLabel, BorderLayout.CENTER);
 		buttonPanel.add(createSouthPanelButtons(), BorderLayout.EAST);
 		return buttonPanel;
 	}
@@ -164,11 +156,12 @@ public class FieldSelectView extends JPanel {
 	 */
 	private JPanel createSouthPanelButtons() {
 		JPanel buttonPanel = new JPanel();
+		buttonPanel.setBackground(FontsAndColors.BLUE_MEDIUM);
+		buttonPanel.add(this.cancelButton);
+//		buttonPanel.add(Box.createRigidArea(new Dimension(3, 0)));
 		buttonPanel.add(okayButton);
-		buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
-		Dimension d = okayButton.getMaximumSize();
-		cancelButton.setMaximumSize(new Dimension(d));
-		buttonPanel.add(cancelButton);
+//        Dimension d = this.cancelButton.getMaximumSize();
+//        this.okayButton.setPreferredSize(new Dimension(d));
 		return buttonPanel;
 	}
 
@@ -180,6 +173,7 @@ public class FieldSelectView extends JPanel {
 	 */
 	private JPanel createCenterPanelButtons() {
 		JPanel buttonPanel = new JPanel();
+		buttonPanel.setBackground(FontsAndColors.BLUE_MEDIUM);
 		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
 		buttonPanel.add(Box.createRigidArea(new Dimension(0, 50)));
 		transferButton.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -192,27 +186,24 @@ public class FieldSelectView extends JPanel {
 	 * Sets the listeners for all of the components.
 	 */
 	private void setListeners() {
-		transferButton.addActionListener(new addRemoveListener());
-		removeAllButton.addActionListener(new removeAddAllListener());
-		addAllButton.addActionListener(new removeAddAllListener());
-		rightUpButton.addActionListener(new moveUpDownListener());
-		rightDownButton.addActionListener(new moveUpDownListener());
-		taggedListBox.addListSelectionListener(new SharedListSelectionHandler());
-		excludedListBox.addListSelectionListener(new SharedListSelectionHandler());
-		cancelButton.addActionListener(new cancelOkayListener());
-		okayButton.addActionListener(new cancelOkayListener());
-		jFrame.addWindowListener(new frameWindowListener());
-		taggedListBox.addKeyListener(new LeftRightListener());
-		excludedListBox.addKeyListener(new LeftRightListener());
-		taggedListBox.addMouseListener(new MouseAdapter() {
-			@Override
+        this.transferButton.addActionListener(new FieldSelectView.addRemoveListener());
+        this.removeAllButton.addActionListener(new FieldSelectView.removeAddAllListener());
+        this.addAllButton.addActionListener(new FieldSelectView.removeAddAllListener());
+        this.taggedListBox.addListSelectionListener(new FieldSelectView.SharedListSelectionHandler());
+        this.ignoredListBox.addListSelectionListener(new FieldSelectView.SharedListSelectionHandler());
+        this.cancelButton.addActionListener(new FieldSelectView.cancelOkayListener());
+        this.okayButton.addActionListener(new FieldSelectView.cancelOkayListener());
+        this.jFrame.addWindowListener(new FieldSelectView.frameWindowListener());
+        this.taggedListBox.addKeyListener(new FieldSelectView.LeftRightListener());
+        this.ignoredListBox.addKeyListener(new FieldSelectView.LeftRightListener());
+        this.taggedListBox.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
 				if (e.getClickCount() == 2) {
-					String selectedValue = taggedListBox.getSelectedValue();
-					if (selectedValue != null && !selectedValue.equals(primaryField)) {
-						moveElementToStart(taggedListBox);
-						primaryField = selectedValue;
-						updatePrimaryField();
+                    String selectedValue = (String)FieldSelectView.this.taggedListBox.getSelectedValue();
+                    if (selectedValue != null && !selectedValue.equals(FieldSelectView.this.primaryField)) {
+                        FieldSelectView.this.primaryField = selectedValue;
+                        FieldSelectView.this.updatePrimaryField();
+                        FieldSelectView.this.sortJList(FieldSelectView.this.taggedListBox);
 					} else {
 						primaryField = new String();
 						updatePrimaryField();
@@ -220,22 +211,21 @@ public class FieldSelectView extends JPanel {
 				}
 			}
 		});
-
-		excludedListBox.addMouseListener(new MouseAdapter() {
-			@Override
+        this.ignoredListBox.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
 				if (e.getClickCount() == 2) {
-					String selectedValue = excludedListBox.getSelectedValue();
+                    String selectedValue = (String)FieldSelectView.this.ignoredListBox.getSelectedValue();
 					if (selectedValue != null) {
-						isTagBox = true;
-						primaryField = selectedValue;
-						int primaryFieldIndex = excludedListBox.getSelectedIndex();
-						excludedListBox.setSelectedIndex(primaryFieldIndex);
-						transferFromBoxes(excludedListBox, taggedListBox);
-						taggedListBox.setSelectedIndex(taggedListBox.getModel().getSize() - 1);
-						moveElementToStart(taggedListBox);
-						taggedListBox.requestFocusInWindow();
-						updatePrimaryField();
+                        FieldSelectView.this.isTagBox = true;
+                        FieldSelectView.this.primaryField = selectedValue;
+                        int primaryFieldIndex = FieldSelectView.this.ignoredListBox.getSelectedIndex();
+                        FieldSelectView.this.ignoredListBox.setSelectedIndex(primaryFieldIndex);
+                        FieldSelectView.this.transferFromBoxes(FieldSelectView.this.ignoredListBox, FieldSelectView.this.taggedListBox);
+                        FieldSelectView.this.taggedListBox.setSelectedIndex(FieldSelectView.this.taggedListBox.getModel().getSize() - 1);
+                        FieldSelectView.this.taggedListBox.requestFocusInWindow();
+                        FieldSelectView.this.updatePrimaryField();
+                        FieldSelectView.this.sortJList(FieldSelectView.this.ignoredListBox);
+                        FieldSelectView.this.sortJList(FieldSelectView.this.taggedListBox);
 					}
 				}
 			}
@@ -277,6 +267,10 @@ public class FieldSelectView extends JPanel {
 	 * Sets the colors for all of the components.
 	 */
 	private void setColors() {
+	    descriptionLabel.setForeground(FontsAndColors.BLUE_DARK);
+		ignoreBoxLabel.setForeground(FontsAndColors.BLUE_DARK);
+		primaryFieldLabel.setForeground(FontsAndColors.BLUE_DARK);
+		tagBoxLabel.setForeground(FontsAndColors.BLUE_DARK);
 		removeAllButton.setBackground(Color.gray);
 		removeAllButton.setOpaque(false);
 		addAllButton.setBackground(Color.gray);
@@ -333,6 +327,7 @@ public class FieldSelectView extends JPanel {
 	 */
 	private JPanel createPanelForListBoxWithLabel(JList<String> listBox, JLabel listBoxLabel, JButton transferButton) {
 		JPanel panel = new JPanel(new BorderLayout(0, 3));
+		panel.setBackground(FontsAndColors.BLUE_MEDIUM);
 		listBox.setVisibleRowCount(20);
 		panel.add(listBoxLabel, BorderLayout.NORTH);
 		JScrollPane scrollPaneForListBox = new JScrollPane(listBox);
@@ -355,13 +350,8 @@ public class FieldSelectView extends JPanel {
 		return listBoxToArray(taggedListBox);
 	}
 
-	/**
-	 * Gets all of the excluded fields from the exclude ListBox.
-	 * 
-	 * @return A String array containing all of the excluded fields.
-	 */
-	public String[] getExcludedFields() {
-		return listBoxToArray(excludedListBox);
+    public String[] getIgnoredFields() {
+        return this.listBoxToArray(this.ignoredListBox);
 	}
 
 	/**
@@ -385,8 +375,8 @@ public class FieldSelectView extends JPanel {
 	 * Updates the primary field label.
 	 */
 	private void updatePrimaryField() {
-		checkPrimary();
-		primaryFieldLabel.setText("Primary field: " + primaryField);
+        this.checkPrimary();
+        this.primaryFieldLabel.setText("<html>Primary field: <b>" + this.primaryField + "</b> " + this.primaryFieldDescription + "</html>");
 	}
 
 	/**
@@ -476,7 +466,7 @@ public class FieldSelectView extends JPanel {
 	 * 
 	 * @param jList
 	 *            The JList whose element is shifted to the beginning.
-	 * @param indices
+	 * @param index
 	 *            The index whose element is shifted to the beginning.
 	 */
 	private void shiftElementsToStart(JList<String> jList, int index) {
@@ -498,7 +488,7 @@ public class FieldSelectView extends JPanel {
 	 * 
 	 * @param jList
 	 *            The JList whose elements are shifted up one position.
-	 * @param indices
+	 * @param indexes
 	 *            The indices whose elements are shifted up one position.
 	 */
 	private void shiftUpElements(JList<String> jList, List<Integer> indexes) {
@@ -670,22 +660,76 @@ public class FieldSelectView extends JPanel {
 	 * The action listener class for the JList list boxes.
 	 */
 	public class SharedListSelectionHandler implements ListSelectionListener {
-		@Override
+		public SharedListSelectionHandler() {
+		}
+
 		public void valueChanged(ListSelectionEvent e) {
-			@SuppressWarnings("unchecked")
-			JList<String> sourceList = (JList<String>) e.getSource();
+			JList<String> sourceList = (JList)e.getSource();
 			if (sourceList.getValueIsAdjusting()) {
-				if (sourceList == taggedListBox) {
-					isTagBox = true;
-					excludedListBox.clearSelection();
+				if (sourceList == FieldSelectView.this.taggedListBox) {
+					FieldSelectView.this.isTagBox = true;
+					FieldSelectView.this.ignoredListBox.clearSelection();
 				} else {
-					isTagBox = false;
-					taggedListBox.clearSelection();
+					FieldSelectView.this.isTagBox = false;
+					FieldSelectView.this.taggedListBox.clearSelection();
 				}
 			}
+
 		}
 	}
 
+	private void sortJList(JList<String> jList) {
+		ListModel<String> model = jList.getModel();
+		String[] strings = new String[model.getSize()];
+
+		for(int i = 0; i < strings.length; ++i) {
+			strings[i] = ((String)model.getElementAt(i)).toString();
+		}
+
+		Arrays.sort(strings);
+		jList.setListData(strings);
+	}
+
+	/**
+	 * Creates a integer array containing elements between a range.
+	 *
+	 * @param start
+	 *            The start of the range.
+	 * @param end
+	 *            The end of the range.
+	 * @return The integer array containing the elements between the range.
+	 */
+	private int[] createArrayFromRange(int start, int end) {
+		int numElements = end - start;
+		int[] array = new int[numElements];
+
+		for(int i = 0; i < numElements; ++i) {
+			array[i] = start++;
+		}
+
+		return array;
+	}
+
+	/**
+	 * A dialog that asks if the user would like to cancel the FieldSelectView.
+	 *
+	 * @param message
+	 *            The message that is displayed in the dialog.
+	 * @return 0 if the FieldSelctView should be canceled, 1 if otherwise.
+	 */
+	private int createYesNoDialog(String message) {
+		YesNoDialog dialog = new YesNoDialog(this.jFrame, message);
+		int option = dialog.showDialog();
+		if (option == 0) {
+			this.loader.setNotified(true);
+			this.jFrame.dispose();
+			this.loader.setIgnoredFields(this.getIgnoredFields());
+			this.loader.setTaggedFields(this.getTaggedFields());
+			this.loader.setPrimaryField(this.primaryField);
+		}
+
+		return option;
+	}
 	/**
 	 * The action listener class for the Left and Right arrow buttons.
 	 */
@@ -696,24 +740,29 @@ public class FieldSelectView extends JPanel {
 
 		public void keyPressed(KeyEvent e) {
 			int key = e.getKeyCode();
-			if (key == KeyEvent.VK_LEFT && isTagBox) {
-				isTagBox = false;
-				int currentSize = excludedListBox.getModel().getSize();
-				transferFromBoxes(taggedListBox, excludedListBox);
-				int newSize = excludedListBox.getModel().getSize();
-				int[] selectedIndexes = createArrayFromRange(currentSize, newSize);
-				excludedListBox.setSelectedIndices(selectedIndexes);
-				updatePrimaryField();
-				excludedListBox.requestFocusInWindow();
-			} else if (key == KeyEvent.VK_RIGHT && !isTagBox) {
-				isTagBox = true;
-				int currentSize = taggedListBox.getModel().getSize();
-				transferFromBoxes(excludedListBox, taggedListBox);
-				int newSize = taggedListBox.getModel().getSize();
-				int[] selectedIndexes = createArrayFromRange(currentSize, newSize);
-				taggedListBox.setSelectedIndices(selectedIndexes);
-				updatePrimaryField();
-				taggedListBox.requestFocusInWindow();
+            int currentSize;
+            int newSize;
+            int[] selectedIndexes;
+            if (key == KeyEvent.VK_LEFT && FieldSelectView.this.isTagBox) {
+                FieldSelectView.this.isTagBox = false;
+                currentSize = FieldSelectView.this.ignoredListBox.getModel().getSize();
+                FieldSelectView.this.transferFromBoxes(FieldSelectView.this.taggedListBox, FieldSelectView.this.ignoredListBox);
+                newSize = FieldSelectView.this.ignoredListBox.getModel().getSize();
+                selectedIndexes = FieldSelectView.this.createArrayFromRange(currentSize, newSize);
+                FieldSelectView.this.ignoredListBox.setSelectedIndices(selectedIndexes);
+                FieldSelectView.this.updatePrimaryField();
+                FieldSelectView.this.sortJList(FieldSelectView.this.ignoredListBox);
+                FieldSelectView.this.ignoredListBox.requestFocusInWindow();
+            } else if (key == KeyEvent.VK_RIGHT && !FieldSelectView.this.isTagBox) {
+                FieldSelectView.this.isTagBox = true;
+                currentSize = FieldSelectView.this.taggedListBox.getModel().getSize();
+                FieldSelectView.this.transferFromBoxes(FieldSelectView.this.ignoredListBox, FieldSelectView.this.taggedListBox);
+                newSize = FieldSelectView.this.taggedListBox.getModel().getSize();
+                selectedIndexes = FieldSelectView.this.createArrayFromRange(currentSize, newSize);
+                FieldSelectView.this.taggedListBox.setSelectedIndices(selectedIndexes);
+                FieldSelectView.this.updatePrimaryField();
+                FieldSelectView.this.sortJList(FieldSelectView.this.taggedListBox);
+                FieldSelectView.this.taggedListBox.requestFocusInWindow();
 			}
 		}
 
@@ -722,33 +771,77 @@ public class FieldSelectView extends JPanel {
 		}
 	}
 
+
 	/**
 	 * The action listener class for the Remove and Add buttons.
 	 */
 	public class addRemoveListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
-			JButton sourceButton = (JButton) e.getSource();
-			if (sourceButton == transferButton && isTagBox) {
-				isTagBox = false;
-				int currentSize = excludedListBox.getModel().getSize();
-				transferFromBoxes(taggedListBox, excludedListBox);
-				int newSize = excludedListBox.getModel().getSize();
-				int[] selectedIndexes = createArrayFromRange(currentSize, newSize);
-				excludedListBox.setSelectedIndices(selectedIndexes);
-				taggedListBox.clearSelection();
-				updatePrimaryField();
-				excludedListBox.requestFocusInWindow();
-			} else if (sourceButton == transferButton && !isTagBox) {
-				isTagBox = true;
-				int currentSize = taggedListBox.getModel().getSize();
-				transferFromBoxes(excludedListBox, taggedListBox);
-				int newSize = taggedListBox.getModel().getSize();
-				int[] selectedIndexes = createArrayFromRange(currentSize, newSize);
-				taggedListBox.setSelectedIndices(selectedIndexes);
-				excludedListBox.clearSelection();
-				updatePrimaryField();
-				taggedListBox.requestFocusInWindow();
+			JButton sourceButton = (JButton)e.getSource();
+			int currentSize;
+			int newSize;
+			int[] selectedIndexes;
+			if (sourceButton == FieldSelectView.this.transferButton && FieldSelectView.this.isTagBox) {
+				FieldSelectView.this.isTagBox = false;
+				currentSize = FieldSelectView.this.ignoredListBox.getModel().getSize();
+				FieldSelectView.this.transferFromBoxes(FieldSelectView.this.taggedListBox, FieldSelectView.this.ignoredListBox);
+				newSize = FieldSelectView.this.ignoredListBox.getModel().getSize();
+				selectedIndexes = FieldSelectView.this.createArrayFromRange(currentSize, newSize);
+				FieldSelectView.this.ignoredListBox.setSelectedIndices(selectedIndexes);
+				FieldSelectView.this.taggedListBox.clearSelection();
+				FieldSelectView.this.updatePrimaryField();
+				FieldSelectView.this.sortJList(FieldSelectView.this.ignoredListBox);
+				FieldSelectView.this.ignoredListBox.requestFocusInWindow();
+			} else if (sourceButton == FieldSelectView.this.transferButton && !FieldSelectView.this.isTagBox) {
+				FieldSelectView.this.isTagBox = true;
+				currentSize = FieldSelectView.this.taggedListBox.getModel().getSize();
+				FieldSelectView.this.transferFromBoxes(FieldSelectView.this.ignoredListBox, FieldSelectView.this.taggedListBox);
+				newSize = FieldSelectView.this.taggedListBox.getModel().getSize();
+				selectedIndexes = FieldSelectView.this.createArrayFromRange(currentSize, newSize);
+				FieldSelectView.this.taggedListBox.setSelectedIndices(selectedIndexes);
+				FieldSelectView.this.ignoredListBox.clearSelection();
+				FieldSelectView.this.updatePrimaryField();
+				FieldSelectView.this.sortJList(FieldSelectView.this.taggedListBox);
+				FieldSelectView.this.taggedListBox.requestFocusInWindow();
 			}
+
+		}
+	}
+
+	/**
+	 * The action listener class for the Cancel and Okay buttons.
+	 */
+	public class cancelOkayListener implements ActionListener {
+		public cancelOkayListener() {
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			JButton sourceButton = (JButton)e.getSource();
+			if (sourceButton == FieldSelectView.this.cancelButton) {
+				String message = "Are you sure you want to exit?";
+				FieldSelectView.this.createYesNoDialog(message);
+			} else {
+				FieldSelectView.this.loader.setNotified(true);
+				FieldSelectView.this.loader.setSubmitted(true);
+				FieldSelectView.this.jFrame.dispose();
+			}
+
+			FieldSelectView.this.loader.setIgnoredFields(FieldSelectView.this.getIgnoredFields());
+			FieldSelectView.this.loader.setTaggedFields(FieldSelectView.this.getTaggedFields());
+			FieldSelectView.this.loader.setPrimaryField(FieldSelectView.this.primaryField);
+		}
+	}
+
+	/**
+	 * The frame window listener class for the close button.
+	 */
+	public class frameWindowListener extends WindowAdapter {
+		public frameWindowListener() {
+		}
+
+		public void windowClosing(WindowEvent evt) {
+			String message = "Are you sure you want to exit?";
+			FieldSelectView.this.createYesNoDialog(message);
 		}
 	}
 
@@ -757,47 +850,35 @@ public class FieldSelectView extends JPanel {
 	 */
 	public class removeAddAllListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
-			JButton sourceButton = (JButton) e.getSource();
-			if (sourceButton == removeAllButton && taggedListBox.getModel().getSize() > 0) {
-				isTagBox = false;
-				int currentSize = excludedListBox.getModel().getSize();
-				transferAllFromBoxes(taggedListBox, excludedListBox);
-				int newSize = excludedListBox.getModel().getSize();
-				int[] selectedIndexes = createArrayFromRange(currentSize, newSize);
-				excludedListBox.setSelectedIndices(selectedIndexes);
-				updatePrimaryField();
-				excludedListBox.requestFocusInWindow();
-			} else if (sourceButton == addAllButton && excludedListBox.getModel().getSize() > 0) {
-				isTagBox = true;
-				int currentSize = taggedListBox.getModel().getSize();
-				transferAllFromBoxes(excludedListBox, taggedListBox);
-				int newSize = taggedListBox.getModel().getSize();
-				int[] selectedIndexes = createArrayFromRange(currentSize, newSize);
-				taggedListBox.setSelectedIndices(selectedIndexes);
-				updatePrimaryField();
-				taggedListBox.requestFocusInWindow();
+			JButton sourceButton = (JButton)e.getSource();
+			int currentSize;
+			int newSize;
+			int[] selectedIndexes;
+			if (sourceButton == FieldSelectView.this.removeAllButton && FieldSelectView.this.taggedListBox.getModel().getSize() > 0) {
+				FieldSelectView.this.isTagBox = false;
+				currentSize = FieldSelectView.this.ignoredListBox.getModel().getSize();
+				FieldSelectView.this.transferAllFromBoxes(FieldSelectView.this.taggedListBox, FieldSelectView.this.ignoredListBox);
+				newSize = FieldSelectView.this.ignoredListBox.getModel().getSize();
+				selectedIndexes = FieldSelectView.this.createArrayFromRange(currentSize, newSize);
+				FieldSelectView.this.ignoredListBox.setSelectedIndices(selectedIndexes);
+				FieldSelectView.this.updatePrimaryField();
+				FieldSelectView.this.sortJList(FieldSelectView.this.ignoredListBox);
+				FieldSelectView.this.ignoredListBox.requestFocusInWindow();
+			} else if (sourceButton == FieldSelectView.this.addAllButton && FieldSelectView.this.ignoredListBox.getModel().getSize() > 0) {
+				FieldSelectView.this.isTagBox = true;
+				currentSize = FieldSelectView.this.taggedListBox.getModel().getSize();
+				FieldSelectView.this.transferAllFromBoxes(FieldSelectView.this.ignoredListBox, FieldSelectView.this.taggedListBox);
+				newSize = FieldSelectView.this.taggedListBox.getModel().getSize();
+				selectedIndexes = FieldSelectView.this.createArrayFromRange(currentSize, newSize);
+				FieldSelectView.this.taggedListBox.setSelectedIndices(selectedIndexes);
+				FieldSelectView.this.updatePrimaryField();
+				FieldSelectView.this.sortJList(FieldSelectView.this.taggedListBox);
+				FieldSelectView.this.taggedListBox.requestFocusInWindow();
 			}
-		}
 
+		}
 	}
 
-	/**
-	 * Creates a integer array containing elements between a range.
-	 * 
-	 * @param start
-	 *            The start of the range.
-	 * @param end
-	 *            The end of the range.
-	 * @return The integer array containing the elements between the range.
-	 */
-	private int[] createArrayFromRange(int start, int end) {
-		int numElements = end - start;
-		int[] array = new int[numElements];
-		for (int i = 0; i < numElements; i++) {
-			array[i] = start++;
-		}
-		return array;
-	}
 
 	/**
 	 * The action listener class for the Move up and Move down buttons.
@@ -813,25 +894,6 @@ public class FieldSelectView extends JPanel {
 		}
 	}
 
-	/**
-	 * The action listener class for the Cancel and Okay buttons.
-	 */
-	public class cancelOkayListener implements ActionListener {
-		public void actionPerformed(ActionEvent e) {
-			JButton sourceButton = (JButton) e.getSource();
-			if (sourceButton == cancelButton) {
-				String message = MessageConstants.CANCEL_Q;
-				createYesNoDialog(message);
-			} else {
-				loader.setNotified(true);
-				loader.setSubmitted(true);
-				jFrame.dispose();
-			}
-			loader.setExcludedFields(getExcludedFields());
-			loader.setTaggedFields(getTaggedFields());
-			loader.setPrimaryField(primaryField);
-		}
-	}
 
 	/**
 	 * The action listener class for the Remove primary button.
@@ -843,34 +905,5 @@ public class FieldSelectView extends JPanel {
 		}
 	}
 
-	/**
-	 * A dialog that asks if the user would like to cancel the FieldSelectView.
-	 * 
-	 * @param message
-	 *            The message that is displayed in the dialog.
-	 * @return 0 if the FieldSelctView should be canceled, 1 if otherwise.
-	 */
-	private int createYesNoDialog(String message) {
-		YesNoDialog dialog = new YesNoDialog(jFrame, message);
-		int option = dialog.showDialog();
-		if (option == 0) {
-			loader.setNotified(true);
-			jFrame.dispose();
-			loader.setExcludedFields(getExcludedFields());
-			loader.setTaggedFields(getTaggedFields());
-			loader.setPrimaryField(primaryField);
-		}
-		return option;
-	}
-
-	/**
-	 * The frame window listener class for the close button.
-	 */
-	public class frameWindowListener extends WindowAdapter {
-		public void windowClosing(WindowEvent evt) {
-			String message = MessageConstants.CANCEL_Q;
-			createYesNoDialog(message);
-		}
-	}
 
 }

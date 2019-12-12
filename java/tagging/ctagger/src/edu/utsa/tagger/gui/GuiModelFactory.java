@@ -7,6 +7,7 @@ import edu.utsa.tagger.FieldSelectLoader;
 import edu.utsa.tagger.IFactory;
 import edu.utsa.tagger.TaggerLoader;
 import edu.utsa.tagger.Tagger;
+import edu.utsa.tagger.TaggerLoader;
 
 /**
  * This class is a factory to create the App view, tag models, and event models
@@ -27,10 +28,12 @@ public class GuiModelFactory implements IFactory {
 		return new GuiTagModel(tagger);
 	}
 
-	@Override
-	public TaggerView createTaggerView(TaggerLoader loader, Tagger tagger, String frameTitle,
-			boolean isStandAloneVersion) {
-		return new TaggerView(loader, tagger, frameTitle, isStandAloneVersion);
+    public TaggerView createTaggerView(TaggerLoader loader, Tagger tagger, String frameTitle) {
+        return new TaggerView(loader, tagger, frameTitle);
+    }
+
+    public TaggerView createTaggerView(TaggerLoader loader) {
+        return new TaggerView(loader);
 	}
 
 	@Override

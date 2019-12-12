@@ -14,6 +14,7 @@ import javax.swing.JTextArea;
 import edu.utsa.tagger.guisupport.Constraint;
 import edu.utsa.tagger.guisupport.ConstraintContainer;
 import edu.utsa.tagger.guisupport.ConstraintLayout;
+import edu.utsa.tagger.guisupport.FontsAndColors;
 
 /**
  * This class represents the view for a notification shown at the top of the

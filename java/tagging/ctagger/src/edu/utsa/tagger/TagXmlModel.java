@@ -113,6 +113,7 @@ public class TagXmlModel {
 	}
 
 	public boolean isExtensionAllowed() {
+
 		return extensionAllowed;
 	}
 

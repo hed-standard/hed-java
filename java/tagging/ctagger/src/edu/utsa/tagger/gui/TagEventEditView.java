@@ -24,12 +24,7 @@ import javax.swing.event.DocumentListener;
 import edu.utsa.tagger.AbstractTagModel;
 import edu.utsa.tagger.TaggedEvent;
 import edu.utsa.tagger.Tagger;
-import edu.utsa.tagger.guisupport.Constraint;
-import edu.utsa.tagger.guisupport.ConstraintContainer;
-import edu.utsa.tagger.guisupport.ConstraintLayout;
-import edu.utsa.tagger.guisupport.XButton;
-import edu.utsa.tagger.guisupport.XScrollTextBox;
-import edu.utsa.tagger.guisupport.XTextBox;
+import edu.utsa.tagger.guisupport.*;
 
 /**
  * 
@@ -63,7 +58,8 @@ public class TagEventEditView extends ConstraintContainer {
 		add(save, new Constraint("top:10 height:20 right:70 width:35"));
 
 		nameLabel.setBackground(FontsAndColors.EDITTAG_BG);
-		name.setForeground(FontsAndColors.GREY_DARK);
+		nameLabel.setForeground(FontsAndColors.BLUE_DARK);
+		name.setForeground(FontsAndColors.BLUE_DARK);
 		name.getJTextArea().getDocument()
 				.putProperty("filterNewlines", Boolean.TRUE);
 		name.getJTextArea().getInputMap()
@@ -154,6 +150,7 @@ public class TagEventEditView extends ConstraintContainer {
 			}
 			tagModel.setInEdit(false);
 			appView.updateEventsPanel();
+			appView.scrollToEvent(taggedEvent);
 		}
 	}
 
@@ -204,7 +201,7 @@ public class TagEventEditView extends ConstraintContainer {
 		return name.getJTextArea().getText();
 	}
 
-	private XButton cancel = new XButton("cancel") {
+	private TagEditOptionButton cancel = new TagEditOptionButton("cancel") {
 		@Override
 		public Font getFont() {
 			Map<TextAttribute, Integer> fontAttributes = new HashMap<TextAttribute, Integer>();
@@ -214,7 +211,7 @@ public class TagEventEditView extends ConstraintContainer {
 		}
 	};
 
-	private XButton save = new XButton("save") {
+	private TagEditOptionButton save = new TagEditOptionButton("save") {
 		@Override
 		public Font getFont() {
 			Map<TextAttribute, Integer> fontAttributes = new HashMap<TextAttribute, Integer>();

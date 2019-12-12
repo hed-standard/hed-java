@@ -23,9 +23,12 @@ public class TagComments {
 	 *            a connection to the database
 	 * @param pathname
 	 *            the pathname of the tag
-	 * @param comment
-	 *            a node representing a comment
-	 * 
+	 * @param dateString
+	 *            date string
+	 * @param author
+	 * @param text
+	 *            comment text
+	 *
 	 */
 	public static int insertCommentByPathname(Connection dbCon,
 			String pathname, String dateString, String author, String text)

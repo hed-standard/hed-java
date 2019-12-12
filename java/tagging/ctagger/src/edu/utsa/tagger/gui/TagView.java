@@ -25,6 +25,8 @@ import edu.utsa.tagger.Tagger;
 import edu.utsa.tagger.gui.ContextMenu.ContextMenuAction;
 import edu.utsa.tagger.guisupport.ClickDragThreshold;
 import edu.utsa.tagger.guisupport.ConstraintLayout;
+import edu.utsa.tagger.guisupport.FontsAndColors;
+import edu.utsa.tagger.guisupport.MessageConstants;
 
 /**
  * View used to display a tag in the hierarchy.
@@ -52,6 +54,12 @@ public class TagView extends JComponent implements MouseListener {
 	private String toolTip;
 
 	private Rectangle collapserBounds = new Rectangle(0, 0, 0, 0);
+	ActionListener taskPerformer = new ActionListener() {
+		public void actionPerformed(ActionEvent evt) {
+			TagView.this.highlight = false;
+			TagView.this.repaint();
+		}
+	};
 
 	public TagView(Tagger tagger, TaggerView appview, GuiTagModel model) {
 		this.tagger = tagger;
@@ -72,16 +80,8 @@ public class TagView extends JComponent implements MouseListener {
 	 * @param e
 	 */
 	private void displayContextMenu(MouseEvent e) {
-		Map<String, ContextMenuAction> map = new LinkedHashMap<String, ContextMenuAction>();
-		if (tagger.canEditTags()) {
-			map.put("edit", new ContextMenuAction() {
-				@Override
-				public void doAction() {
-					model.setInEdit(true);
-					appView.updateTags();
-					appView.scrollToTag(model);
-				}
-			});
+        Map<String, ContextMenuAction> map = new LinkedHashMap();
+        if (this.tagger.getExtensionsAllowed() && this.tagger.isExtensionTag(this.model)) {
 			map.put("add tag", new ContextMenuAction() {
 				@Override
 				public void doAction() {
@@ -89,10 +89,21 @@ public class TagView extends JComponent implements MouseListener {
 					GuiTagModel newGuiTag = (GuiTagModel) newTag;
 					if (newTag != null) {
 						newGuiTag.setFirstEdit(true);
-						model.setCollapsed(false);
-						appView.updateTags();
-						appView.scrollToTag(newTag);
+                        TagView.this.model.setCollapsed(false);
+                        TagView.this.appView.updateTagsPanel();
+                        TagView.this.appView.scrollToTagEdit(newTag);
+                    }
+
 					}
+            });
+        }
+
+        if (this.tagger.getExtensionsAllowed() && this.tagger.isNewTag(this.model)) {
+            map.put("edit", new ContextMenuAction() {
+                public void doAction() {
+                    TagView.this.model.setInEdit(true);
+                    TagView.this.appView.updateTagsPanel();
+                    TagView.this.appView.scrollToTag(TagView.this.model);
 				}
 			});
 			map.put("delete", new ContextMenuAction() {
@@ -100,19 +111,20 @@ public class TagView extends JComponent implements MouseListener {
 				public void doAction() {
 					int delete = 0;
 					if (model.isCollapsable()) {
-						delete = appView.showTaggerMessageDialog(MessageConstants.TAG_DELETE_WARNING, "Okay", "Cancel",
+						delete = appView.showTaggerMessageDialog(MessageConstants.TAG_DELETE_WARNING, "Ok", "Cancel",
 								null);
 					}
 					if (delete == 0) {
-						tagger.deleteTag(model);
-						tagger.setHedEdited(true);
-						appView.updateTags();
-						appView.updateEventsPanel();
+                        TagView.this.tagger.deleteTag(TagView.this.model);
+                        TagView.this.tagger.setHedExtended(true);
+                        TagView.this.appView.updateTagsPanel();
+                        TagView.this.appView.updateEventsPanel();
 					}
 				}
 			});
 		}
-		appView.showContextMenu(map);
+        if (map.size() > 0)
+			appView.showContextMenu(map);
 	}
 
 	@Override
@@ -132,15 +144,16 @@ public class TagView extends JComponent implements MouseListener {
 		if (SwingUtilities.isRightMouseButton(e) && !"~".equals(model.getName())) {
 			displayContextMenu(e);
 		} else if (SwingUtilities.isLeftMouseButton(e)) {
-			if (model.isCollapsable() && collapserBounds.contains(e.getPoint())) {
-				model.setCollapsed(!model.isCollapsed());
-				appView.updateTags();
-			} else if (model.takesValue() || model.isNumeric()) {
-				model.setInAddValue(true);
-				appView.updateTags();
+            if (this.model.isCollapsable() && this.collapserBounds.contains(e.getPoint())) {
+                this.model.setCollapsed(!this.model.isCollapsed());
+                this.appView.updateTagsPanel();
+            } else if (!this.model.takesValue() && !this.model.isNumeric()) {
+                this.model.requestToggleTag();
+                this.appView.scrollToEventTag(this.model);
 			} else {
-				model.requestToggleTag();
-				appView.scrollToEventTag(model);
+                this.model.setInAddValue(true);
+                this.appView.updateTagsPanel();
+                this.appView.scrollToTagAddIn(this.model);
 			}
 		}
 	}
@@ -183,6 +196,8 @@ public class TagView extends JComponent implements MouseListener {
 		try {
 			Field f = FontsAndColors.class.getField(model.getHighlight().toString().toUpperCase());
 			bg = (Color) f.get(bg);
+			if (pressed || highlight)
+				bg = FontsAndColors.BLUE_VERY_LIGHT;
 		} catch (Exception ex) {
 		}
 
@@ -223,11 +238,19 @@ public class TagView extends JComponent implements MouseListener {
 		}
 
 		g2d.setFont(font);
-		g2d.drawString(model.getName() + " ", (int) x, (int) y);
+		String name = null;
+//		if (tagger.getExtensionsAllowed())
+//			name = model.isExtensionAllowed() ? model.getName() + " (extension allowed - right click to add)" : model.getName();
+//		else
+			name = model.getName();
+		g2d.drawString(name + " ", (int) x, (int) y);
 
 		String info = null;
 		if (model.isChildRequired()) {
 			info = "(child required)";
+		}
+		if (tagger.getExtensionsAllowed() && model.isExtensionAllowed()) {
+			info = info == null ? "(extension allowed)" : info + " (extension allowed)";
 		}
 
 		if (info != null) {
@@ -249,15 +272,11 @@ public class TagView extends JComponent implements MouseListener {
 		if (model.takesValue() || model.isNumeric()) {
 			toolTip = MessageConstants.TAKES_VALUE;
 		}
+		else {
+			toolTip = model.getDescription();
+		}
 		setToolTipText(toolTip);
 	}
-
-	ActionListener taskPerformer = new ActionListener() {
-		public void actionPerformed(ActionEvent evt) {
-			highlight = false;
-			repaint();
-		}
-	};
 
 	/**
 	 * Updates the information shown in the view to match the underlying tag

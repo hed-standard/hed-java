@@ -20,10 +20,7 @@ import javax.swing.JPanel;
 
 import edu.utsa.tagger.EventModel;
 import edu.utsa.tagger.TaggedEvent;
-import edu.utsa.tagger.guisupport.Constraint;
-import edu.utsa.tagger.guisupport.ConstraintLayout;
-import edu.utsa.tagger.guisupport.ScrollLayout;
-import edu.utsa.tagger.guisupport.XButton;
+import edu.utsa.tagger.guisupport.*;
 
 /**
  * Dialog used to show a message to the user that references specific tags of
@@ -75,8 +72,8 @@ public class TagDisplayDialog extends JDialog {
 			g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
 					RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
 
-			Color fg = Color.gray;
-			Color bg = Color.white;
+			Color fg = FontsAndColors.BLUE_DARK;//Color.gray;
+			Color bg = FontsAndColors.BLUE_MEDIUM;//Color.white;
 
 			g2d.setColor(bg);
 			g2d.fill(new Rectangle2D.Double(0, 0, getWidth(), getHeight()));
@@ -140,21 +137,23 @@ public class TagDisplayDialog extends JDialog {
 		this.egtList = egtList;
 
 		bgPanel.setLayout(new ConstraintLayout());
-		bgPanel.setBackground(Color.white);
+		bgPanel.setBackground(FontsAndColors.DIALOG_BG);
 		bgPanel.setPreferredSize(new Dimension(700, 300));
 
 		topMessageLabel.setText(topMessage);
+		topMessageLabel.setForeground(FontsAndColors.DIALOG_MESSAGE_FG);
 		okButton = TaggerView.createMenuButton(buttonText);
 		okButton.addMouseListener(new OkButtonListener());
 		fileScrollLayout = new ScrollLayout(fileScrollPane, tagsPanel);
 		fileScrollPane.setLayout(fileScrollLayout);
 		tagsPanel.setLayout(new ConstraintLayout());
-		tagsPanel.setBackground(Color.white);
+		tagsPanel.setBackground(FontsAndColors.DIALOG_BG);
 
 		bgPanel.add(topMessageLabel, new Constraint(
 				"top:0 height:30 left:10 width:700"));
 		if (bottomMessage != null) {
 			bottomMessageLabel.setText(bottomMessage);
+			bottomMessageLabel.setForeground(FontsAndColors.DIALOG_MESSAGE_FG);
 			bgPanel.add(fileScrollPane, new Constraint(
 					"top:40 bottom:80 left:0 right:0"));
 			bgPanel.add(bottomMessageLabel, new Constraint(
@@ -164,12 +163,12 @@ public class TagDisplayDialog extends JDialog {
 					"top:40 bottom:80 left:0 right:0"));
 		}
 		bgPanel.add(okButton, new Constraint(
-				"bottom:10 height:30 right:10 width:120"));
+				"bottom:10 height:30 right:5 width:120"));
 		if (options) {
 			cancelButton = TaggerView.createMenuButton("Cancel");
 			cancelButton.addMouseListener(new CancelButtonListener());
 			bgPanel.add(cancelButton, new Constraint(
-					"bottom:10 height:30 left:10 width:80"));
+					"bottom:10 height:30 right:140 width:80"));
 		}
 
 		addTags();
@@ -205,8 +204,8 @@ public class TagDisplayDialog extends JDialog {
 		String eventString = taggedEvent.getEventModel().getCode() + ": "
 				+ taggedEvent.getLabel();
 		String message = egt.getTagModel().getPath() + " in";
-		if (egt.getGroupId() != taggedEvent.getEventGroupId()) {
-			int groupNumber = taggedEvent.getGroupNumber(egt.getGroupId());
+		if (egt.getGroupId() != taggedEvent.getEventLevelId()) {
+			int groupNumber = taggedEvent.getGroupId(egt.getGroupId());
 			message += " group " + groupNumber + " of";
 		}
 		message += " event " + eventString;

@@ -14,6 +14,8 @@ public class XScrollTextBox extends JScrollPane {
 		this.jTextArea = jTextArea;
 		setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
 		setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		setBackground(FontsAndColors.BLUE_MEDIUM);
+		setBorder(null);
 	}
 
 	public JTextArea getJTextArea() {

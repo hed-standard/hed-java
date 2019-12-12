@@ -17,6 +17,7 @@ import javax.swing.SwingUtilities;
 import edu.utsa.tagger.Tagger;
 import edu.utsa.tagger.guisupport.ClickDragThreshold;
 import edu.utsa.tagger.guisupport.ConstraintLayout;
+import edu.utsa.tagger.guisupport.FontsAndColors;
 
 /**
  * Tag view to be used with the file chooser dialog.

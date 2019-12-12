@@ -21,10 +21,7 @@ public class FieldOrderLoader {
 	 * 
 	 * @param frameTitle
 	 *            The title for the FieldSelectView frame.
-	 * @param excluded
-	 *            The excluded fields for the FieldSelectView list box.
-	 * @param tagged
-	 *            The tagged fields for the FieldSelectView list box.
+	 * @param fields
 	 */
 	public FieldOrderLoader(String frameTitle, String[] fields) {
 		this(new GuiModelFactory(), frameTitle, fields);
@@ -36,10 +33,7 @@ public class FieldOrderLoader {
 	 *            The Factory interface used to create a FieldSelectView object.
 	 * @param frameTitle
 	 *            The title for the FieldSelectView frame.
-	 * @param excluded
-	 *            The excluded fields for the FieldSelectView list box.
-	 * @param tagged
-	 *            The tagged fields for the FieldSelectView list box.
+	 * @param fields
 	 */
 	public FieldOrderLoader(IFactory factory, String frameTitle, String[] fields) {
 		fieldOrderView = factory.createFieldOrderView(this, frameTitle, fields);
@@ -75,7 +69,7 @@ public class FieldOrderLoader {
 	/**
 	 * Sets if the FieldSelectView is notified.
 	 * 
-	 * @param submitted
+	 * @param notified
 	 *            True if the FieldSelectView is notified, false if otherwise.
 	 */
 	public synchronized void setNotified(boolean notified) {
@@ -96,7 +90,7 @@ public class FieldOrderLoader {
 	/**
 	 * Sets the tagged fields.
 	 * 
-	 * @param taggedFields
+	 * @param fields
 	 *            A String array containing the tagged fields.
 	 */
 	public synchronized void setFields(String[] fields) {

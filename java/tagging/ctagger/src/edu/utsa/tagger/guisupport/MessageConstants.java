@@ -1,4 +1,4 @@
-package edu.utsa.tagger.gui;
+package edu.utsa.tagger.guisupport;
 
 /**
  * This class contains various messages displayed throughout the Tagger GUI.
@@ -37,6 +37,7 @@ public final class MessageConstants {
 	public static final String TAG_RR_ERROR = "Tag cannot be both required and recommended.";
 	public static final String TAG_POSITION_ERROR = "Tag position must be an integer.";
 	public static final String TAG_UNIT_ERROR = "Tag value must be numerical.";
+	public static final String TAG_COMMA_ERROR = "Tag value must not contain comma.";
 	public static final String TILDE_ERROR = "There can be at most " + MAX_GROUP_TILDES + " tildes in a group.";
 	public static final String ADD_EVENT_ERROR = "Duplicate event - unable to add";
 	public static final String ASSOCIATE_RR_ERROR = "Unable to add tag: Required and recommended tags can only be added at the event level.";

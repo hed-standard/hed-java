@@ -26,10 +26,9 @@ import javax.swing.Timer;
 import edu.utsa.tagger.AbstractTagModel;
 import edu.utsa.tagger.TaggedEvent;
 import edu.utsa.tagger.Tagger;
+import edu.utsa.tagger.ToggleTagMessage;
 import edu.utsa.tagger.gui.ContextMenu.ContextMenuAction;
-import edu.utsa.tagger.guisupport.ClickDragThreshold;
-import edu.utsa.tagger.guisupport.ConstraintLayout;
-import edu.utsa.tagger.guisupport.XCheckBox;
+import edu.utsa.tagger.guisupport.*;
 import edu.utsa.tagger.guisupport.XCheckBox.StateListener;
 
 /**
@@ -44,35 +43,13 @@ public class GroupView extends JComponent implements MouseListener,
 		StateListener {
 
 	private final int MAX_GROUP_TILDES = 2;
-	private final Tagger tagger;
-	private final TaggerView appView;
-	private final Integer groupId;
-	private HashMap<AbstractTagModel, TagEventView> tagEgtViews;
+    private static Tagger tagger;
+    private static TaggerView appView;
+    private final Integer id;
+    private HashMap<AbstractTagModel, TagEventView> tagEventViews = new HashMap();
 	private boolean highlight = false;
 	private boolean selected = false;
 	XCheckBox checkbox;
-
-	public GroupView(Tagger tagger, TaggerView appView, Integer groupId) {
-		this.tagger = tagger;
-		this.appView = appView;
-		this.groupId = groupId;
-		this.tagEgtViews = new HashMap<AbstractTagModel, TagEventView>();
-		addMouseListener(this);
-		setLayout(layout);
-		new ClickDragThreshold(this);
-		checkbox = new XCheckBox(FontsAndColors.TRANSPARENT, Color.black,
-				FontsAndColors.TRANSPARENT, Color.blue,
-				FontsAndColors.TRANSPARENT, Color.blue) {
-			@Override
-			public Dimension getPreferredSize() {
-				return new Dimension((int) (ConstraintLayout.scale * 20),
-						(int) (ConstraintLayout.scale * 20));
-			}
-		};
-		add(checkbox);
-		checkbox.addStateListener(this);
-	}
-
 	LayoutManager layout = new LayoutManager() {
 		@Override
 		public void addLayoutComponent(String s, Component c) {
@@ -102,39 +79,117 @@ public class GroupView extends JComponent implements MouseListener,
 
 	};
 
+	ActionListener taskPerformer = new ActionListener() {
+		public void actionPerformed(ActionEvent evt) {
+			highlight = false;
+			repaint();
+		}
+	};
+
+	/**
+	 * Updates the information shown in the view to match the underlying tag
+	 * model.
+	 */
+	public GroupView(Tagger tagger, TaggerView appView, Integer id) {
+		GroupView.tagger = tagger;
+		GroupView.appView = appView;
+		this.id = id;
+		this.createLayout();
+	}
+
+    private void createLayout() {
+        this.createCheckbox();
+        this.setLayout(this.layout);
+        this.addMouseListener(this);
+        new ClickDragThreshold(this);
+    }
+
+    private void createCheckbox() {
+        this.checkbox = new XCheckBox(FontsAndColors.TRANSPARENT, Color.black, FontsAndColors.TRANSPARENT, Color.blue, FontsAndColors.TRANSPARENT, Color.blue) {
+            public Dimension getPreferredSize() {
+                return new Dimension((int)(ConstraintLayout.scale * 20.0D), (int)(ConstraintLayout.scale * 20.0D));
+            }
+        };
+        this.checkbox.addStateListener(new GroupView.CheckBoxListener());
+        this.add(this.checkbox);
+    }
+
+    private void handleStateChange() {
+        if (appView.isSelected(this.id)) {
+            appView.removeSelectedGroup(this.id);
+            this.setSelected(false);
+        } else {
+            appView.addSelectedGroup(this.id);
+            this.setSelected(true);
+        }
+
+    }
+
 	public Integer getGroupId() {
-		return groupId;
+        return this.id;
 	}
 
 	public void addTagEgtView(AbstractTagModel tagModel, TagEventView tagEgtView) {
-		tagEgtViews.put(tagModel, tagEgtView);
+        this.tagEventViews.put(tagModel, tagEgtView);
 	}
 
 	public TagEventView getTagEgtViewByKey(AbstractTagModel tagModel) {
-		return tagEgtViews.get(tagModel);
+        return (TagEventView)this.tagEventViews.get(tagModel);
 	}
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		if (SwingUtilities.isLeftMouseButton(e)) {
-			appView.selectedGroups.clear();
-			appView.selectedGroups.add(groupId);
-			appView.updateEventsPanel();
+            this.changeState();
 		} else if (SwingUtilities.isRightMouseButton(e)) {
-			Map<String, ContextMenuAction> map = new LinkedHashMap<String, ContextMenuAction>();
+            Map<String, ContextMenuAction> map = new LinkedHashMap();
 			map.put("add ~", new ContextMenuAction() {
 				@Override
 				public void doAction() {
-					TaggedEvent taggedEvent = tagger.getEventByGroupId(groupId);
-					int numTags = taggedEvent.getNumTagsInGroup(groupId);
-					addTilde(numTags);
+                    TaggedEvent taggedEvent = GroupView.tagger.getEventByGroupId(GroupView.this.id);
+                    int numTags = taggedEvent.getNumTagsInGroup(GroupView.this.id);
+                    GroupView.this.addTilde(numTags);
+				}
+			});
+			map.put("duplicate group", new ContextMenuAction() {
+				@Override
+				public void doAction() {
+				    // Create new group
+					TaggedEvent taggedEvent = GroupView.tagger.getEventByGroupId(GroupView.this.id);
+					int groupId = tagger.addNewGroup(taggedEvent);
+					HashSet<Integer> idSet = new HashSet<>();
+					idSet.add(groupId);
+
+					// Copy tags
+                    for (AbstractTagModel tagModel : tagEventViews.keySet()) {
+						AbstractTagModel duplicateTag = tagger.getFactory().createAbstractTagModel(tagger);
+						duplicateTag.setPath(tagModel.getPath());
+						GuiTagModel gtm = (GuiTagModel) duplicateTag;
+						gtm.setAppView(appView);
+						ToggleTagMessage message = tagger.toggleTag(gtm, idSet);
+						if (message != null) {
+							if (message.rrError) {
+								appView.showTaggerMessageDialog(
+										MessageConstants.ASSOCIATE_RR_ERROR, "Ok", null, null);
+							} else if (message.descendants.size() > 0) {
+								appView.showDescendantDialog(message);
+							} else if (message.uniqueValues.size() > 0) {
+								appView.showUniqueDialog(message);
+							} else {
+								appView.showAncestorDialog(message);
+							}
+						}
+					}
+
+					appView.updateEventsPanel();
+					appView.scrollToNewGroup(taggedEvent, groupId);
 				}
 			});
 			map.put("remove group", new ContextMenuAction() {
 				@Override
 				public void doAction() {
-					tagger.removeGroup(groupId);
-					appView.updateEventsPanel();
+                    GroupView.tagger.removeGroup(GroupView.this.id);
+                    GroupView.appView.updateEventsPanel();
 				}
 			});
 			appView.showContextMenu(map, 105);
@@ -143,17 +198,17 @@ public class GroupView extends JComponent implements MouseListener,
 
 	private void addTilde(int index) {
 		int numTildes = 0;
-		TaggedEvent taggedEvent = tagger.getEventByGroupId(groupId);
+        TaggedEvent taggedEvent = tagger.getEventByGroupId(this.id);
 		if (taggedEvent != null) {
-			numTildes = taggedEvent.findNumTildes(groupId);
+            numTildes = taggedEvent.findGroupTildeCount(this.id);
 		}
 		if (numTildes < MAX_GROUP_TILDES) {
 			GuiTagModel newTag = (GuiTagModel) tagger.getFactory()
 					.createAbstractTagModel(tagger);
 			newTag.setPath("~");
 			newTag.setAppView(appView);
-			Set<Integer> groupSet = new HashSet<Integer>();
-			groupSet.add(groupId);
+            Set<Integer> groupSet = new HashSet();
+            groupSet.add(this.id);
 			tagger.associate(newTag, index, groupSet);
 			appView.updateEventsPanel();
 			appView.scrollToEventTag(newTag);
@@ -193,7 +248,7 @@ public class GroupView extends JComponent implements MouseListener,
 		if (selected) {
 			g2d.setColor(FontsAndColors.GROUP_SELECTED);
 		} else {
-			g2d.setColor(Color.white);
+			g2d.setColor(FontsAndColors.GROUP_UNSELECTED);
 		}
 		g2d.fill(SwingUtilities.calculateInnerArea(this, null));
 
@@ -219,28 +274,11 @@ public class GroupView extends JComponent implements MouseListener,
 		repaint();
 	}
 
-	@Override
-	public void stateChanged() {
-		if (appView.selectedGroups.contains(groupId)) {
-			appView.selectedGroups.remove(groupId);
-			setSelected(false);
-		} else {
-			appView.selectedGroups.add(groupId);
-			setSelected(true);
-		}
+    public void changeState() {
+        this.handleStateChange();
 	}
 
-	ActionListener taskPerformer = new ActionListener() {
-		public void actionPerformed(ActionEvent evt) {
-			highlight = false;
-			repaint();
-		}
-	};
 
-	/**
-	 * Updates the information shown in the view to match the underlying tag
-	 * model.
-	 */
 	public void highlight() {
 		highlight = true;
 		SwingUtilities.invokeLater(new Runnable() {
@@ -252,4 +290,16 @@ public class GroupView extends JComponent implements MouseListener,
 			}
 		});
 	}
+
+    private class CheckBoxListener implements StateListener {
+        private CheckBoxListener() {
+        }
+
+        public void changeState() {
+            GroupView.this.handleStateChange();
+		}
+		public void stateChanged() {
+			GroupView.this.handleStateChange();
+		}
+    }
 }

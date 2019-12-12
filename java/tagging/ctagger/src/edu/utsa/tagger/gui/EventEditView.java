@@ -26,12 +26,7 @@ import javax.swing.event.DocumentListener;
 import edu.utsa.tagger.AbstractTagModel;
 import edu.utsa.tagger.TaggedEvent;
 import edu.utsa.tagger.Tagger;
-import edu.utsa.tagger.guisupport.Constraint;
-import edu.utsa.tagger.guisupport.ConstraintContainer;
-import edu.utsa.tagger.guisupport.ConstraintLayout;
-import edu.utsa.tagger.guisupport.XButton;
-import edu.utsa.tagger.guisupport.XScrollTextBox;
-import edu.utsa.tagger.guisupport.XTextBox;
+import edu.utsa.tagger.guisupport.*;
 
 /**
  * This class represents view for editing an event.

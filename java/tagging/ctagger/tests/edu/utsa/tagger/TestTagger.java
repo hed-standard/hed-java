@@ -38,9 +38,10 @@ public class TestTagger {
 	public static final int numRequiredJson = 3;
 	public static final int numRecommendedJson = 0;
 	public static final int numUniqueJson = 3;
+	private TestSetup testSetup;
 	private Tagger testTagger;
 	private File testLoadXml;
-	private String hedOld;
+	private String hedXML;
 	private String hedRR;
 	private String eventsOld;
 	private IFactory factory;
@@ -54,38 +55,32 @@ public class TestTagger {
 	private static int[] testGroupIds = { 1000, 2000, 3000, 4000 };
 
 	@Before
-	public void setUp() throws URISyntaxException {
-		testLoadXml = TestUtilities.getResourceAsFile(TestUtilities.saveFileTest);
-		hedOld = TestUtilities.getResourceAsString(TestUtilities.HedFileName);
-		hedRR = TestUtilities.getResourceAsString(TestUtilities.HedFileName);
-		eventsOld = TestUtilities.getResourceAsString(TestUtilities.JsonEventsArrays);
-		factory = new GuiModelFactory();
-		TaggerLoader loader = new TaggerLoader(hedOld, eventsOld, TaggerLoader.USE_JSON, 0, "Tagger Test - JSON Events", 2, factory, true,
-				true);
-		testTagger = new Tagger(hedOld, eventsOld, true, factory, loader);
-		TaggerSet<TaggedEvent> egtSet = testTagger.getEgtSet();
-		testEvent1 = egtSet.get(0);
-		testEvent2 = egtSet.get(1);
-		testEvent3 = egtSet.get(2);
-		tagAncestor = factory.createAbstractTagModel(testTagger);
-		tagAncestor.setPath("/a/b/c");
-		tagAncestor2 = factory.createAbstractTagModel(testTagger);
-		tagAncestor2.setPath("/a");
-		tag = factory.createAbstractTagModel(testTagger);
-		tag.setPath("/a/b/c/d");
-		tagDescendant = factory.createAbstractTagModel(testTagger);
-		tagDescendant.setPath("/a/b/c/d/e/f");
+	public void setUp() {
+		testSetup = new TestSetup();
+		testTagger = testSetup.getTestTagger();
+		testLoadXml = testSetup.getTestLoadXml();
+		hedXML = testSetup.getHedXML();
+		hedRR = testSetup.getHedRR();
+		eventsOld = testSetup.getEventsOld();
+		factory = testSetup.getFactory();
+		tagAncestor = testSetup.getTagAncestor();
+		tagAncestor2 = testSetup.getTagAncestor2();
+		tag = testSetup.getTag();
+		tagDescendant = testSetup.getTagDescendant();
+		testEvent1 = testSetup.getTestEvent1();
+		testEvent2 = testSetup.getTestEvent2();
+		testEvent3 = testSetup.getTestEvent3();
 	}
 
 	@Test
 	public void testAddEventInvalidDuplicate() {
 		System.out.println("It should not add an event that already exists.");
-		TaggedEvent existingEvent = testTagger.getEgtSet().get(0);
+		TaggedEvent existingEvent = testTagger.getEventSet().get(0);
 		String existingCode = existingEvent.getEventModel().getCode();
 		String existingLabel = existingEvent.getLabel();
-		int numEvents = testTagger.getEgtSet().size();
+		int numEvents = testTagger.getEventSet().size();
 		assertNotNull("Success of adding event", testTagger.addNewEvent(existingCode, existingLabel));
-		assertEquals("Number of events in tagger", numEvents, testTagger.getEgtSet().size());
+		assertEquals("Number of events in tagger", numEvents, testTagger.getEventSet().size());
 	}
 
 	@Test
@@ -93,9 +88,9 @@ public class TestTagger {
 		System.out.println("It should add a new event to the tagger.");
 		String newCode = "Test code";
 		String newLabel = "Test label";
-		int numEvents = testTagger.getEgtSet().size() + 1;
+		int numEvents = testTagger.getEventSet().size() + 1;
 		assertNotNull("Success of adding event", testTagger.addNewEvent(newCode, newLabel));
-		assertEquals("Number of events in tagger", numEvents, testTagger.getEgtSet().size());
+		assertEquals("Number of events in tagger", numEvents, testTagger.getEventSet().size());
 	}
 
 	@Test
@@ -144,14 +139,14 @@ public class TestTagger {
 	@Test
 	public void testLoad() throws URISyntaxException {
 		System.out.println("It should load the correct number of tags and " + "EGT data into the Tagger using XML.");
-		TaggerLoader loader = new TaggerLoader(hedRR, eventsOld, TaggerLoader.USE_JSON, 0, "Tagger Test", 2, factory, true, true);
-		testTagger = new Tagger(hedRR, eventsOld, true, factory, loader);
+		TaggerLoader loader = new TaggerLoader(hedRR, eventsOld, TaggerLoader.USE_JSON, "Tagger Test", 2, factory);
+		testTagger = new Tagger(factory, loader);
 		testTagger.loadEventsAndHED(testLoadXml);
 		// Verify EGT set loaded correctly
 		int groupIdx = 0;
 		int tagIdx = 0;
-		assertEquals("Wrong EGT set size:", testEgtSetSize, testTagger.getEgtSet().size());
-		for (TaggedEvent event : testTagger.getEgtSet()) {
+		assertEquals("Wrong EGT set size:", testEgtSetSize, testTagger.getEventSet().size());
+		for (TaggedEvent event : testTagger.getEventSet()) {
 			assertEquals("Number of groups in the event", groupsPerEvent[groupIdx++], event.getTagGroups().size());
 			for (Integer groupId : event.getTagGroups().keySet()) {
 				assertEquals("Number of tags in the group", tagGroupSizes[tagIdx++], event.getNumTagsInGroup(groupId));
@@ -168,12 +163,12 @@ public class TestTagger {
 	public void testLoadJSON() throws URISyntaxException {
 		System.out.println(
 				"It should load the correct number of tags and " + "EGT data into the Tagger using JSON + XML.");
-		TaggerLoader loader = new TaggerLoader(hedRR, eventsOld, TaggerLoader.USE_JSON, 0, "Tagger Test", 2, factory, true, true);
-		testTagger = new Tagger(hedOld, eventsOld, true, factory, loader);
+		TaggerLoader loader = new TaggerLoader(hedRR, eventsOld, TaggerLoader.USE_JSON, "Tagger Test", 2, factory);
+		testTagger = new Tagger(factory, loader);
 		testTagger.loadJSON(TestUtilities.getResourceAsFile(TestUtilities.JsonEventsArrays),
 				TestUtilities.getResourceAsFile(TestUtilities.HedFileName));
 		// Verify EGT set loaded correctly
-		assertEquals("Wrong EGT set size:", testEgtSetSize, testTagger.getEgtSet().size());
+		assertEquals("Wrong EGT set size:", testEgtSetSize, testTagger.getEventSet().size());
 		// Verify tag set loaded correctly
 		assertEquals("Wrong tag set size:", testTagSetSizeJson, testTagger.getTagSet().size());
 		assertEquals("Required tags found", numRequiredJson, testTagger.getRequiredTags().size());
@@ -185,9 +180,8 @@ public class TestTagger {
 	public void testLoadTdt() throws URISyntaxException {
 		System.out.println("It should load the events and tag hierarchy from "
 				+ "saved files when the events are in tab-delimited text format");
-		TaggerLoader loader = new TaggerLoader(hedOld, eventsOld, TaggerLoader.USE_JSON, 0, "Tagger Test - delimited string", 2, factory,
-				true, true);
-		testTagger = new Tagger(hedOld, eventsOld, true, factory, loader);
+		TaggerLoader loader = new TaggerLoader(hedXML, eventsOld, TaggerLoader.USE_JSON, "Tagger Test - delimited string", 2, factory);
+		testTagger = new Tagger(factory, loader);
 		int headerLines = 0;
 		int[] codeColumns = { 1 };
 		int[] tagColumns = { 2 };
@@ -198,8 +192,8 @@ public class TestTagger {
 		// Verify EGT set loaded correctly
 		int groupIdx = 0;
 		int tagIdx = 0;
-		assertEquals("Wrong EGT set size:", testEgtSetSize, testTagger.getEgtSet().size());
-		for (TaggedEvent event : testTagger.getEgtSet()) {
+		assertEquals("Wrong EGT set size:", testEgtSetSize, testTagger.getEventSet().size());
+		for (TaggedEvent event : testTagger.getEventSet()) {
 			assertEquals("Number of groups in the event", groupsPerEventJson[groupIdx++], event.getTagGroups().size());
 			for (Integer groupId : event.getTagGroups().keySet()) {
 				assertEquals("Number of tags in the group", tagGroupSizesJson[tagIdx++],
@@ -220,9 +214,8 @@ public class TestTagger {
 		int headerLines = 0;
 		int[] eventCodeColumn = { 1 };
 		int[] tagColumns = { 2, 3, 4 };
-		TaggerLoader loader = new TaggerLoader(hedOld, eventsOld, TaggerLoader.USE_JSON, 0, "Tagger Test - delimited string", 2, factory,
-				true, true);
-		testTagger = new Tagger(hedOld, eventsOld, true, factory, loader);
+		TaggerLoader loader = new TaggerLoader(hedXML, eventsOld, TaggerLoader.USE_JSON, "Tagger Test - delimited string",2, factory);
+		testTagger = new Tagger(factory, loader);
 		assertTrue("Tagger load success - tag-delimited text",
 				testTagger.loadTabDelimited(TestUtilities.getResourceAsFile(TestUtilities.DelimitedString2),
 						TestUtilities.getResourceAsFile(TestUtilities.HedFileName), headerLines, eventCodeColumn,
@@ -230,8 +223,8 @@ public class TestTagger {
 		// Verify EGT set loaded correctly
 		int groupIdx = 0;
 		int tagIdx = 0;
-		assertEquals("Wrong EGT set size:", testEgtSetSize, testTagger.getEgtSet().size());
-		for (TaggedEvent event : testTagger.getEgtSet()) {
+		assertEquals("Wrong EGT set size:", testEgtSetSize, testTagger.getEventSet().size());
+		for (TaggedEvent event : testTagger.getEventSet()) {
 			assertEquals("Number of groups in the event", groupsPerEventJson[groupIdx++], event.getTagGroups().size());
 			for (Integer groupId : event.getTagGroups().keySet()) {
 				assertEquals("Number of tags in the group", tagGroupSizesJson[tagIdx++],
@@ -252,9 +245,8 @@ public class TestTagger {
 		int headerLines = 0;
 		int[] eventCodeColumn = { 1 };
 		int[] tagColumns = { 3 };
-		TaggerLoader loader = new TaggerLoader(hedOld, eventsOld, TaggerLoader.USE_JSON, 0, "Tagger Test - delimited string", 2, factory,
-				true, true);
-		testTagger = new Tagger(hedOld, eventsOld, true, factory, loader);
+		TaggerLoader loader = new TaggerLoader(hedXML, eventsOld, TaggerLoader.USE_JSON, "Tagger Test - delimited string", 2, factory);
+		testTagger = new Tagger(factory, loader);
 		assertTrue("Tagger load success - tag-delimited text",
 				testTagger.loadTabDelimited(TestUtilities.getResourceAsFile(TestUtilities.DelimitedString2),
 						TestUtilities.getResourceAsFile(TestUtilities.HedFileName), headerLines, eventCodeColumn,
@@ -264,8 +256,8 @@ public class TestTagger {
 		int tagIdx = 0;
 		int[] groupsPerEventJson = new int[] { 2, 1, 1 };
 		int[] tagGroupSizesJson = new int[] { 3, 3, 1, 2 };
-		assertEquals("Wrong EGT set size:", testEgtSetSize, testTagger.getEgtSet().size());
-		for (TaggedEvent event : testTagger.getEgtSet()) {
+		assertEquals("Wrong EGT set size:", testEgtSetSize, testTagger.getEventSet().size());
+		for (TaggedEvent event : testTagger.getEventSet()) {
 			assertEquals("Number of groups in the event", groupsPerEventJson[groupIdx++], event.getTagGroups().size());
 			for (Integer groupId : event.getTagGroups().keySet()) {
 				assertEquals("Number of tags in the group", tagGroupSizesJson[tagIdx++],
@@ -286,9 +278,8 @@ public class TestTagger {
 		int headerLines = 0;
 		int[] eventCodeColumn = { 1 };
 		int[] tagColumns = { 0 };
-		TaggerLoader loader = new TaggerLoader(hedOld, eventsOld, TaggerLoader.USE_JSON, 0, "Tagger Test - delimited string", 2, factory,
-				true, true);
-		testTagger = new Tagger(hedOld, eventsOld, true, factory, loader);
+		TaggerLoader loader = new TaggerLoader(hedXML, eventsOld, TaggerLoader.USE_JSON, "Tagger Test - delimited string", 2, factory);
+		testTagger = new Tagger(factory, loader);
 		assertTrue("Tagger load success - tag-delimited text",
 				testTagger.loadTabDelimited(TestUtilities.getResourceAsFile(TestUtilities.DelimitedString2),
 						TestUtilities.getResourceAsFile(TestUtilities.HedFileName), headerLines, eventCodeColumn,
@@ -298,8 +289,8 @@ public class TestTagger {
 		int tagIdx = 0;
 		int[] groupsPerEventTdt = new int[] { 1, 1, 1 };
 		int[] tagGroupSizesTdt = new int[] { 0, 0, 0 };
-		assertEquals("Wrong EGT set size:", testEgtSetSize, testTagger.getEgtSet().size());
-		for (TaggedEvent event : testTagger.getEgtSet()) {
+		assertEquals("Wrong EGT set size:", testEgtSetSize, testTagger.getEventSet().size());
+		for (TaggedEvent event : testTagger.getEventSet()) {
 			assertEquals("Number of groups in the event", groupsPerEventTdt[groupIdx++], event.getTagGroups().size());
 			for (Integer groupId : event.getTagGroups().keySet()) {
 				assertEquals("Number of tags in the group", tagGroupSizesTdt[tagIdx++],
@@ -317,10 +308,10 @@ public class TestTagger {
 	public void testPreservePrefixTrue1() {
 		System.out.println("It should return null even though ancestors " + "exist.");
 		// Set up for preserve prefix
-		TaggerLoader loader = new TaggerLoader(hedOld, eventsOld, TaggerLoader.USE_JSON | TaggerLoader.PRESERVE_PREFIX, 0,
-				"Tagger Test - JSON Events", 2, factory, true, true);
-		testTagger = new Tagger(hedOld, eventsOld, true, factory, loader);
-		TaggerSet<TaggedEvent> egtSet = testTagger.getEgtSet();
+		TaggerLoader loader = new TaggerLoader(hedXML, eventsOld, TaggerLoader.USE_JSON | TaggerLoader.PRESERVE_PREFIX,
+				"Tagger Test - JSON Events", 2, factory);
+		testTagger = new Tagger(factory, loader);
+		TaggerSet<TaggedEvent> egtSet = testTagger.getEventSet();
 		testEvent1 = egtSet.get(0);
 		testEvent2 = egtSet.get(1);
 		testEvent3 = egtSet.get(2);
@@ -349,10 +340,10 @@ public class TestTagger {
 	public void testPreservePrefixTrue2() {
 		System.out.println("It should return null even though descendants " + "exist.");
 		// Set up for preserve prefix
-		TaggerLoader loader = new TaggerLoader(hedOld, eventsOld, TaggerLoader.USE_JSON | TaggerLoader.PRESERVE_PREFIX, 0,
-				"Tagger Test - JSON Events", 2, factory, true, true);
-		testTagger = new Tagger(hedOld, eventsOld, true, factory, loader);
-		TaggerSet<TaggedEvent> egtSet = testTagger.getEgtSet();
+		TaggerLoader loader = new TaggerLoader(hedXML, eventsOld, TaggerLoader.USE_JSON | TaggerLoader.PRESERVE_PREFIX,
+				"Tagger Test - JSON Events", 2, factory);
+		testTagger = new Tagger(factory, loader);
+		TaggerSet<TaggedEvent> egtSet = testTagger.getEventSet();
 		testEvent1 = egtSet.get(0);
 		testEvent2 = egtSet.get(1);
 		testEvent3 = egtSet.get(2);
@@ -384,8 +375,8 @@ public class TestTagger {
 		String required2 = "Event/Description";
 		System.out.println("It should find the required and recommended tags "
 				+ "in the hierarchy and add them to the correct lists, sorted" + " by their position attributes.");
-		TaggerLoader loader = new TaggerLoader(hedRR, eventsOld, TaggerLoader.USE_JSON, 0, "Tagger Test", 2, factory, true, true);
-		testTagger = new Tagger(hedRR, eventsOld, true, factory, loader);
+		TaggerLoader loader = new TaggerLoader(hedRR, eventsOld, TaggerLoader.USE_JSON, "Tagger Test", 2, factory);
+		testTagger = new Tagger(factory, loader);
 		TaggerSet<AbstractTagModel> requiredTags = testTagger.getRequiredTags();
 		assertEquals("First required tag (Label)", requiredTags.get(0).getPath(), required0);
 		assertEquals("Required tag (Category)", requiredTags.get(1).getPath(), required1);
@@ -400,10 +391,10 @@ public class TestTagger {
 		testTagger.loadEventsAndHED(testLoadXml);
 		// Get sizes for loaded data
 		int tagSize = testTagger.getTagSet().size();
-		int egtSize = testTagger.getEgtSet().size();
+		int egtSize = testTagger.getEventSet().size();
 		ArrayList<Integer> numGroupsPerEvent = new ArrayList<Integer>();
 		ArrayList<Integer> numTagsPerGroup = new ArrayList<Integer>();
-		for (TaggedEvent event : testTagger.getEgtSet()) {
+		for (TaggedEvent event : testTagger.getEventSet()) {
 			numGroupsPerEvent.add(event.getTagGroups().size());
 			for (Integer groupId : event.getTagGroups().keySet()) {
 				numTagsPerGroup.add(event.getNumTagsInGroup(groupId));
@@ -412,15 +403,15 @@ public class TestTagger {
 		int reqSize = testTagger.getRequiredTags().size();
 		int recSize = testTagger.getRecommendedTags().size();
 		testTagger.saveEventsAndHED(testOutput);
-		testTagger.removeEvent(testTagger.getEgtSet().first());
+		testTagger.removeEvent(testTagger.getEventSet().first());
 		testTagger.deleteTag(testTagger.getTagSet().first());
 		// Verify sizes the same after saving
 		testTagger.loadEventsAndHED(testOutput); // Reload from the saved output
 		// Verify EGT set
 		int groupIdx = 0;
 		int tagIdx = 0;
-		assertEquals("EGTs not loaded to XML models properly - wrong size", egtSize, testTagger.getEgtSet().size());
-		for (TaggedEvent event : testTagger.getEgtSet()) {
+		assertEquals("EGTs not loaded to XML models properly - wrong size", egtSize, testTagger.getEventSet().size());
+		for (TaggedEvent event : testTagger.getEventSet()) {
 			assertEquals("Groups per event", (int) numGroupsPerEvent.get(groupIdx++), event.getTagGroups().size());
 			for (Integer groupId : event.getTagGroups().keySet()) {
 				assertEquals("Tags per group", (int) numTagsPerGroup.get(tagIdx++), event.getNumTagsInGroup(groupId));
@@ -443,10 +434,10 @@ public class TestTagger {
 		testTagger.loadJSON(jsonLoad, xmlLoad);
 		// Get sizes for loaded data
 		int tagSize = testTagger.getTagSet().size();
-		int egtSize = testTagger.getEgtSet().size();
+		int egtSize = testTagger.getEventSet().size();
 		ArrayList<Integer> numGroupsPerEvent = new ArrayList<Integer>();
 		ArrayList<Integer> numTagsPerGroup = new ArrayList<Integer>();
-		for (TaggedEvent event : testTagger.getEgtSet()) {
+		for (TaggedEvent event : testTagger.getEventSet()) {
 			numGroupsPerEvent.add(event.getTagGroups().size());
 			for (Integer groupId : event.getTagGroups().keySet()) {
 				numTagsPerGroup.add(event.getNumTagsInGroup(groupId));
@@ -458,14 +449,14 @@ public class TestTagger {
 		testTagger.save(testJsonOut, testXmlOut, true);
 		// // Change data
 		// testTagger.deleteTag(testTagger.getTagSet().first());
-		// testTagger.removeEvent(testTagger.getEgtSet().first());
+		// testTagger.removeEvent(testTagger.getEventSet().first());
 		// Reload from the saved output
 		testTagger.loadJSON(testJsonOut, testXmlOut);
 		// Verify EGT set
 		int groupIdx = 0;
 		int tagIdx = 0;
-		assertEquals("EGT not loaded properly - wrong size", egtSize, testTagger.getEgtSet().size());
-		for (TaggedEvent event : testTagger.getEgtSet()) {
+		assertEquals("EGT not loaded properly - wrong size", egtSize, testTagger.getEventSet().size());
+		for (TaggedEvent event : testTagger.getEventSet()) {
 			assertEquals("Groups per event", (int) numGroupsPerEvent.get(groupIdx++), event.getTagGroups().size());
 			for (Integer groupId : event.getTagGroups().keySet()) {
 				assertEquals("Tags per group", (int) numTagsPerGroup.get(tagIdx++), event.getNumTagsInGroup(groupId));
@@ -492,10 +483,10 @@ public class TestTagger {
 		testTagger.loadTabDelimited(tdtLoad, xmlLoad, headerLines, codeColumns, tagColumns);
 		// Get sizes for loaded data
 		int tagSize = testTagger.getTagSet().size();
-		int egtSize = testTagger.getEgtSet().size();
+		int egtSize = testTagger.getEventSet().size();
 		ArrayList<Integer> numGroupsPerEvent = new ArrayList<Integer>();
 		ArrayList<Integer> numTagsPerGroup = new ArrayList<Integer>();
-		for (TaggedEvent event : testTagger.getEgtSet()) {
+		for (TaggedEvent event : testTagger.getEventSet()) {
 			numGroupsPerEvent.add(event.getTagGroups().size());
 			for (Integer groupId : event.getTagGroups().keySet()) {
 				numTagsPerGroup.add(event.getNumTagsInGroup(groupId));
@@ -507,14 +498,14 @@ public class TestTagger {
 		testTagger.save(testTdtOut, testXmlOut, false);
 		// Change data
 		testTagger.deleteTag(testTagger.getTagSet().first());
-		testTagger.removeEvent(testTagger.getEgtSet().first());
+		testTagger.removeEvent(testTagger.getEventSet().first());
 		// Reload from the saved output
 		testTagger.loadTabDelimited(testTdtOut, testXmlOut, headerLines, codeColumns, tagColumns);
 		// Verify EGT set
 		int groupIdx = 0;
 		int tagIdx = 0;
-		assertEquals("EGT not loaded properly - wrong size", egtSize, testTagger.getEgtSet().size());
-		for (TaggedEvent event : testTagger.getEgtSet()) {
+		assertEquals("EGT not loaded properly - wrong size", egtSize, testTagger.getEventSet().size());
+		for (TaggedEvent event : testTagger.getEventSet()) {
 			assertEquals("Groups per event", (int) numGroupsPerEvent.get(groupIdx++), event.getTagGroups().size());
 			for (Integer groupId : event.getTagGroups().keySet()) {
 				assertEquals("Tags per group", (int) numTagsPerGroup.get(tagIdx++), event.getNumTagsInGroup(groupId));
