@@ -192,7 +192,7 @@ public class GroupView extends JComponent implements MouseListener,
                     GroupView.appView.updateEventsPanel();
 				}
 			});
-			appView.showContextMenu(map, 105);
+			appView.showContextMenu(map, 130);
 		}
 	}
 
