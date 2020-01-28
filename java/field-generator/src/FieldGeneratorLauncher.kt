@@ -1,6 +1,3 @@
-package edu.utsa.tagger
-
-import edu.utsa.tagger.gui.FieldGenerator
 import tornadofx.launch
 
 fun main(args: Array<String>) {
