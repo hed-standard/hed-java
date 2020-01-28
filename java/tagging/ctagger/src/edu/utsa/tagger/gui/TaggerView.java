@@ -158,6 +158,7 @@ public class TaggerView extends ConstraintContainer {
     //private String fMapPath;
     private ScrollLayout tagsScrollLayout;
     private ScrollLayout eventsScrollLayout;
+    private JPanel topPane = new JPanel(new GridLayout(1,3));
     private JLayeredPane splitContainer = new JLayeredPane();
     private JLayeredPane tagsScrollPane = new JLayeredPane();
     private JLabel hedTitle = new JLabel("HED schema:") {
@@ -170,9 +171,17 @@ public class TaggerView extends ConstraintContainer {
             return FontsAndColors.secondHeaderFont;
         }
     };
+    private JPanel btnPanel = new JPanel();
     private XButton undo = new HistoryButton("Undo", true);
     int hasMissingTag = 0;
-    private JLabel incompatibleTagWarning = new JLabel("Red tags violate HED schema!") {
+    private JPanel warningPanel = new JPanel();
+    private JLabel incompatibleTagWarning = new JLabel("<html><div style='text-align: left;'>" + "Red tags violate HED schema!" + "</div></html>") {
+        @Override
+        public Font getFont() {
+            return FontsAndColors.headerFont;
+        }
+    };
+    private JLabel titleLabel = new JLabel() {
         @Override
         public Font getFont() {
             return FontsAndColors.headerFont;
@@ -190,14 +199,6 @@ public class TaggerView extends ConstraintContainer {
             return FontsAndColors.buttonFont;
         }
     };
-//    private XButton zoomIn = createMenuButton("+");
-//    private XButton zoomOut = createMenuButton("-");
-//    private JLabel zoomPercent = new JLabel("100%", JLabel.CENTER) {
-//        @Override
-//        public Font getFont() {
-//            return FontsAndColors.contentFont;
-//        }
-//    };
 
     /**
      * Constructor creates the GUI and sets up functionality of the buttons
@@ -210,7 +211,7 @@ public class TaggerView extends ConstraintContainer {
         this.tagger = loader.getTagger();
         this.isStandAloneVersion = loader.checkFlags(16);
         autoCollapseDepth = loader.getInitialDepth();
-        createLayout(loader.getTitle());
+        createLayout();
         updateHEDVersion();
     }
 
@@ -219,7 +220,7 @@ public class TaggerView extends ConstraintContainer {
         this.tagger = loader.getTagger();
         this.isStandAloneVersion = loader.checkFlags(16);
         autoCollapseDepth = loader.getInitialDepth();
-        createLayout(title);
+        createLayout();
         updateHEDVersion();
     }
 
@@ -227,8 +228,8 @@ public class TaggerView extends ConstraintContainer {
         this.hedTitle.setText("HED schema : " + this.tagger.getHEDVersion());
     }
 
-    public void createLayout(String title) {
-        this.createFrame(title);
+    public void createLayout() {
+        this.createFrame();
         this.setColors();
         this.setListeners();
         this.addComponents();
@@ -236,13 +237,13 @@ public class TaggerView extends ConstraintContainer {
         this.updateEventsPanel();
     }
 
-    private void createFrame(String title) {
+    private void createFrame() {
         JMenuBar menuBar = this.createMenuBar();
         this.frame = new JFrame();
         this.frame.setSize(1024, 768);
         this.frame.setVisible(true);
         this.frame.setDefaultCloseOperation(0);
-        this.frame.setTitle(title);
+        this.frame.setTitle("CTAGGER - Specify event HED tags");
         this.frame.setJMenuBar(menuBar);
         this.frame.getContentPane().add(this);
     }
@@ -253,8 +254,9 @@ public class TaggerView extends ConstraintContainer {
         this.hedTitle.setForeground(FontsAndColors.BLUE_DARK);
         this.cancel.setHoverForeground(FontsAndColors.BLUE_DARK);
         this.ok.setHoverForeground(FontsAndColors.BLUE_DARK);
-//        this.zoomPercent.setFont(FontsAndColors.contentFont);
-//        this.zoomPercent.setForeground(FontsAndColors.BLUE_VERY_LIGHT);
+        this.topPane.setBackground((FontsAndColors.BLUE_MEDIUM));
+        this.warningPanel.setBackground((FontsAndColors.BLUE_MEDIUM));
+        this.btnPanel.setBackground((FontsAndColors.BLUE_MEDIUM));
         this.eventsPanel.setOpaque(true);
         this.eventsPanel.setBackground(FontsAndColors.BLUE_2);
         this.tagsPanel.setBackground(FontsAndColors.BLUE_MEDIUM);
@@ -306,6 +308,8 @@ public class TaggerView extends ConstraintContainer {
         this.searchResults.setBackground(Color.WHITE);
         this.incompatibleTagWarning.setForeground(FontsAndColors.RED_MEDIUM);
         this.incompatibleTagWarning.setBackground(FontsAndColors.TRANSPARENT);
+        this.titleLabel.setForeground(FontsAndColors.BLUE_DARK);
+        this.titleLabel.setBackground(FontsAndColors.TRANSPARENT);
     }
 
     private void setListeners() {
@@ -504,6 +508,13 @@ public class TaggerView extends ConstraintContainer {
     private void addComponents() {
         this.setLayout(new ConstraintLayout());
         this.addOptionComponents();
+
+        this.topPane.add(warningPanel);
+        titleLabel.setText("<html><div style='text-align: center;'>" + loader.getTitle() + "</div></html>");
+        this.topPane.add(titleLabel);
+        btnPanel.add(undo);  btnPanel.add(redo);
+        this.topPane.add(btnPanel);
+
         this.searchResults.setLayout(new ListLayout(0, 0, 0, 0));
         this.searchResultsScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         this.searchResultsScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
@@ -521,6 +532,7 @@ public class TaggerView extends ConstraintContainer {
         this.splitPaneLeft.add(this.eventEnterTagView.getjTextAreaPanel(), new Constraint("top:12 height:26 left:130 right:100"));
         this.splitPaneLeft.add(this.eventEnterTagView.getSearchResultsScrollPane(), new Constraint("top:40 bottom:300 left:130 right:0"));
         this.splitPaneLeft.setLayer(this.eventEnterTagView.getSearchResultsScrollPane(), 1);
+//        this.splitPaneLeft.add(this.titleLabel, new Constraint("top:55 height:50 left:1 width:500"));
         this.splitPaneLeft.add(this.selectAllorNone, new Constraint("top:55 height:30 left:1 width:20"));
         this.splitPaneLeft.add(this.addGroup, new Constraint("top:55 height:30 left:27 width:140"));
         this.splitPaneLeft.add(this.eventsScrollPane, new Constraint("top:90 bottom:0 left:0 right:5"));
@@ -535,6 +547,9 @@ public class TaggerView extends ConstraintContainer {
         this.splitPaneRight.add(this.collapseAll, new Constraint("top:57 height:30 right:250 width:100"));
         this.splitPaneRight.add(this.tagsScrollPane, new Constraint("top:90 bottom:0 left:5 right:0"));
 
+        // top pane
+
+
         this.add(this.notification, new Constraint("top:10 height:30 left:305 right:245"));
         this.setLayer(this.notification, 1);
         this.notification.setVisible(false);
@@ -546,9 +561,10 @@ public class TaggerView extends ConstraintContainer {
         this.add(this.shield);
         this.setLayer(this.shield, 2);
         this.shield.setVisible(false);
-        this.add(this.hedTitle, new Constraint("top:30 height:26 right:10 width:150"));
-        this.add(this.redo, new Constraint("top:0 height:30 right:10 width:80"));
-        this.add(this.undo, new Constraint("top:0 height:30 right:90 width:80"));
+        this.add(topPane, new Constraint("top:0 height:56 left:10 right:10"));
+//        this.add(this.redo, new Constraint("top:0 height:30 right:10 width:80"));
+//        this.add(this.undo, new Constraint("top:0 height:30 right:90 width:80"));
+//        this.add(this.hedTitle, new Constraint("top:30 height:26 right:10 width:150"));
 //        this.add(this.zoomOut, new Constraint("top:0 height:50 right:80 width:30"));
 //        this.add(this.zoomPercent, new Constraint("top:0 height:50 right:30 width:50"));
 //        this.add(this.zoomIn, new Constraint("top:0 height:50 right:0 width:30"));
@@ -613,14 +629,14 @@ public class TaggerView extends ConstraintContainer {
         // add warning to tagger view if there exists tag(s) that are not compatible with schema
         if (hasMissingTag > 0) {
             if (hasMissingTag == 1)
-                incompatibleTagWarning.setText("Red tag violate HED schema!");
-            if (incompatibleTagWarning.getParent() != this) {
-                this.add(incompatibleTagWarning, new Constraint("top:0 height:50 left:10 width:300"));
+                incompatibleTagWarning.setText("<html><div style='text-align: left;'>" + "Red tag violate HED schema!" + "</div></html>");
+            if (incompatibleTagWarning.getParent() != warningPanel) {
+                warningPanel.add(incompatibleTagWarning, BorderLayout.LINE_START);
             }
         }
         else {
-            if (incompatibleTagWarning.getParent() == this)
-                this.remove(incompatibleTagWarning);
+            if (incompatibleTagWarning.getParent() == warningPanel)
+                warningPanel.remove(incompatibleTagWarning);
         }
         validate();
         repaint();
