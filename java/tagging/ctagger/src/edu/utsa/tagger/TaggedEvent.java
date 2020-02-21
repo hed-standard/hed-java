@@ -324,24 +324,16 @@ public class TaggedEvent implements Comparable<TaggedEvent> {
     public TaggerSet<AbstractTagModel> getRRValue(AbstractTagModel tagModel) {
         TaggerSet<AbstractTagModel> desc = new TaggerSet();
         TaggerSet<AbstractTagModel> eventTags = (TaggerSet)this.tagGroups.get(this.eventLevelId);
-        Iterator var5 = eventTags.iterator();
 
-        while(true) {
-            AbstractTagModel tag;
-            do {
-                if (!var5.hasNext()) {
-                    if (desc.size() > 0) {
-                        return desc;
-                    }
-
-                    return null;
-                }
-
-                tag = (AbstractTagModel)var5.next();
-            } while(!tag.getPath().startsWith(tagModel.getPath() + "/") && !tag.getPath().equals(tagModel.getPath()));
-
-            desc.add(tag);
+        for (AbstractTagModel tag : eventTags) {
+            if (tag.getPath().startsWith(tagModel.getPath() + "/") || tag.getPath().equals(tagModel.getPath())) {
+                desc.add(tag);
+            }
         }
+        if (desc.size() > 0)
+            return desc;
+        else
+            return null;
     }
 
     public TreeMap<Integer, TaggerSet<AbstractTagModel>> getTagGroups() {
