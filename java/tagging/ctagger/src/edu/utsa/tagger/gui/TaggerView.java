@@ -178,6 +178,12 @@ public class TaggerView extends ConstraintContainer {
             return FontsAndColors.headerFont;
         }
     };
+    private XButton clearAll = new XButton("Clear all tags") {
+        @Override
+        public Font getFont() {
+            return FontsAndColors.buttonFont;
+        }
+    };
     private XButton help = new XButton("User manual") {
         @Override
         public Font getFont() {
@@ -467,6 +473,14 @@ public class TaggerView extends ConstraintContainer {
             }
         });
 
+        this.clearAll.addMouseListener(new MouseAdapter() {
+          public void mouseClicked(MouseEvent e) {
+            for (TaggedEvent evt : tagger.getEventSet()) {
+                evt.deleteAllTag();
+            }
+            updateEventsPanel();
+          }
+        });
         this.help.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
@@ -549,6 +563,7 @@ public class TaggerView extends ConstraintContainer {
         this.add(this.hedTitle, new Constraint("top:30 height:26 right:10 width:150"));
         this.add(this.redo, new Constraint("top:0 height:30 right:10 width:80"));
         this.add(this.undo, new Constraint("top:0 height:30 right:90 width:80"));
+        this.add(this.clearAll, new Constraint("top:0 height:30 right:170 width:80"));
 //        this.add(this.zoomOut, new Constraint("top:0 height:50 right:80 width:30"));
 //        this.add(this.zoomPercent, new Constraint("top:0 height:50 right:30 width:50"));
 //        this.add(this.zoomIn, new Constraint("top:0 height:50 right:0 width:30"));

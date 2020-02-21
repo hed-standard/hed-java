@@ -7,18 +7,14 @@ package edu.utsa.tagger;
 
 import edu.utsa.tagger.gui.*;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * This class represents a tagged event, consisting of the event model and the
  * associated groupIds and tag models.
  *
  * @author Lauren Jett, Rebecca Strautman, Thomas Rognon, Jeremy Cockfield, Kay
- *         Robbins
+ *         Robbins, Dung Truong
  */
 public class TaggedEvent implements Comparable<TaggedEvent> {
     private static Tagger tagger;
@@ -44,7 +40,7 @@ public class TaggedEvent implements Comparable<TaggedEvent> {
     }
 
     /**
-     * Adds a group with the given ID to the event.
+     * Adds an empty group with the given ID to the event.
      *
      * @param groupId
      * @return True if the group was added successfully, false if the group ID
@@ -52,12 +48,12 @@ public class TaggedEvent implements Comparable<TaggedEvent> {
      */
     public boolean addGroup(int groupId) {
         TaggerSet<AbstractTagModel> tags = (TaggerSet)this.tagGroups.get(groupId);
-        if (tags != null) {
-            return false;
-        } else {
+        if (tags == null) {
             tags = new TaggerSet();
             this.tagGroups.put(groupId, tags);
             return true;
+        } else {
+            return false;
         }
     }
 
@@ -437,5 +433,10 @@ public class TaggedEvent implements Comparable<TaggedEvent> {
 
     public void setAppView(TaggerView appView) {
         TaggedEvent.appView = appView;
+    }
+
+    public void deleteAllTag() {
+        tagGroups.clear();
+        tagGroups.put(eventLevelId, new TaggerSet<AbstractTagModel>());
     }
 }
