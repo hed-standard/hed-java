@@ -1,7 +1,9 @@
 package edu.utsa.tagger;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeMap;
 
 import edu.utsa.tagger.TaggerHistory.Type;
 import edu.utsa.tagger.gui.GuiTagModel;
@@ -29,4 +31,5 @@ public class HistoryItem {
 	public Integer groupId;
 	public TaggerSet<Integer> groupIds;
 	public TaggerSet<AbstractTagModel> tags;
+	public HashMap<TaggedEvent, TreeMap<Integer, TaggerSet<AbstractTagModel>>> tagMap;
 }

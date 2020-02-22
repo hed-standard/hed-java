@@ -2163,6 +2163,11 @@ public class Tagger {
         }
     }
 
+    /**
+     * Remove tag from groups and update history
+     * @param tagModel
+     * @param groupIds
+     */
     public void unassociate(AbstractTagModel tagModel, Set<Integer> groupIds) {
         Set<Integer> affectedGroups = this.unassociateBase(tagModel, groupIds);
         if (!affectedGroups.isEmpty()) {
@@ -2199,6 +2204,12 @@ public class Tagger {
 
     }
 
+    /**
+     * Perform the action of removing tag from event tagGroups
+     * @param tagModel
+     * @param groupIds
+     * @return
+     */
     public Set<Integer> unassociateBase(AbstractTagModel tagModel, Set<Integer> groupIds) {
         Set<Integer> affectedGroups = new HashSet();
         Iterator var5 = groupIds.iterator();
@@ -2219,6 +2230,19 @@ public class Tagger {
         return affectedGroups;
     }
 
+    public void clearAllTags() {
+        HashMap<TaggedEvent, TreeMap<Integer, TaggerSet<AbstractTagModel>>> tagMap = new HashMap<>();
+        for (TaggedEvent evt : eventList) {
+            TreeMap<Integer, TaggerSet<AbstractTagModel>> removedTagGroups = evt.deleteAllTag();
+            tagMap.put(evt, removedTagGroups);
+        }
+        // history
+        HistoryItem historyItem = new HistoryItem();
+        historyItem.type = Type.CLEAR_ALL_TAGS;
+        historyItem.tagMap = tagMap;
+        this.history.add(historyItem);
+
+    }
     public HistoryItem undo() {
         return this.history.undo();
     }

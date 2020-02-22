@@ -336,6 +336,10 @@ public class TaggedEvent implements Comparable<TaggedEvent> {
         return this.tagGroups;
     }
 
+    public void setTagGroups(TreeMap<Integer, TaggerSet<AbstractTagModel>> tGroup) {
+        tagGroups = tGroup;
+    }
+
 //    public EventEnterTagView getEventEnterTagView() {return eventEnterTagView;}
 
     public int findTagCount() {
@@ -435,8 +439,16 @@ public class TaggedEvent implements Comparable<TaggedEvent> {
         TaggedEvent.appView = appView;
     }
 
-    public void deleteAllTag() {
+    public TreeMap<Integer, TaggerSet<AbstractTagModel>> deleteAllTag() {
+        // Create copy of the to be removed tagGroups, for undoing
+        TreeMap<Integer, TaggerSet<AbstractTagModel>> removed = new TreeMap<Integer, TaggerSet<AbstractTagModel>>();
+        for (Map.Entry<Integer, TaggerSet<AbstractTagModel>> entry : tagGroups.entrySet()) {
+            removed.put(entry.getKey(), (TaggerSet<AbstractTagModel>) entry.getValue().clone());
+        }
+        // clear
         tagGroups.clear();
         tagGroups.put(eventLevelId, new TaggerSet<AbstractTagModel>());
+        guiEventModel.setLabel("");
+        return removed;
     }
 }

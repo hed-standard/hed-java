@@ -475,10 +475,8 @@ public class TaggerView extends ConstraintContainer {
 
         this.clearAll.addMouseListener(new MouseAdapter() {
           public void mouseClicked(MouseEvent e) {
-            for (TaggedEvent evt : tagger.getEventSet()) {
-                evt.deleteAllTag();
-            }
-            updateEventsPanel();
+              tagger.clearAllTags();
+              updateEventsPanel();
           }
         });
         this.help.addMouseListener(new MouseAdapter() {
@@ -1496,48 +1494,51 @@ public class TaggerView extends ConstraintContainer {
     private int addOtherTags(TaggedEvent taggedEvent, int top) {
         Iterator var4 = taggedEvent.getTagGroups().entrySet().iterator();
 
-        label35:
-        while (var4.hasNext()) {
-            Map.Entry<Integer, TaggerSet<AbstractTagModel>> tagGroup = (Map.Entry) var4.next();
+        for (Map.Entry<Integer, TaggerSet<AbstractTagModel>> tagGroup : taggedEvent.getTagGroups().entrySet()) {
+//        label35:
+//        while (var4.hasNext()) {
+//            Map.Entry<Integer, TaggerSet<AbstractTagModel>> tagGroup = (Map.Entry) var4.next();
             top = this.createGroupSpace(taggedEvent, tagGroup, top);
-            Iterator var6 = ((TaggerSet) tagGroup.getValue()).iterator();
+//            Iterator var6 = ((TaggerSet) tagGroup.getValue()).iterator();
 
-            while (true) {
-                AbstractTagModel tag;
-                do {
-                    if (!var6.hasNext()) {
-                        continue label35;
+//            while (true) {
+//                AbstractTagModel tag;
+//                do {
+//                    if (!var6.hasNext()) {
+//                        continue label35;
+//                    }
+//
+//                    tag = (AbstractTagModel) var6.next();
+//                } while ((Integer) tagGroup.getKey() == taggedEvent.getEventLevelId() && this.tagger.isRRValue(tag) && this.tagger.isPrimary());
+            for (AbstractTagModel tag : (TaggerSet<AbstractTagModel>) tagGroup.getValue()) {
+                if (!((Integer) tagGroup.getKey() == taggedEvent.getEventLevelId() && this.tagger.isRRValue(tag) && this.tagger.isPrimary())) {
+                    GuiTagModel guiTagModel = (GuiTagModel) tag;
+                    guiTagModel.setAppView(this);
+                    guiTagModel.updateMissing();
+                    TagEventView tagEgtView = guiTagModel.getTagEventView((Integer) tagGroup.getKey());
+                    GroupView groupView = taggedEvent.getGroupViewByKey((Integer) tagGroup.getKey());
+                    if (groupView == null) {
+                        taggedEvent.addTagEgtView(tag, tagEgtView);
+                    } else {
+                        groupView.addTagEgtView(tag, tagEgtView);
                     }
 
-                    tag = (AbstractTagModel) var6.next();
-                } while ((Integer) tagGroup.getKey() == taggedEvent.getEventLevelId() && this.tagger.isRRValue(tag) && this.tagger.isPrimary());
-
-                GuiTagModel guiTagModel = (GuiTagModel) tag;
-                guiTagModel.setAppView(this);
-                guiTagModel.updateMissing();
-                TagEventView tagEgtView = guiTagModel.getTagEventView((Integer) tagGroup.getKey());
-                GroupView groupView = taggedEvent.getGroupViewByKey((Integer) tagGroup.getKey());
-                if (groupView == null) {
-                    taggedEvent.addTagEgtView(tag, tagEgtView);
-                } else {
-                    groupView.addTagEgtView(tag, tagEgtView);
-                }
-
-                this.eventsPanel.add(tagEgtView, new Constraint("top:" + top + " height:26 left:30 right:40")); // show on GUI
-                if (guiTagModel.isMissing()) {
-                    hasMissingTag++;
-                    this.eventsPanel.add(tagEgtView.getMaskForMissingTag(), new Constraint("top:" + top + " height:26 left:30 right:40")); // add mask of correct part of the missing tag
-                    this.eventsPanel.setLayer(tagEgtView.getMaskForMissingTag(),1);
-                }
-                this.eventsPanel.add(tagEgtView.getDelete(), new Constraint("top:" + top + " height:26 width:30 right:0")); //add delete 'X' button associated with this tag
-                this.eventsPanel.setLayer(tagEgtView.getDelete(), 1);
-                top += 27;
-                if (guiTagModel.isInEdit()) {
-                    TagEventEditView teev = guiTagModel.getTagEventEditView(taggedEvent);
-                    teev.setAppView(this);
-                    teev.update();
-                    this.eventsPanel.add(teev, new Constraint("top:" + top + " height:" + 85 + " left:30 right:0"));
-                    top += 85;
+                    this.eventsPanel.add(tagEgtView, new Constraint("top:" + top + " height:26 left:30 right:40")); // show on GUI
+                    if (guiTagModel.isMissing()) {
+                        hasMissingTag++;
+                        this.eventsPanel.add(tagEgtView.getMaskForMissingTag(), new Constraint("top:" + top + " height:26 left:30 right:40")); // add mask of correct part of the missing tag
+                        this.eventsPanel.setLayer(tagEgtView.getMaskForMissingTag(), 1);
+                    }
+                    this.eventsPanel.add(tagEgtView.getDelete(), new Constraint("top:" + top + " height:26 width:30 right:0")); //add delete 'X' button associated with this tag
+                    this.eventsPanel.setLayer(tagEgtView.getDelete(), 1);
+                    top += 27;
+                    if (guiTagModel.isInEdit()) {
+                        TagEventEditView teev = guiTagModel.getTagEventEditView(taggedEvent);
+                        teev.setAppView(this);
+                        teev.update();
+                        this.eventsPanel.add(teev, new Constraint("top:" + top + " height:" + 85 + " left:30 right:0"));
+                        top += 85;
+                    }
                 }
             }
         }
