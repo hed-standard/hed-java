@@ -168,17 +168,27 @@ public class RRTagView extends JComponent {
 	}
 
 	public void save() {
-		AbstractTagModel newTag = this.getNewValue();
-		if (this.takesValueTag != null) {
-			// Check if description has comma
-			if (newTag != null && "Event/Description".equals(newTag.getParentPath())) {
-				if (newTag.getName().indexOf(',') != -1) {
-				    appView.showTaggerMessageDialog("Description should not contain commas","Ok", null, null);
-					inAddValue = true;
-					refreshView();
-					return;
-				}
+	    // Validation
+	    String valueText = "";
+		if (valueField != null && !valueField.getJTextArea().getText().isEmpty()) {
+			valueText = valueField.getJTextArea().getText().trim();
+			if (valueText.indexOf(',') != -1) {
+				appView.showTaggerMessageDialog("Tag value should not contain commas", "Ok", null, null);
+				inAddValue = true;
+				refreshView();
+				return;
 			}
+			if (valueText.indexOf('/') != -1) {
+				appView.showTaggerMessageDialog("Tag value should not contain forward slash (/)", "Ok", null, null);
+				inAddValue = true;
+				refreshView();
+				return;
+			}
+		}
+
+		// New tag
+		AbstractTagModel newTag = tagger.createTransientTagModel(takesValueTag, valueText);
+		if (this.takesValueTag != null) {
 			this.updateTakesValueTag(newTag);
 		} else if (newTag != null) {
 			this.updateValue(newTag);
@@ -229,24 +239,7 @@ public class RRTagView extends JComponent {
 	public TaggerSet<AbstractTagModel> getValues() {
 	    return values;
     }
-	/**
-	 * Finds the required/recommended tag chosen.
-	 *
-	 * @return The tag model for the tag chosen, if one exists. Returns null if
-	 *         a tag has not been chosen (or a value has not been entered, for a
-	 *         tag with a child that takes a value). For a tag with a child that
-	 *         takes a value, if the text field is currently empty, but
-	 *         previously contained a value, it will return the tag model for
-	 *         the previous tag represented (i.e. a user cannot use the edit
-	 *         field to remove an existing required/recommended tag).
-	 */
-	private AbstractTagModel getNewValue() {
-		if (valueField != null && !valueField.getJTextArea().getText().isEmpty()) {
-			String valueText = valueField.getJTextArea().getText().trim();
-			return tagger.createTransientTagModel(takesValueTag, valueText);
-		}
-		return null;
-	}
+
 	/**
 	 * Add components to the view or Refreshes the view (when there's already components in it)
 	 */
