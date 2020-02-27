@@ -475,8 +475,11 @@ public class TaggerView extends ConstraintContainer {
 
         this.clearAll.addMouseListener(new MouseAdapter() {
           public void mouseClicked(MouseEvent e) {
-              tagger.clearAllTags();
-              updateEventsPanel();
+              int option = showTaggerMessageDialog("Are you sure you want to clear all tags?", "Yes", "No", null);
+              if (option == 0) {
+                  tagger.clearAllTags();
+                  updateEventsPanel();
+              }
           }
         });
         this.help.addMouseListener(new MouseAdapter() {

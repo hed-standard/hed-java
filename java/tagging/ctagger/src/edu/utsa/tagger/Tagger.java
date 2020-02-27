@@ -1088,7 +1088,6 @@ public class Tagger {
                 ancestor = tag;
         }
         long end = System.nanoTime();
-        System.out.println("Elapsed time for getting missing tags' ancestor: " + (end-start));
         return ancestor;
     }
 
