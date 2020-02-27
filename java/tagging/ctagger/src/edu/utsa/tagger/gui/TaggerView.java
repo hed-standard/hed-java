@@ -45,7 +45,7 @@ public class TaggerView extends ConstraintContainer {
             return FontsAndColors.buttonFont;
         }
     };
-    private XButton addGroup = new XButton("Add new tag group") {
+    private XButton addGroup = new XButton(new ImageIcon(System.getProperty("user.dir") + File.separator + "group_scaled.png")) {
         @Override
         public Font getFont() {
             return FontsAndColors.buttonFont;
@@ -123,7 +123,7 @@ public class TaggerView extends ConstraintContainer {
     private boolean isStandAloneVersion;
     private Notification notification = new Notification();
     private XButton ok = createMenuButton("Ok");
-    private XButton redo = new HistoryButton("Redo", false);
+    private XButton redo = new HistoryButton(new ImageIcon(System.getProperty("user.dir") + File.separator + "redo_scaled.png"), false);
     private JPanel searchResults = new JPanel() {
         @Override
         protected void paintComponent(Graphics g) {
@@ -171,8 +171,8 @@ public class TaggerView extends ConstraintContainer {
             return FontsAndColors.secondHeaderFont;
         }
     };
-    private JPanel btnPanel = new JPanel();
-    private XButton undo = new HistoryButton("Undo", true);
+    private ConstraintContainer btnPanel = new ConstraintContainer();
+    private XButton undo = new HistoryButton(new ImageIcon(System.getProperty("user.dir") + File.separator + "undo_scaled.png"), true);
     int hasMissingTag = 0;
     private JPanel warningPanel = new JPanel();
     private JLabel incompatibleTagWarning = new JLabel("<html><div style='text-align: left;'>" + "Red tags violate HED schema!" + "</div></html>") {
@@ -187,12 +187,8 @@ public class TaggerView extends ConstraintContainer {
             return FontsAndColors.headerFont;
         }
     };
-    private XButton clearAll = new XButton("Clear all tags") {
-        @Override
-        public Font getFont() {
-            return FontsAndColors.buttonFont;
-        }
-    };
+    private Icon icon = new ImageIcon(System.getProperty("user.dir") + File.separator + "delete_scaled.png");
+    private JButton clearAll = new JButton(icon);
     private XButton help = new XButton("User manual") {
         @Override
         public Font getFont() {
@@ -527,8 +523,6 @@ public class TaggerView extends ConstraintContainer {
         this.topPane.add(warningPanel);
         titleLabel.setText("<html><div style='text-align: center;'>" + loader.getTitle() + "</div></html>");
         this.topPane.add(titleLabel);
-        btnPanel.add(undo);  btnPanel.add(redo);
-        this.topPane.add(btnPanel);
 
         this.searchResults.setLayout(new ListLayout(0, 0, 0, 0));
         this.searchResultsScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -549,7 +543,6 @@ public class TaggerView extends ConstraintContainer {
         this.splitPaneLeft.setLayer(this.eventEnterTagView.getSearchResultsScrollPane(), 1);
 //        this.splitPaneLeft.add(this.titleLabel, new Constraint("top:55 height:50 left:1 width:500"));
         this.splitPaneLeft.add(this.selectAllorNone, new Constraint("top:55 height:30 left:1 width:20"));
-        this.splitPaneLeft.add(this.addGroup, new Constraint("top:55 height:30 left:27 width:140"));
         this.splitPaneLeft.add(this.eventsScrollPane, new Constraint("top:90 bottom:0 left:0 right:5"));
 
         this.splitPaneRight.add(this.tagsTitle, new Constraint("top:0 height:57 left:5 width:100"));
@@ -563,7 +556,10 @@ public class TaggerView extends ConstraintContainer {
         this.splitPaneRight.add(this.tagsScrollPane, new Constraint("top:90 bottom:0 left:5 right:0"));
 
         // top pane
-
+        btnPanel.add(undo, new Constraint("top:0 height:33 left:0 width:33"));
+        btnPanel.add(redo, new Constraint("top:0 left:34 height:33 width:33"));
+        btnPanel.add(addGroup, new Constraint("top:0 left:72 height:33 width:33"));
+        btnPanel.add(clearAll, new Constraint("top:0 left:106 height:33 width:33"));
 
         this.add(this.notification, new Constraint("top:10 height:30 left:305 right:245"));
         this.setLayer(this.notification, 1);
@@ -577,9 +573,11 @@ public class TaggerView extends ConstraintContainer {
         this.setLayer(this.shield, 2);
         this.shield.setVisible(false);
         this.add(this.hedTitle, new Constraint("top:30 height:26 right:10 width:150"));
-        this.add(this.redo, new Constraint("top:0 height:30 right:10 width:80"));
-        this.add(this.undo, new Constraint("top:0 height:30 right:90 width:80"));
-        this.add(this.clearAll, new Constraint("top:0 height:30 right:170 width:80"));
+        this.add(btnPanel, new Constraint("top:0 height:33 left:10 width:200"));
+//        this.add(this.redo, new Constraint("top:0 height:33 right:10 width:33"));
+//        this.add(this.undo, new Constraint("top:0 height:33 right:90 width:33"));
+//        this.add(this.addGroup, new Constraint("top:0 height:33 right:140 width:33"));
+//        this.add(this.clearAll, new Constraint("top:0 height:33 right:170 width:33"));
 //        this.add(this.zoomOut, new Constraint("top:0 height:50 right:80 width:30"));
 //        this.add(this.zoomPercent, new Constraint("top:0 height:50 right:30 width:50"));
 //        this.add(this.zoomIn, new Constraint("top:0 height:50 right:0 width:30"));
@@ -2161,6 +2159,11 @@ public class TaggerView extends ConstraintContainer {
     public class HistoryButton extends XButton {
         String hoverText;
         boolean undo;
+
+        public HistoryButton(Icon icon, boolean undo) {
+            super(icon);
+            this.undo = undo;
+        }
 
         public HistoryButton(String textArg, boolean undo) {
             super(textArg);

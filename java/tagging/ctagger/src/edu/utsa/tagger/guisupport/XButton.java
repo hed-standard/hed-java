@@ -29,6 +29,10 @@ public abstract class XButton extends JButton implements MouseListener {
 		text = textArg;
 		addMouseListener(this);
 	}
+	public XButton(Icon icon) {
+		super(icon);
+		addMouseListener(this);
+	}
 	
 	public abstract Font getFont();
 	
