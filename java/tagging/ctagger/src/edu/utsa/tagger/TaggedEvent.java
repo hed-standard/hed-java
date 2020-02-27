@@ -7,18 +7,14 @@ package edu.utsa.tagger;
 
 import edu.utsa.tagger.gui.*;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * This class represents a tagged event, consisting of the event model and the
  * associated groupIds and tag models.
  *
  * @author Lauren Jett, Rebecca Strautman, Thomas Rognon, Jeremy Cockfield, Kay
- *         Robbins
+ *         Robbins, Dung Truong
  */
 public class TaggedEvent implements Comparable<TaggedEvent> {
     private static Tagger tagger;
@@ -44,7 +40,7 @@ public class TaggedEvent implements Comparable<TaggedEvent> {
     }
 
     /**
-     * Adds a group with the given ID to the event.
+     * Adds an empty group with the given ID to the event.
      *
      * @param groupId
      * @return True if the group was added successfully, false if the group ID
@@ -52,12 +48,12 @@ public class TaggedEvent implements Comparable<TaggedEvent> {
      */
     public boolean addGroup(int groupId) {
         TaggerSet<AbstractTagModel> tags = (TaggerSet)this.tagGroups.get(groupId);
-        if (tags != null) {
-            return false;
-        } else {
+        if (tags == null) {
             tags = new TaggerSet();
             this.tagGroups.put(groupId, tags);
             return true;
+        } else {
+            return false;
         }
     }
 
@@ -324,28 +320,24 @@ public class TaggedEvent implements Comparable<TaggedEvent> {
     public TaggerSet<AbstractTagModel> getRRValue(AbstractTagModel tagModel) {
         TaggerSet<AbstractTagModel> desc = new TaggerSet();
         TaggerSet<AbstractTagModel> eventTags = (TaggerSet)this.tagGroups.get(this.eventLevelId);
-        Iterator var5 = eventTags.iterator();
 
-        while(true) {
-            AbstractTagModel tag;
-            do {
-                if (!var5.hasNext()) {
-                    if (desc.size() > 0) {
-                        return desc;
-                    }
-
-                    return null;
-                }
-
-                tag = (AbstractTagModel)var5.next();
-            } while(!tag.getPath().startsWith(tagModel.getPath() + "/") && !tag.getPath().equals(tagModel.getPath()));
-
-            desc.add(tag);
+        for (AbstractTagModel tag : eventTags) {
+            if (tag.getPath().startsWith(tagModel.getPath() + "/") || tag.getPath().equals(tagModel.getPath())) {
+                desc.add(tag);
+            }
         }
+        if (desc.size() > 0)
+            return desc;
+        else
+            return null;
     }
 
     public TreeMap<Integer, TaggerSet<AbstractTagModel>> getTagGroups() {
         return this.tagGroups;
+    }
+
+    public void setTagGroups(TreeMap<Integer, TaggerSet<AbstractTagModel>> tGroup) {
+        tagGroups = tGroup;
     }
 
 //    public EventEnterTagView getEventEnterTagView() {return eventEnterTagView;}
@@ -445,5 +437,18 @@ public class TaggedEvent implements Comparable<TaggedEvent> {
 
     public void setAppView(TaggerView appView) {
         TaggedEvent.appView = appView;
+    }
+
+    public TreeMap<Integer, TaggerSet<AbstractTagModel>> deleteAllTag() {
+        // Create copy of the to be removed tagGroups, for undoing
+        TreeMap<Integer, TaggerSet<AbstractTagModel>> removed = new TreeMap<Integer, TaggerSet<AbstractTagModel>>();
+        for (Map.Entry<Integer, TaggerSet<AbstractTagModel>> entry : tagGroups.entrySet()) {
+            removed.put(entry.getKey(), (TaggerSet<AbstractTagModel>) entry.getValue().clone());
+        }
+        // clear
+        tagGroups.clear();
+        tagGroups.put(eventLevelId, new TaggerSet<AbstractTagModel>());
+        guiEventModel.setLabel("");
+        return removed;
     }
 }

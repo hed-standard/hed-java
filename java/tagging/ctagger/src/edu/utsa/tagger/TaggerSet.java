@@ -250,4 +250,13 @@ public class TaggerSet<E extends Comparable<? super E>> implements SortedSet<E> 
 	public Object[] toArray(Object[] a) {
 		return set.toArray(a);
 	}
+
+	@Override
+	public Object clone() {
+		TaggerSet<E> cloned = new TaggerSet<E>();
+		for (E item : set) {
+			cloned.add(item);
+		}
+		return cloned;
+	}
 }

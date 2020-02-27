@@ -112,6 +112,11 @@ public class GuiTagModel extends AbstractTagModel {
         return new TagEventEditView(this.tagger, taggedEvent, this);
 	}
 
+	/**
+	 * Create a new TagEventView
+	 * @param groupId
+	 * @return
+	 */
     public TagEventView getTagEventView(int groupId) {
         return new TagEventView(this.tagger, this.appView, groupId, this, false);
 	}

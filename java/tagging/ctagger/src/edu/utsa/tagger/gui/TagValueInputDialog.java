@@ -270,8 +270,7 @@ public class TagValueInputDialog extends JDialog implements ActionListener,
      * @return Null if invalid, numerical value with unit appended if valid
      */
     private String validateNumericValue(String numericValue, String unit) {
-        if (numericValue.matches("^-?[0-9]+(\\.[0-9]+)?$")
-                || numericValue.matches("^-?\\.[0-9]+$"))
+        if (numericValue.matches("^-?[0-9]+(\\.[0-9]+)?$") || numericValue.matches("^-\\.[0-9]+$"))
             numericValue = numericValue + " " + unit;
         else
             numericValue = null;

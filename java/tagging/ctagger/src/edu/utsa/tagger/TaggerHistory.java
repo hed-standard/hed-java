@@ -76,6 +76,8 @@ public class TaggerHistory {
             return "tag event(s)";
         case 13:
             return "untag event(s)";
+        case 14:
+                return "clear all tags";
         default:
             return "";
         }
@@ -152,6 +154,8 @@ public class TaggerHistory {
                 break;
             case 12:
                 this.redoUnassociate(item);
+            case 13:
+                this.redoClearAllTags(item);
             }
 
             return item;
@@ -277,7 +281,11 @@ public class TaggerHistory {
             tagger.unassociateBase(item.tagModel, item.groupsIds);
             this.addToUndo(item);
         }
+    }
 
+    private void redoClearAllTags(HistoryItem item) {
+        tagger.clearAllTags();
+        addToUndo(item);
     }
 
     public HistoryItem undo() {
@@ -323,6 +331,8 @@ public class TaggerHistory {
                 break;
             case 12:
                 this.undoUnassociate(item);
+            case 13:
+                this.undoClearAllTags(item);
             }
 
             return item;
@@ -461,6 +471,18 @@ public class TaggerHistory {
 
     }
 
+    private void undoClearAllTags(HistoryItem item) {
+        if (item.tagMap != null) {
+            for (TaggedEvent evt : tagger.getEventSet()) {
+                if (item.tagMap.containsKey(evt)) {
+                    evt.setTagGroups(item.tagMap.get(evt));
+                }
+            }
+        }
+
+        addToRedo(item);
+    }
+
     public static enum Type {
         CLEAR,
         TAG_ADDED,
@@ -474,7 +496,8 @@ public class TaggerHistory {
         TAG_PATH_EDITED,
         EVENT_EDITED,
         ASSOCIATED,
-        UNASSOCIATED;
+        UNASSOCIATED,
+        CLEAR_ALL_TAGS;
 
         private Type() {
         }
