@@ -1476,19 +1476,6 @@ public class TaggerView extends ConstraintContainer {
         searchResultsScrollPane.setVisible(true);
     }
 
-//    private void zoomIn() {
-//        ConstraintLayout.scale += 0.1D;
-//        FontsAndColors.resizeFonts(ConstraintLayout.scale);
-//        this.zoomPercent.setText((int) (ConstraintLayout.scale * 100.0D) + "%");
-//    }
-//
-//    private void zoomOut() {
-//        ConstraintLayout.scale -= 0.1D;
-//        FontsAndColors.resizeFonts(ConstraintLayout.scale);
-//        this.zoomPercent.setText((int) (ConstraintLayout.scale * 100.0D) + "%");
-//    }
-
-
     /*** support methods for addComponents ***/
     private void addOptionComponents() {
         if (this.isStandAloneVersion) {
@@ -1498,36 +1485,23 @@ public class TaggerView extends ConstraintContainer {
             this.add(this.ok, new Constraint("bottom:10 height:30 right:10 width:80"));
             this.add(this.help, new Constraint("bottom:10 height:30 left:10 width:110"));
             this.add(this.strategyGuide, new Constraint("bottom:10 height:30 left:120 width:120"));
-//            this.cancel.setEnabled(!this.loader.checkFlags(64));
         }
-
-//        if (this.tagger.getExtensionsAllowed()) {
-////            this.add(this.redo, new Constraint("top:0 height:30 right:90 width:80"));
-//            this.add(this.addTag, new Constraint("top:0 height:30 right:170 width:80"));
-//        }
-
     }
 
     /*** support methods for updateEventsPanel. Add groups and other tags ***/
     private int addOtherTags(TaggedEvent taggedEvent, int top) {
-        Iterator var4 = taggedEvent.getTagGroups().entrySet().iterator();
+        JLabel label = new JLabel("Other tags") {
+            @Override
+            public Font getFont() {
+                return FontsAndColors.contentFont.deriveFont(Font.BOLD);
+            }
+        };
+        label.setForeground(FontsAndColors.BLUE_DARK);
+        eventsPanel.add(label, new Constraint("top:" + top + " height:20 left:5 right:105"));
+        top += 23;
 
         for (Map.Entry<Integer, TaggerSet<AbstractTagModel>> tagGroup : taggedEvent.getTagGroups().entrySet()) {
-//        label35:
-//        while (var4.hasNext()) {
-//            Map.Entry<Integer, TaggerSet<AbstractTagModel>> tagGroup = (Map.Entry) var4.next();
             top = this.createGroupSpace(taggedEvent, tagGroup, top);
-//            Iterator var6 = ((TaggerSet) tagGroup.getValue()).iterator();
-
-//            while (true) {
-//                AbstractTagModel tag;
-//                do {
-//                    if (!var6.hasNext()) {
-//                        continue label35;
-//                    }
-//
-//                    tag = (AbstractTagModel) var6.next();
-//                } while ((Integer) tagGroup.getKey() == taggedEvent.getEventLevelId() && this.tagger.isRRValue(tag) && this.tagger.isPrimary());
             for (AbstractTagModel tag : (TaggerSet<AbstractTagModel>) tagGroup.getValue()) {
                 if (!((Integer) tagGroup.getKey() == taggedEvent.getEventLevelId() && this.tagger.isRRValue(tag) && this.tagger.isPrimary())) {
                     GuiTagModel guiTagModel = (GuiTagModel) tag;
@@ -1638,6 +1612,8 @@ public class TaggerView extends ConstraintContainer {
             taggedEvent.addRRTagView(tag, rrtv);
             size = rrtv.getConstraintHeight();
             this.eventsPanel.add(rrtv, new Constraint("top:" + top + " height:" + size));
+
+            // add delete tag 'x' icon to Category tags
             if (rrtv.getKey().getName().equals("Category")) {
                 TaggerSet<AbstractTagModel> sets = rrtv.getValues();
                 if (sets != null && !sets.isEmpty()) {
