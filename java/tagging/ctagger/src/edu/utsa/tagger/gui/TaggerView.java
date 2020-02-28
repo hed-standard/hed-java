@@ -7,12 +7,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -475,11 +471,7 @@ public class TaggerView extends ConstraintContainer {
 
         this.clearAll.addMouseListener(new MouseAdapter() {
           public void mouseClicked(MouseEvent e) {
-              int option = showTaggerMessageDialog("Are you sure you want to clear all tags?", "Yes", "No", null);
-              if (option == 0) {
-                  tagger.clearAllTags();
-                  updateEventsPanel();
-              }
+              clearAllTags();
           }
         });
         this.help.addMouseListener(new MouseAdapter() {
@@ -808,32 +800,40 @@ public class TaggerView extends ConstraintContainer {
         });
         menu.add(item);
 
-//        menu = new JMenu("Edit");
-//        menuBar.add(menu);
-//        item = new JMenuItem("Select All");
-//        item.addActionListener(new ActionListener() {
-//            public void actionPerformed(ActionEvent e) {
-//                TaggerView.this.selectAll();
-//            }
-//        });
-//        menu.add(item);
-//        item = new JMenuItem("Deselect All");
-//        item.addActionListener(new ActionListener() {
-//            public void actionPerformed(ActionEvent e) {
-//                TaggerView.this.deselectAll();
-//            }
-//        });
-//        menu.add(item);
-//        if (this.isStandAloneVersion) {
-//            menu.addSeparator();
-//            item = new JMenuItem("Delete");
-//            item.addActionListener(new ActionListener() {
-//                public void actionPerformed(ActionEvent e) {
-//                    TaggerView.this.deleteSelected();
-//                }
-//            });
-//            menu.add(item);
-//        }
+        menu = new JMenu("Edit");
+        menuBar.add(menu);
+        item = new JMenuItem("Select All");
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                TaggerView.this.selectAll();
+            }
+        });
+        menu.add(item);
+        item = new JMenuItem("Deselect All");
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                TaggerView.this.deselectAll();
+            }
+        });
+        menu.add(item);
+
+        menu.addSeparator();
+        item = new JMenuItem("Delete all tags");
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                TaggerView.this.clearAllTags();
+            }
+        });
+        menu.add(item);
+
+        menu.addSeparator();
+        item = new JMenuItem("Get tag summary of selected events");
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                TaggerView.this.getTagSummaryOfSelected();
+            }
+        });
+        menu.add(item);
 
         menu = new JMenu("View");
         menuBar.add(menu);
@@ -1994,6 +1994,22 @@ public class TaggerView extends ConstraintContainer {
         this.selectedEvents.add(id);
     }
 
+    /**
+     * Delete all tags of CTAGGER
+     */
+    public void clearAllTags() {
+        int option = showTaggerMessageDialog("Are you sure you want to clear all tags?", "Yes", "No", null);
+        if (option == 0) {
+            tagger.clearAllTags();
+            updateEventsPanel();
+        }
+    }
+
+
+    public void getTagSummaryOfSelected() {
+        HashMap<String, ArrayList<String>> report = tagger.extractTags(selectedEvents);
+        System.out.println(report);
+    }
     /**
      * Shows a message dialog with the given message and options for the user to
      * choose.

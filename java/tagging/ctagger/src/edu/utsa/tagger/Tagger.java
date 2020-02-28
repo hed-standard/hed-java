@@ -23,18 +23,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -2229,6 +2220,9 @@ public class Tagger {
         return affectedGroups;
     }
 
+    /**
+     * Delete all tags
+     */
     public void clearAllTags() {
         HashMap<TaggedEvent, TreeMap<Integer, TaggerSet<AbstractTagModel>>> tagMap = new HashMap<>();
         for (TaggedEvent evt : eventList) {
@@ -2242,6 +2236,50 @@ public class Tagger {
         this.history.add(historyItem);
 
     }
+
+    /**
+     * Extract common and unique tags of the selected events
+     * @param selectedEvents    tagged events ids to extract tags from
+     * @return
+     *      A map containing an arraylist of common tags, indexed by key "shared"
+     *                       and arraylists of unique tags for each events
+     */
+    public HashMap<String, ArrayList<String>> extractTags(Set<Integer> selectedEvents) {
+        HashMap<String, ArrayList<String>> report = new HashMap<>();
+
+        HashMap<Integer, ArrayList<String>> tagList = new HashMap<>(); // map of selected events and all their tags in string
+        for (TaggedEvent event : eventList) {
+            if (selectedEvents.contains(event.getEventLevelId())) {
+                tagList.put(event.getEventLevelId(), event.tagsToString());
+            }
+        }
+
+        // extract shared tags
+        ArrayList<Integer> events = new ArrayList<>(selectedEvents);
+        Set<String> sharedTags = tagList.get(events.get(0)).stream().distinct().filter(tagList.get(events.get(1))::contains).collect(Collectors.toSet());
+        for (int i=2; i < events.size(); ++i) {
+            ArrayList<String> sharedList = new ArrayList<String>(sharedTags);
+            sharedTags = sharedList.stream().distinct().filter(tagList.get(events.get(i))::contains).collect(Collectors.toSet());
+        }
+        report.put("shared", new ArrayList<>(sharedTags));
+
+        // get unique tags
+        for (Entry<Integer, ArrayList<String>> entry : tagList.entrySet()) {
+            // get unique tags of this event
+            ArrayList<String> uniqueTags = new ArrayList<>();
+            for (String tag : entry.getValue()) {
+                if (!sharedTags.contains(tag)) {
+                    uniqueTags.add(tag);
+                }
+            }
+
+            // add to report
+            report.put(""+entry.getKey(), uniqueTags);
+        }
+
+        return report;
+    }
+
     public HistoryItem undo() {
         return this.history.undo();
     }
