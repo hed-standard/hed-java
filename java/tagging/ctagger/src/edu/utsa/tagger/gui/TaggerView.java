@@ -3,13 +3,17 @@ package edu.utsa.tagger.gui;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.*;
 import java.util.List;
 
+import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageInputStream;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -41,7 +45,7 @@ public class TaggerView extends ConstraintContainer {
             return FontsAndColors.buttonFont;
         }
     };
-    private XButton addGroup = new XButton(new ImageIcon(System.getProperty("user.dir") + File.separator + "group_scaled.png")) {
+    private XButton addGroup = new XButton(new ImageIcon(getClass().getResource("/img/group_scaled.png"))) {
         @Override
         public Font getFont() {
             return FontsAndColors.buttonFont;
@@ -102,18 +106,18 @@ public class TaggerView extends ConstraintContainer {
     /**
      * Creates a expand button.
      */
-//    private XButton expandAll = new XButton("Expand") { @Override
-//        public Font getFont() {
-//            return FontsAndColors.headerFont;
-//        }
-//    };
+    private XButton expandAll = new XButton("Expand") { @Override
+        public Font getFont() {
+            return FontsAndColors.headerFont;
+        }
+    };
     private JFrame frame;
     private JLabel hoverMessage = new JLabel();
     private TaggerLoader loader;
     private boolean isStandAloneVersion;
     private Notification notification = new Notification();
     private XButton ok = createMenuButton("Ok");
-    private XButton redo = new HistoryButton(new ImageIcon(System.getProperty("user.dir") + File.separator + "redo_scaled.png"), false);
+    private XButton redo = new HistoryButton(new ImageIcon(getClass().getResource("/img/redo_scaled.png")), false);
     private JPanel searchResults = new JPanel() {
         @Override
         protected void paintComponent(Graphics g) {
@@ -162,7 +166,7 @@ public class TaggerView extends ConstraintContainer {
         }
     };
     private ConstraintContainer btnPanel = new ConstraintContainer();
-    private XButton undo = new HistoryButton(new ImageIcon(System.getProperty("user.dir") + File.separator + "undo_scaled.png"), true);
+    private XButton undo;
     int hasMissingTag = 0;
     private JPanel warningPanel = new JPanel();
     private JLabel incompatibleTagWarning = new JLabel("<html><div style='text-align: left;'>" + "Red tags violate HED schema!" + "</div></html>") {
@@ -177,7 +181,7 @@ public class TaggerView extends ConstraintContainer {
             return FontsAndColors.headerFont;
         }
     };
-    private Icon icon = new ImageIcon(System.getProperty("user.dir") + File.separator + "delete_scaled.png");
+    private Icon icon = new ImageIcon(getClass().getResource("/img/delete_scaled.png"));
     private JButton clearAll = new JButton(icon);
     private XButton help = new XButton("User manual") {
         @Override
@@ -221,12 +225,24 @@ public class TaggerView extends ConstraintContainer {
     }
 
     public void createLayout() {
+        this.setupComponents();
         this.createFrame();
         this.setColors();
         this.setListeners();
         this.addComponents();
         this.updateTagsPanel();
         this.updateEventsPanel();
+    }
+
+    private void setupComponents() {
+        try {
+//            System.out.println(TaggerView.class.getResourceAsStream("/img/undo_scaled.png"));
+            undo = new HistoryButton(new ImageIcon(ImageIO.read(TaggerView.class.getResourceAsStream("/img/undo_scaled.png"))), true);
+        }
+        catch (Exception ex) {
+            System.err.println("Exception: " + ex.getMessage());
+            System.err.println(ex.getStackTrace());
+        }
     }
 
     private void createFrame() {
@@ -260,24 +276,12 @@ public class TaggerView extends ConstraintContainer {
         this.addEvent.setHoverForeground(FontsAndColors.BLUE_DARK);
         this.addEvent.setPressedBackground(FontsAndColors.TRANSPARENT);
         this.addEvent.setPressedForeground(FontsAndColors.BLUE_VERY_LIGHT);
-//        this.selectAllorNone.setNormalBackground(FontsAndColors.TRANSPARENT);
-//        this.selectAllorNone.setNormalForeground(FontsAndColors.BLUE_VERY_LIGHT);
-//        this.selectAllorNone.setHoverBackground(FontsAndColors.TRANSPARENT);
-//        this.selectAllorNone.setHoverForeground(FontsAndColors.BLUE_DARK);
-//        this.selectAllorNone.setPressedBackground(FontsAndColors.TRANSPARENT);
-//        this.selectAllorNone.setPressedForeground(FontsAndColors.BLUE_VERY_LIGHT);
         this.addGroup.setNormalBackground(FontsAndColors.TRANSPARENT);
         this.addGroup.setNormalForeground(FontsAndColors.BLUE_VERY_LIGHT);
         this.addGroup.setHoverBackground(FontsAndColors.TRANSPARENT);
         this.addGroup.setHoverForeground(FontsAndColors.BLUE_DARK);
         this.addGroup.setPressedBackground(FontsAndColors.TRANSPARENT);
         this.addGroup.setPressedForeground(FontsAndColors.BLUE_VERY_LIGHT);
-//        this.addTag.setNormalBackground(FontsAndColors.TRANSPARENT);
-//        this.addTag.setNormalForeground(FontsAndColors.BLUE_VERY_LIGHT);
-//        this.addTag.setHoverBackground(FontsAndColors.TRANSPARENT);
-//        this.addTag.setHoverForeground(FontsAndColors.BLUE_DARK);
-//        this.addTag.setPressedBackground(FontsAndColors.TRANSPARENT);
-//        this.addTag.setPressedForeground(FontsAndColors.BLUE_VERY_LIGHT);
         this.collapseLabel.setBackground(FontsAndColors.TRANSPARENT);
         this.collapseLabel.setForeground(FontsAndColors.BLUE_DARK);
         this.collapseAll.setNormalBackground(FontsAndColors.TRANSPARENT);
@@ -2193,12 +2197,6 @@ public class TaggerView extends ConstraintContainer {
         public HistoryButton(String textArg, boolean undo) {
             super(textArg);
             this.undo = undo;
-//            this.setNormalBackground(FontsAndColors.MENU_NORMAL_BG);
-//            this.setNormalForeground(FontsAndColors.MENU_NORMAL_FG);
-//            this.setHoverBackground(FontsAndColors.MENU_HOVER_BG);
-//            this.setHoverForeground(FontsAndColors.MENU_HOVER_FG);
-//            this.setPressedBackground(FontsAndColors.MENU_PRESSED_BG);
-//            this.setPressedForeground(FontsAndColors.MENU_PRESSED_FG);
         }
 
         public Font getFont() {
@@ -2215,22 +2213,22 @@ public class TaggerView extends ConstraintContainer {
 
         }
 
-        public void mouseEntered(MouseEvent e) {
-            super.mouseEntered(e);
-            this.hoverText = this.undo ? TaggerView.this.tagger.getUndoMessage() : TaggerView.this.tagger.getRedoMessage();
-            TaggerView.this.hoverMessage.setText(this.hoverText);
-            Point point = this.getLocation();
-            int top = point.y + 50;
-            int right = this.getWidth() - point.x - 120;
-            TaggerView.this.setTopHeight(TaggerView.this.hoverMessage, (double) top, Unit.PX, 25.0D, Unit.PX);
-            TaggerView.this.setRightWidth(TaggerView.this.hoverMessage, (double) right, Unit.PX, 120.0D, Unit.PX);
-            TaggerView.this.hoverMessage.setVisible(true);
-        }
-
-        public void mouseExited(MouseEvent e) {
-            super.mouseExited(e);
-            TaggerView.this.hoverMessage.setVisible(false);
-        }
+//        public void mouseEntered(MouseEvent e) {
+//            super.mouseEntered(e);
+//            this.hoverText = this.undo ? TaggerView.this.tagger.getUndoMessage() : TaggerView.this.tagger.getRedoMessage();
+//            TaggerView.this.hoverMessage.setText(this.hoverText);
+//            Point point = this.getLocation();
+//            int top = point.y + 50;
+//            int right = this.getWidth() - point.x - 120;
+//            TaggerView.this.setTopHeight(TaggerView.this.hoverMessage, (double) top, Unit.PX, 25.0D, Unit.PX);
+//            TaggerView.this.setRightWidth(TaggerView.this.hoverMessage, (double) right, Unit.PX, 120.0D, Unit.PX);
+//            TaggerView.this.hoverMessage.setVisible(true);
+//        }
+//
+//        public void mouseExited(MouseEvent e) {
+//            super.mouseExited(e);
+//            TaggerView.this.hoverMessage.setVisible(false);
+//        }
     }
 
 
