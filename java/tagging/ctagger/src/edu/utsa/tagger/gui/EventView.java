@@ -243,9 +243,10 @@ public class EventView extends JComponent implements MouseListener {
 
 		g2d.setColor(fg);
 		g2d.setFont(FontsAndColors.contentFont.deriveFont(Font.BOLD));
-		g2d.drawString(taggedEvent.getEventModel().getCode() + ": "
-				+ taggedEvent.getEventModel().getLabel() + " ", (int) x,
-				(int) y);
+		g2d.drawString(taggedEvent.getEventModel().getCode(), (int) x, (int) y);
+//		g2d.drawString(taggedEvent.getEventModel().getCode() + ": "
+//						+ taggedEvent.getEventModel().getLabel() + " ", (int) x,
+//				(int) y);
 	}
 
 	public void setCurrentPosition(int position) {
