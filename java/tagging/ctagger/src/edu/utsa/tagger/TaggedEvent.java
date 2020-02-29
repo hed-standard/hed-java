@@ -308,6 +308,10 @@ public class TaggedEvent implements Comparable<TaggedEvent> {
         return label;
     }
 
+    public String getCode() {
+        return guiEventModel.getCode();
+    }
+
     public int getNumTagsInGroup(int groupId) {
         TaggerSet<AbstractTagModel> tags = (TaggerSet)this.tagGroups.get(groupId);
         return tags == null ? -1 : tags.size();

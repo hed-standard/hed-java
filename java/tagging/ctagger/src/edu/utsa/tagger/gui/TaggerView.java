@@ -91,12 +91,6 @@ public class TaggerView extends ConstraintContainer {
             return FontsAndColors.headerFont;
         }
     };
-//    private JLabel deselectAllLabel = new JLabel("Deselect all") {
-//        @Override
-//        public Font getFont() {
-//            return FontsAndColors.headerFont;
-//        }
-//    };
     private JLayeredPane eventsScrollPane = new JLayeredPane();
     private JLabel eventsTitle = new JLabel("<html>Data<br>Events</html>") {
         @Override
@@ -1425,18 +1419,16 @@ public class TaggerView extends ConstraintContainer {
     }
 
     private void selectAll() {
-        Iterator var2 = this.tagger.getEventSet().iterator();
-
-        while (var2.hasNext()) {
-            TaggedEvent taggedEvent = (TaggedEvent) var2.next();
+        for (TaggedEvent taggedEvent : tagger.getEventSet()) {
             this.selected.add(taggedEvent.getEventLevelId());
-            Set<Integer> keys = taggedEvent.getTagGroups().keySet();
-            Iterator var5 = keys.iterator();
-
-            while (var5.hasNext()) {
-                Integer key = (Integer) var5.next();
-                this.selected.add(key);
-            }
+            this.selectedEvents.add(taggedEvent.getEventLevelId());
+//            Set<Integer> keys = taggedEvent.getTagGroups().keySet();
+//            Iterator var5 = keys.iterator();
+//
+//            while (var5.hasNext()) {
+//                Integer key = (Integer) var5.next();
+//                this.selected.add(key);
+//            }
         }
 
         this.updateEventsPanel();
@@ -2007,8 +1999,25 @@ public class TaggerView extends ConstraintContainer {
 
 
     public void getTagSummaryOfSelected() {
+        if (selectedEvents.size() == 0) {
+            showTaggerMessageDialog("Select events to be included in the summary first", "Ok", null, null);
+            return;
+        }
+        else if (selectedEvents.size() == 1) {
+            showTaggerMessageDialog("Please select more than one events for this report", "Ok", null, null);
+            return;
+        }
         HashMap<String, ArrayList<String>> report = tagger.extractTags(selectedEvents);
         System.out.println(report);
+        HashMap<String, ArrayList<String>> fullEventNameUniqueTags = new HashMap<>();
+        Set<String> eventIDs = report.keySet();
+        for (TaggedEvent event : tagger.getEventSet()) {
+            if (eventIDs.contains(""+event.getEventLevelId())) {
+                fullEventNameUniqueTags.put(event.getCode(), report.get(""+event.getEventLevelId()));
+            }
+        }
+        TagSummaryDialog dialog = new TagSummaryDialog(frame, report.get("shared"), fullEventNameUniqueTags);
+        dialog.showDialog();
     }
     /**
      * Shows a message dialog with the given message and options for the user to
