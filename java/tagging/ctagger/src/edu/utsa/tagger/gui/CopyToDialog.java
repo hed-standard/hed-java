@@ -1,153 +1,210 @@
 package edu.utsa.tagger.gui;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
-import javax.swing.JCheckBox;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.*;
+import javax.swing.border.EtchedBorder;
 
+import edu.utsa.tagger.AbstractTagModel;
 import edu.utsa.tagger.TaggedEvent;
 import edu.utsa.tagger.Tagger;
-import edu.utsa.tagger.guisupport.ConstraintLayout;
+import edu.utsa.tagger.TaggerSet;
+import edu.utsa.tagger.guisupport.*;
 
 /**
  * Dialog for user to select what events to copy the tag to
  *
  * @author Dung Truong
  */
-public class CopyToDialog extends JDialog implements ItemListener, PropertyChangeListener {
+public class CopyToDialog extends JDialog {
 
-    private JOptionPane bgPanel = new JOptionPane();
-    private JTextField textField;
-    String btnString1 = "Copy"; // used to communicate between input and optionpane
-    String btnString2 = "Cancel";
-    String typedText = null;
-    TaggerView appView;
-    GuiTagModel guiTagModel = null;
-    Tagger tagger = null;
-    TaggedEvent tgevt;
-    JPanel typeOptionsPanel;
-    HashMap<String,Integer> boxIdMap = new HashMap<String,Integer>();
-    public CopyToDialog(Tagger tgr,TaggerView view, GuiTagModel gtm) {
-        super(view.getFrame(),true);
-        appView = view;
-        guiTagModel = gtm;
-        tagger = tgr;
+    private JLayeredPane tagPanel = new JLayeredPane();
+    private Integer eventID;
+    private Tagger tagger;
+    private ArrayList<TagItemView> topLevelTags = new ArrayList<>();
+    private TreeMap<Integer,ArrayList<TagItemView>> groupLevelTags = new TreeMap<>();
+    private HashMap<String, Integer> copyToList = new HashMap<>();
+    private JList eventList;
+    private XButton cancelBtn;
+    private XButton okButton;
+    private boolean response;
 
-        bgPanel.setLayout(new ConstraintLayout());
-        bgPanel.setBackground(Color.white);
-        bgPanel.setPreferredSize(new Dimension(400, 200));
+    public CopyToDialog(JFrame frame, Tagger tagger, Integer evtID) {
+        super(frame, "Copy Tag", true);
+        this.tagger = tagger;
+        eventID = evtID;
 
-        // message display
-        textField = new JTextField(20);
-        String message = "Select events:";
-        typeOptionsPanel = new JPanel(new GridLayout(0, 3));
-        Set<Integer> groupIds = appView.getSelected();
-        for (TaggedEvent event : tagger.getEventSet()) {
-            if (!groupIds.contains(event.getEventLevelId())) {
-                JCheckBox cb = new JCheckBox(event.getEventModel().getCode());
-                cb.addItemListener(this);
-                typeOptionsPanel.add(cb);
-                boxIdMap.put(cb.getText(), event.getEventLevelId()); //event.getEventGroupId
-            }
-        }
-        Object[] array = {message,typeOptionsPanel};
+        ConstraintContainer mainPanel = new ConstraintContainer();
+        mainPanel.setBackground(FontsAndColors.DIALOG_BG);
+        mainPanel.setOpaque(true);
+        JLayeredPane splitPane = new JLayeredPane();
+        splitPane.setBackground(FontsAndColors.DIALOG_BG);
+        splitPane.setOpaque(true);
 
-        // dialog buttons
-        Object[] options = {btnString1, btnString2};
-        bgPanel = new JOptionPane(array,
-                JOptionPane.PLAIN_MESSAGE,
-                JOptionPane.YES_NO_OPTION,
-                null,
-                options,
-                options[0]);
+        ConstraintContainer splitPaneLeft = new ConstraintContainer();
+        JLabel tagTitle = new JLabel("Select tags to copy");
+        tagTitle.setFont(FontsAndColors.headerFont);
+        tagTitle.setForeground(FontsAndColors.DIALOG_MESSAGE_FG);
+        splitPaneLeft.add(tagTitle, new Constraint("top:0 left:65 height:30 right:0"));
+        tagPanel.setOpaque(true);
+        tagPanel.setBackground(FontsAndColors.BLUE_MEDIUM);
+        tagPanel.setLayout(new ConstraintLayout());
+        addMainTags(tagger.getTaggedEventFromGroupId(eventID).getTagGroups());
+        JLayeredPane tagContainer = new JLayeredPane();
+        ScrollLayout tagScrollLayout = new ScrollLayout(tagContainer, tagPanel);
+        tagContainer.setLayout(tagScrollLayout);
+        splitPaneLeft.add(tagContainer, new Constraint("top:35 left:10 right:10 bottom:30"));
 
-        setContentPane(bgPanel);
+        ConstraintContainer splitPaneRight = new ConstraintContainer();
+        JLabel eventTitle = new JLabel("Select events to copy tags to");
+        eventTitle.setFont(FontsAndColors.headerFont);
+        eventTitle.setForeground(FontsAndColors.DIALOG_MESSAGE_FG);
+        splitPaneRight.add(eventTitle, new Constraint("top:0 left:13 height:30 right:0"));
+        getCopyToList();
+        eventList = new JList(copyToList.keySet().toArray());
+        eventList.setBackground(FontsAndColors.BLUE_VERY_LIGHT);
+        eventList.setFont(FontsAndColors.contentFont);
+        eventList.setForeground(FontsAndColors.BLUE_DARK);
+        eventList.setVisibleRowCount(-1);
+        JLayeredPane eventContainer = new JLayeredPane();
+        eventList.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
+        ScrollLayout eventScrollLayout = new ScrollLayout(eventContainer, eventList);
+        eventContainer.setLayout(eventScrollLayout);
+        splitPaneRight.add(eventContainer, new Constraint("top:35 left:10 right:10 bottom:30"));
 
+        VerticalSplitLayout splitLayout = new VerticalSplitLayout(splitPane, splitPaneLeft, splitPaneRight, 300);
+        splitPane.setLayout(splitLayout);
+        splitPane.setPreferredSize(new Dimension(600,500));
+        mainPanel.add(splitPane, new Constraint("top:10 left:10 right:10 bottom:50"));
+
+        cancelBtn = TaggerView.createMenuButton("Cancel");
+        cancelBtn.addMouseListener(new CancelButtonListener());
+        mainPanel.add(cancelBtn, new Constraint(
+                "bottom:10 height:30 right:150 width:100"));
+
+        okButton = TaggerView.createMenuButton("Ok");
+        okButton.addMouseListener(new OkButtonListener());
+        mainPanel.add(okButton, new Constraint(
+                "bottom:10 height:30 right:5 width:100"));
+
+        getContentPane().add(mainPanel);
+        mainPanel.setPreferredSize(new Dimension(600,550));
         pack();
-        setLocationRelativeTo(appView.getFrame());
-
-        //Ensure the text field always gets the first focus.
-        addComponentListener(new ComponentAdapter() {
-            public void componentShown(ComponentEvent ce) {
-                textField.requestFocusInWindow();
-            }
-        });
-
-        //Register an event handler that reacts to option pane state changes.
-        bgPanel.addPropertyChangeListener(this); // cuz implement Property Change Listener
-
+        setLocationRelativeTo(frame);
         setVisible(true);
     }
 
-    /** Listens to the check boxes. */
-    public void itemStateChanged(ItemEvent e) {
-        int index = 0;
-        char c = '-';
-        Object source = e.getItemSelectable();
-
-    }
-
-    /** This method reacts to state changes in the option pane. */
-    public void propertyChange(PropertyChangeEvent e) {
-        String prop = e.getPropertyName();
-
-        if (isVisible()
-                && (e.getSource() == bgPanel)
-                && (JOptionPane.VALUE_PROPERTY.equals(prop) ||
-                JOptionPane.INPUT_VALUE_PROPERTY.equals(prop))) {
-            Object value = bgPanel.getValue();
-
-            if (value == JOptionPane.UNINITIALIZED_VALUE) {
-                //ignore reset
-                return;
+    public void getCopyToList() {
+        for (TaggedEvent event : tagger.getEventSet()) {
+            if (event.getEventLevelId() != eventID) {
+                copyToList.put(event.getCode(),event.getEventLevelId());
             }
-
-            //Reset the JOptionPane's value.
-            //If you don't do this, then if the user
-            //presses the same button next time, no
-            //property change event will be fired.
-            bgPanel.setValue(
-                    JOptionPane.UNINITIALIZED_VALUE);
-
-            if (btnString1.equals(value)) {
-                Component[] components = typeOptionsPanel.getComponents();
-                Set<Integer> groupIds = new HashSet<Integer>();
-                for (Component comp : components) {
-                    JCheckBox cb = (JCheckBox) comp;
-                    if (cb.getSelectedObjects() != null) {
-                        groupIds.add(boxIdMap.get(cb.getText()));
-                    }
-                }
-                setVisible(false);
-                guiTagModel.requestToggleTag(groupIds);
-            }
-            dispose();
         }
     }
 
+    public void addMainTags(TreeMap<Integer, TaggerSet<AbstractTagModel>> tagGroup) {
+        int top = 0;
+        JLabel topLevelLabel = new JLabel("Top level tags:");
+        topLevelLabel.setForeground(FontsAndColors.DIALOG_MESSAGE_FG);
+        topLevelLabel.setBackground(FontsAndColors.DIALOG_BG);
+        topLevelLabel.setFont(FontsAndColors.contentFont.deriveFont(Font.BOLD));
+        tagPanel.add(topLevelLabel, new Constraint("top:" + top + " height:23"));
+        top += 23;
+
+        for (AbstractTagModel tag : tagGroup.get(eventID)) {
+            // addTagItemView
+            TagItemView tagItemView = new TagItemView(tag);
+            topLevelTags.add(tagItemView);
+            tagPanel.add(tagItemView, new Constraint("top:" + top + " left:10 height:23 right:0"));
+            top += 23;
+        }
+
+        int i = 1;
+        for (Map.Entry<Integer, TaggerSet<AbstractTagModel>> entry : tagGroup.entrySet()) {
+            if (entry.getKey() != eventID) {
+                groupLevelTags.put(entry.getKey(), new ArrayList<TagItemView>());
+                JLabel groupLabel = new JLabel("Group " + i++ + " tags:");
+                groupLabel.setForeground(FontsAndColors.DIALOG_MESSAGE_FG);
+                groupLabel.setBackground(FontsAndColors.DIALOG_BG);
+                groupLabel.setFont(FontsAndColors.contentFont.deriveFont(Font.BOLD));
+                tagPanel.add(groupLabel, new Constraint("top:" + top + " height:23"));
+                top += 23;
+                // addTagGroupView
+                for (AbstractTagModel tag : entry.getValue()) {
+                    TagItemView tagItemView = new TagItemView(tag);
+                    groupLevelTags.get(entry.getKey()).add(tagItemView);
+                    tagPanel.add(tagItemView, new Constraint("left:10 top:" + top + " height:23 right:0"));
+                    top += 23;
+
+                }
+            }
+        }
+    }
+
+
+    /**
+     * Panel of checkbox and tag path
+     */
+    private class TagItemView extends JCheckBox{
+        AbstractTagModel tagModel;
+
+        public TagItemView(AbstractTagModel tag) {
+            super(tag.getPath());
+            this.tagModel = tag;
+            this.setBackground(FontsAndColors.DIALOG_BG);
+            this.setForeground(FontsAndColors.DIALOG_MESSAGE_FG);
+        }
+
+        public AbstractTagModel getTagModel() {
+            return tagModel;
+        }
+    }
+
+    private class CancelButtonListener extends MouseAdapter {
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            response = false;
+            setVisible(false);
+            dispose();
+        }
+    }
+    private class OkButtonListener extends MouseAdapter {
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            ArrayList<Integer> selectedEventID = new ArrayList<>();
+            for (int selected : eventList.getSelectedIndices()) {
+                String eventCode = (String) eventList.getModel().getElementAt(selected);
+                Integer evtID = copyToList.get(eventCode);
+                selectedEventID.add(evtID);
+            }
+            // copy top level tags
+            for (TagItemView tagView : topLevelTags) {
+                if (tagView.isSelected()) {
+                    GuiTagModel tagModel = (GuiTagModel) tagView.getTagModel();
+                    tagModel.requestToggleTag(new HashSet(selectedEventID));
+                }
+            }
+
+            // copy group tags
+            // create new groups
+            for (Map.Entry<Integer, ArrayList<TagItemView>> entry : groupLevelTags.entrySet()) {
+                Set<Integer> newGroupIDs = null;
+                for (TagItemView tagView : entry.getValue()) {
+                    if (tagView.isSelected()) {
+                        if (newGroupIDs == null) {
+                            newGroupIDs = tagger.addNewGroups(new HashSet(selectedEventID));
+                        }
+                        GuiTagModel tagModel = (GuiTagModel) tagView.getTagModel();
+                        tagModel.requestToggleTag(newGroupIDs);
+                    }
+                }
+            }
+            response = true;
+            setVisible(false);
+            dispose();
+        }
+    }
 }

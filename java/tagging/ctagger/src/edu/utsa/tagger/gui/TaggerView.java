@@ -183,6 +183,7 @@ public class TaggerView extends ConstraintContainer {
     };
     private Icon icon = new ImageIcon(getClass().getResource("/img/delete_scaled.png"));
     private JButton clearAll = new JButton(icon);
+    private JButton copyTo = new JButton("Copy To");
     private XButton help = new XButton("User manual") {
         @Override
         public Font getFont() {
@@ -472,6 +473,11 @@ public class TaggerView extends ConstraintContainer {
               clearAllTags();
           }
         });
+        this.copyTo.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                copyTag();
+            }
+        });
         this.help.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
@@ -554,6 +560,8 @@ public class TaggerView extends ConstraintContainer {
         btnPanel.add(addGroup, new Constraint("top:0 left:72 height:33 width:33"));
         clearAll.setToolTipText("Delete all tags");
         btnPanel.add(clearAll, new Constraint("top:0 left:106 height:33 width:33"));
+        copyTo.setToolTipText("Copy tags of selected events to others");
+        btnPanel.add(copyTo, new Constraint("top:0 left:140 height:33 width:50"));
 
         this.add(this.notification, new Constraint("top:10 height:30 left:305 right:245"));
         this.setLayer(this.notification, 1);
@@ -1430,6 +1438,7 @@ public class TaggerView extends ConstraintContainer {
         for (TaggedEvent taggedEvent : tagger.getEventSet()) {
             this.selected.add(taggedEvent.getEventLevelId());
             this.selectedEvents.add(taggedEvent.getEventLevelId());
+//            // add groups
 //            Set<Integer> keys = taggedEvent.getTagGroups().keySet();
 //            Iterator var5 = keys.iterator();
 //
@@ -2005,6 +2014,17 @@ public class TaggerView extends ConstraintContainer {
         }
     }
 
+    /**
+     * Copy tags of selected event to other events
+     */
+    public void copyTag() {
+        if (selectedEvents.size() != 1) {
+            showTaggerMessageDialog("Please select only one event to copy tags from", "Ok", null, null);
+            return;
+        }
+        else
+            new CopyToDialog(frame, tagger, selectedEvents.iterator().next());
+    }
 
     public void getTagSummaryOfSelected() {
         if (selectedEvents.size() == 0) {
