@@ -57,7 +57,7 @@ public class TaggerView extends ConstraintContainer {
 //            return FontsAndColors.buttonFont;
 //        }
 //    };
-    private boolean autoCollapse = true;
+    private boolean autoCollapse = false;
     private int autoCollapseDepth;
     //private XButton exit = createMenuButton("go exit");
     private XButton cancel = createMenuButton("Cancel");
@@ -145,6 +145,7 @@ public class TaggerView extends ConstraintContainer {
     private ConstraintContainer splitPaneLeft = new ConstraintContainer();
     private ConstraintContainer splitPaneRight = new ConstraintContainer();
     private Tagger tagger;
+    private JFrame schemaFrame;
     private JPanel tagsPanel = new JPanel();
     private JLayeredPane eventsPanel = new JLayeredPane();
     //private boolean startOver;
@@ -183,7 +184,15 @@ public class TaggerView extends ConstraintContainer {
     };
     private Icon icon = new ImageIcon(getClass().getResource("/img/delete_scaled.png"));
     private JButton clearAll = new JButton(icon);
-    private JButton copyTo = new JButton("Copy To");
+    private JButton copyTo = new JButton(new ImageIcon(getClass().getResource("/img/copy_to_scaled.png")));
+    private JButton showSchema = new JButton("HED") {
+        @Override
+        public Font getFont() {
+            return FontsAndColors.buttonFont.deriveFont(Font.BOLD);
+        }
+    };
+    private JButton tagSummary = new JButton(new ImageIcon(getClass().getResource("/img/report_scaled.png")));
+    private JButton toFMap = new JButton(new ImageIcon(getClass().getResource("/img/export_scaled.png")));
     private XButton help = new XButton("User manual") {
         @Override
         public Font getFont() {
@@ -249,12 +258,19 @@ public class TaggerView extends ConstraintContainer {
     private void createFrame() {
         JMenuBar menuBar = this.createMenuBar();
         this.frame = new JFrame();
-        this.frame.setSize(1024, 768);
+        this.frame.setSize(685, 768);
         this.frame.setVisible(true);
         this.frame.setDefaultCloseOperation(0);
         this.frame.setTitle("CTAGGER - Specify event HED tags");
         this.frame.setJMenuBar(menuBar);
         this.frame.getContentPane().add(this);
+
+        // schema Frame
+        this.schemaFrame = new JFrame();
+        this.schemaFrame.setSize(512,768);
+        this.schemaFrame.setVisible(false);
+        this.schemaFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+        this.schemaFrame.setTitle("HED Schema");
     }
 
     private void setColors() {
@@ -307,6 +323,8 @@ public class TaggerView extends ConstraintContainer {
         this.incompatibleTagWarning.setBackground(FontsAndColors.TRANSPARENT);
         this.titleLabel.setForeground(FontsAndColors.BLUE_DARK);
         this.titleLabel.setBackground(FontsAndColors.TRANSPARENT);
+
+        schemaFrame.getContentPane().setBackground(FontsAndColors.APP_BG);
     }
 
     private void setListeners() {
@@ -478,6 +496,21 @@ public class TaggerView extends ConstraintContainer {
                 copyTag();
             }
         });
+        this.showSchema.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                schemaFrame.setVisible(true);
+            }
+        });
+        this.tagSummary.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                TaggerView.this.getTagSummaryOfSelected();
+            }
+        });
+        this.toFMap.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                TaggerView.this.saveFieldMapDialog(4);
+            }
+        });
         this.help.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
@@ -556,12 +589,18 @@ public class TaggerView extends ConstraintContainer {
         btnPanel.add(undo, new Constraint("top:0 height:33 left:0 width:33"));
         redo.setToolTipText("Redo");
         btnPanel.add(redo, new Constraint("top:0 left:34 height:33 width:33"));
-        addGroup.setToolTipText("Add tag group to selected");
+        addGroup.setToolTipText("Add tag group to selected event(s)");
         btnPanel.add(addGroup, new Constraint("top:0 left:72 height:33 width:33"));
+        copyTo.setToolTipText("Copy tags of selected event to others");
+        btnPanel.add(copyTo, new Constraint("top:0 left:106 height:33 width:33"));
         clearAll.setToolTipText("Delete all tags");
-        btnPanel.add(clearAll, new Constraint("top:0 left:106 height:33 width:33"));
-        copyTo.setToolTipText("Copy tags of selected events to others");
-        btnPanel.add(copyTo, new Constraint("top:0 left:140 height:33 width:50"));
+        btnPanel.add(clearAll, new Constraint("top:0 left:140 height:33 width:33"));
+        tagSummary.setToolTipText("Show summary of tags from selected events");
+        btnPanel.add(tagSummary, new Constraint("top:0 left:174 height:33 width:33"));
+        toFMap.setToolTipText("Export tags to FieldMap MATLAB structure");
+        btnPanel.add(toFMap, new Constraint("top:0 left:208 height:33 width:33"));
+        showSchema.setToolTipText("Show HED Schema");
+        btnPanel.add(showSchema, new Constraint("top:0 left:242 height:33 width:40"));
 
         this.add(this.notification, new Constraint("top:10 height:30 left:305 right:245"));
         this.setLayer(this.notification, 1);
@@ -575,18 +614,14 @@ public class TaggerView extends ConstraintContainer {
         this.setLayer(this.shield, 2);
         this.shield.setVisible(false);
         this.add(this.hedTitle, new Constraint("top:30 height:26 right:10 width:150"));
-        this.add(btnPanel, new Constraint("top:0 height:33 left:10 width:200"));
-//        this.add(this.redo, new Constraint("top:0 height:33 right:10 width:33"));
-//        this.add(this.undo, new Constraint("top:0 height:33 right:90 width:33"));
-//        this.add(this.addGroup, new Constraint("top:0 height:33 right:140 width:33"));
-//        this.add(this.clearAll, new Constraint("top:0 height:33 right:170 width:33"));
-//        this.add(this.zoomOut, new Constraint("top:0 height:50 right:80 width:30"));
-//        this.add(this.zoomPercent, new Constraint("top:0 height:50 right:30 width:50"));
-//        this.add(this.zoomIn, new Constraint("top:0 height:50 right:0 width:30"));
-        this.add(this.splitContainer, new Constraint("top:55 bottom:50 left:10 right:10"));
-        int splitterPos = this.frame.getWidth() / 2;
-        VerticalSplitLayout splitLayout = new VerticalSplitLayout(this.splitContainer, this.splitPaneLeft, this.splitPaneRight, splitterPos);
-        this.splitContainer.setLayout(splitLayout);
+        this.add(btnPanel, new Constraint("top:0 height:33 left:10 right:0"));
+//        this.add(this.splitContainer, new Constraint("top:55 bottom:50 left:10 right:10"));
+        this.add(this.splitPaneLeft, new Constraint("top:55 bottom:50 left:10 right:10"));
+//        int splitterPos = this.frame.getWidth() / 2;
+//        VerticalSplitLayout splitLayout = new VerticalSplitLayout(this.splitContainer, this.splitPaneLeft, this.splitPaneRight, splitterPos);
+//        this.splitContainer.setLayout(splitLayout);
+
+        schemaFrame.getContentPane().add(this.splitPaneRight);
     }
 
     public void updateTagsPanel() {
@@ -594,16 +629,18 @@ public class TaggerView extends ConstraintContainer {
         this.searchResultsScrollPane.setVisible(false);
         this.tagsPanel.removeAll();
         String lastVisibleTagPath = null;
-        Iterator var3 = this.tagger.getTagSet().iterator();
 
+        Iterator var3 = this.tagger.getTagSet().iterator();
         while (true) {
             AbstractTagModel tagModel;
             GuiTagModel guiTagModel;
             do {
                 if (!var3.hasNext()) {
                     this.autoCollapse = false;
-                    this.validate();
-                    this.repaint();
+                    this.schemaFrame.getContentPane().validate();
+                    this.schemaFrame.getContentPane().repaint();
+//                    validate();
+//                    repaint();
                     return;
                 }
 
@@ -828,6 +865,15 @@ public class TaggerView extends ConstraintContainer {
         menu.add(item);
 
         menu.addSeparator();
+        item = new JMenuItem("Copy tags of selected event");
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                TaggerView.this.copyTag();
+            }
+        });
+        menu.add(item);
+
+        menu.addSeparator();
         item = new JMenuItem("Delete all tags");
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -847,20 +893,20 @@ public class TaggerView extends ConstraintContainer {
 
         menu = new JMenu("View");
         menuBar.add(menu);
-        item = new JMenuItem("Collapse");
-        item.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                TaggerView.this.collapseAll();
-            }
-        });
-        menu.add(item);
-        item = new JMenuItem("Expand");
-        item.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                TaggerView.this.expandAll();
-            }
-        });
-        menu.add(item);
+//        item = new JMenuItem("Collapse");
+//        item.addActionListener(new ActionListener() {
+//            public void actionPerformed(ActionEvent e) {
+//                TaggerView.this.collapseAll();
+//            }
+//        });
+//        menu.add(item);
+//        item = new JMenuItem("Expand");
+//        item.addActionListener(new ActionListener() {
+//            public void actionPerformed(ActionEvent e) {
+//                TaggerView.this.expandAll();
+//            }
+//        });
+//        menu.add(item);
 //        menu.addSeparator();
 //        item = new JMenuItem("Zoom In");
 //        item.addActionListener(new ActionListener() {
@@ -876,7 +922,7 @@ public class TaggerView extends ConstraintContainer {
 //            }
 //        });
 //        menu.add(item);
-        menu.addSeparator();
+//        menu.addSeparator();
         item = new JMenuItem("Hide Required Tags");
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
