@@ -95,12 +95,6 @@ public class TaggerView extends ConstraintContainer {
             return FontsAndColors.headerFont;
         }
     };
-//    private JLabel deselectAllLabel = new JLabel("Deselect all") {
-//        @Override
-//        public Font getFont() {
-//            return FontsAndColors.headerFont;
-//        }
-//    };
     private JLayeredPane eventsScrollPane = new JLayeredPane();
     private JLabel eventsTitle = new JLabel("<html>Data<br>Events</html>") {
         @Override
@@ -112,11 +106,11 @@ public class TaggerView extends ConstraintContainer {
     /**
      * Creates a expand button.
      */
-//    private XButton expandAll = new XButton("Expand") { @Override
-//        public Font getFont() {
-//            return FontsAndColors.headerFont;
-//        }
-//    };
+    private XButton expandAll = new XButton("Expand") { @Override
+        public Font getFont() {
+            return FontsAndColors.headerFont;
+        }
+    };
     private JFrame frame;
     private JLabel hoverMessage = new JLabel();
     private TaggerLoader loader;
@@ -282,24 +276,12 @@ public class TaggerView extends ConstraintContainer {
         this.addEvent.setHoverForeground(FontsAndColors.BLUE_DARK);
         this.addEvent.setPressedBackground(FontsAndColors.TRANSPARENT);
         this.addEvent.setPressedForeground(FontsAndColors.BLUE_VERY_LIGHT);
-//        this.selectAllorNone.setNormalBackground(FontsAndColors.TRANSPARENT);
-//        this.selectAllorNone.setNormalForeground(FontsAndColors.BLUE_VERY_LIGHT);
-//        this.selectAllorNone.setHoverBackground(FontsAndColors.TRANSPARENT);
-//        this.selectAllorNone.setHoverForeground(FontsAndColors.BLUE_DARK);
-//        this.selectAllorNone.setPressedBackground(FontsAndColors.TRANSPARENT);
-//        this.selectAllorNone.setPressedForeground(FontsAndColors.BLUE_VERY_LIGHT);
         this.addGroup.setNormalBackground(FontsAndColors.TRANSPARENT);
         this.addGroup.setNormalForeground(FontsAndColors.BLUE_VERY_LIGHT);
         this.addGroup.setHoverBackground(FontsAndColors.TRANSPARENT);
         this.addGroup.setHoverForeground(FontsAndColors.BLUE_DARK);
         this.addGroup.setPressedBackground(FontsAndColors.TRANSPARENT);
         this.addGroup.setPressedForeground(FontsAndColors.BLUE_VERY_LIGHT);
-//        this.addTag.setNormalBackground(FontsAndColors.TRANSPARENT);
-//        this.addTag.setNormalForeground(FontsAndColors.BLUE_VERY_LIGHT);
-//        this.addTag.setHoverBackground(FontsAndColors.TRANSPARENT);
-//        this.addTag.setHoverForeground(FontsAndColors.BLUE_DARK);
-//        this.addTag.setPressedBackground(FontsAndColors.TRANSPARENT);
-//        this.addTag.setPressedForeground(FontsAndColors.BLUE_VERY_LIGHT);
         this.collapseLabel.setBackground(FontsAndColors.TRANSPARENT);
         this.collapseLabel.setForeground(FontsAndColors.BLUE_DARK);
         this.collapseAll.setNormalBackground(FontsAndColors.TRANSPARENT);
@@ -487,11 +469,7 @@ public class TaggerView extends ConstraintContainer {
 
         this.clearAll.addMouseListener(new MouseAdapter() {
           public void mouseClicked(MouseEvent e) {
-              int option = showTaggerMessageDialog("Are you sure you want to clear all tags?", "Yes", "No", null);
-              if (option == 0) {
-                  tagger.clearAllTags();
-                  updateEventsPanel();
-              }
+              clearAllTags();
           }
         });
         this.help.addMouseListener(new MouseAdapter() {
@@ -824,32 +802,40 @@ public class TaggerView extends ConstraintContainer {
         });
         menu.add(item);
 
-//        menu = new JMenu("Edit");
-//        menuBar.add(menu);
-//        item = new JMenuItem("Select All");
-//        item.addActionListener(new ActionListener() {
-//            public void actionPerformed(ActionEvent e) {
-//                TaggerView.this.selectAll();
-//            }
-//        });
-//        menu.add(item);
-//        item = new JMenuItem("Deselect All");
-//        item.addActionListener(new ActionListener() {
-//            public void actionPerformed(ActionEvent e) {
-//                TaggerView.this.deselectAll();
-//            }
-//        });
-//        menu.add(item);
-//        if (this.isStandAloneVersion) {
-//            menu.addSeparator();
-//            item = new JMenuItem("Delete");
-//            item.addActionListener(new ActionListener() {
-//                public void actionPerformed(ActionEvent e) {
-//                    TaggerView.this.deleteSelected();
-//                }
-//            });
-//            menu.add(item);
-//        }
+        menu = new JMenu("Edit");
+        menuBar.add(menu);
+        item = new JMenuItem("Select All");
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                TaggerView.this.selectAll();
+            }
+        });
+        menu.add(item);
+        item = new JMenuItem("Deselect All");
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                TaggerView.this.deselectAll();
+            }
+        });
+        menu.add(item);
+
+        menu.addSeparator();
+        item = new JMenuItem("Delete all tags");
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                TaggerView.this.clearAllTags();
+            }
+        });
+        menu.add(item);
+
+        menu.addSeparator();
+        item = new JMenuItem("Get tag summary of selected events");
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                TaggerView.this.getTagSummaryOfSelected();
+            }
+        });
+        menu.add(item);
 
         menu = new JMenu("View");
         menuBar.add(menu);
@@ -1441,18 +1427,16 @@ public class TaggerView extends ConstraintContainer {
     }
 
     private void selectAll() {
-        Iterator var2 = this.tagger.getEventSet().iterator();
-
-        while (var2.hasNext()) {
-            TaggedEvent taggedEvent = (TaggedEvent) var2.next();
+        for (TaggedEvent taggedEvent : tagger.getEventSet()) {
             this.selected.add(taggedEvent.getEventLevelId());
-            Set<Integer> keys = taggedEvent.getTagGroups().keySet();
-            Iterator var5 = keys.iterator();
-
-            while (var5.hasNext()) {
-                Integer key = (Integer) var5.next();
-                this.selected.add(key);
-            }
+            this.selectedEvents.add(taggedEvent.getEventLevelId());
+//            Set<Integer> keys = taggedEvent.getTagGroups().keySet();
+//            Iterator var5 = keys.iterator();
+//
+//            while (var5.hasNext()) {
+//                Integer key = (Integer) var5.next();
+//                this.selected.add(key);
+//            }
         }
 
         this.updateEventsPanel();
@@ -2010,6 +1994,39 @@ public class TaggerView extends ConstraintContainer {
         this.selectedEvents.add(id);
     }
 
+    /**
+     * Delete all tags of CTAGGER
+     */
+    public void clearAllTags() {
+        int option = showTaggerMessageDialog("Are you sure you want to clear all tags?", "Yes", "No", null);
+        if (option == 0) {
+            tagger.clearAllTags();
+            updateEventsPanel();
+        }
+    }
+
+
+    public void getTagSummaryOfSelected() {
+        if (selectedEvents.size() == 0) {
+            showTaggerMessageDialog("Select events to be included in the summary first", "Ok", null, null);
+            return;
+        }
+        else if (selectedEvents.size() == 1) {
+            showTaggerMessageDialog("Please select more than one events for this report", "Ok", null, null);
+            return;
+        }
+        HashMap<String, ArrayList<String>> report = tagger.extractTags(selectedEvents);
+        System.out.println(report);
+        HashMap<String, ArrayList<String>> fullEventNameUniqueTags = new HashMap<>();
+        Set<String> eventIDs = report.keySet();
+        for (TaggedEvent event : tagger.getEventSet()) {
+            if (eventIDs.contains(""+event.getEventLevelId())) {
+                fullEventNameUniqueTags.put(event.getCode(), report.get(""+event.getEventLevelId()));
+            }
+        }
+        TagSummaryDialog dialog = new TagSummaryDialog(frame, report.get("shared"), fullEventNameUniqueTags);
+        dialog.showDialog();
+    }
     /**
      * Shows a message dialog with the given message and options for the user to
      * choose.

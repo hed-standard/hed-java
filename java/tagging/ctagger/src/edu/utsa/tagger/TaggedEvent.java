@@ -308,6 +308,10 @@ public class TaggedEvent implements Comparable<TaggedEvent> {
         return label;
     }
 
+    public String getCode() {
+        return guiEventModel.getCode();
+    }
+
     public int getNumTagsInGroup(int groupId) {
         TaggerSet<AbstractTagModel> tags = (TaggerSet)this.tagGroups.get(groupId);
         return tags == null ? -1 : tags.size();
@@ -439,6 +443,11 @@ public class TaggedEvent implements Comparable<TaggedEvent> {
         TaggedEvent.appView = appView;
     }
 
+
+    /**
+     * Delete all tags associated with this event
+     * @return copy of the tag map of this event
+     */
     public TreeMap<Integer, TaggerSet<AbstractTagModel>> deleteAllTag() {
         // Create copy of the to be removed tagGroups, for undoing
         TreeMap<Integer, TaggerSet<AbstractTagModel>> removed = new TreeMap<Integer, TaggerSet<AbstractTagModel>>();
@@ -450,5 +459,20 @@ public class TaggedEvent implements Comparable<TaggedEvent> {
         tagGroups.put(eventLevelId, new TaggerSet<AbstractTagModel>());
         guiEventModel.setLabel("");
         return removed;
+    }
+
+    /**
+     * Retrieve all tags associated with this event in string format
+     * @return  an array list containing all tags of this event in string
+     */
+    public ArrayList<String> tagsToString() {
+        ArrayList<String> tags = new ArrayList<>();
+        for (TaggerSet<AbstractTagModel> tagSet : tagGroups.values()) {
+            for (AbstractTagModel tag : tagSet) {
+                tags.add(tag.getPath());
+            }
+        }
+
+        return tags;
     }
 }
