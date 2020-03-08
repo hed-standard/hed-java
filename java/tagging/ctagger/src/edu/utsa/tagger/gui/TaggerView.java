@@ -15,6 +15,7 @@ import java.util.List;
 import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageInputStream;
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
@@ -169,7 +170,8 @@ public class TaggerView extends ConstraintContainer {
     private ConstraintContainer btnPanel = new ConstraintContainer();
     private XButton undo;
     int hasMissingTag = 0;
-    private JPanel warningPanel = new JPanel();
+//    private JPanel headerPanel = new JPanel();
+//    private JPanel warningPanel = new JPanel();
     private JLabel incompatibleTagWarning = new JLabel("<html><div style='text-align: left;'>" + "Red tags violate HED schema!" + "</div></html>") {
         @Override
         public Font getFont() {
@@ -184,15 +186,30 @@ public class TaggerView extends ConstraintContainer {
     };
     private Icon icon = new ImageIcon(getClass().getResource("/img/delete_scaled.png"));
     private JButton clearAll = new JButton(icon);
-    private JButton copyTo = new JButton(new ImageIcon(getClass().getResource("/img/copy_to_scaled.png")));
+    private XButton copyTo = new XButton(new ImageIcon(getClass().getResource("/img/copy_to_scaled.png"))) {
+        @Override
+        public Font getFont() {
+            return FontsAndColors.buttonFont;
+        }
+    };
     private JButton showSchema = new JButton("HED") {
         @Override
         public Font getFont() {
             return FontsAndColors.buttonFont.deriveFont(Font.BOLD);
         }
     };
-    private JButton tagSummary = new JButton(new ImageIcon(getClass().getResource("/img/report_scaled.png")));
-    private JButton toFMap = new JButton(new ImageIcon(getClass().getResource("/img/export_scaled.png")));
+    private XButton tagSummary = new XButton(new ImageIcon(getClass().getResource("/img/report_scaled.png"))) {
+        @Override
+        public Font getFont() {
+            return FontsAndColors.buttonFont;
+        }
+    };
+    private XButton toFMap = new XButton(new ImageIcon(getClass().getResource("/img/export_scaled.png"))) {
+        @Override
+        public Font getFont() {
+            return FontsAndColors.buttonFont;
+        }
+    };
     private XButton help = new XButton("User manual") {
         @Override
         public Font getFont() {
@@ -235,8 +252,8 @@ public class TaggerView extends ConstraintContainer {
     }
 
     public void createLayout() {
-        this.setupComponents();
         this.createFrame();
+        this.setupComponents();
         this.setColors();
         this.setListeners();
         this.addComponents();
@@ -244,24 +261,14 @@ public class TaggerView extends ConstraintContainer {
         this.updateEventsPanel();
     }
 
-    private void setupComponents() {
-        try {
-//            System.out.println(TaggerView.class.getResourceAsStream("/img/undo_scaled.png"));
-            undo = new HistoryButton(new ImageIcon(ImageIO.read(TaggerView.class.getResourceAsStream("/img/undo_scaled.png"))), true);
-        }
-        catch (Exception ex) {
-            System.err.println("Exception: " + ex.getMessage());
-            System.err.println(ex.getStackTrace());
-        }
-    }
-
     private void createFrame() {
+        System.out.println("test");
         JMenuBar menuBar = this.createMenuBar();
         this.frame = new JFrame();
-        this.frame.setSize(685, 768);
+        this.frame.setSize(685, 800);
         this.frame.setVisible(true);
         this.frame.setDefaultCloseOperation(0);
-        this.frame.setTitle("CTAGGER - Specify event HED tags");
+        this.frame.setTitle("CTAGGER - " + loader.getTitle());
         this.frame.setJMenuBar(menuBar);
         this.frame.getContentPane().add(this);
 
@@ -273,14 +280,29 @@ public class TaggerView extends ConstraintContainer {
         this.schemaFrame.setTitle("HED Schema");
     }
 
+    private void setupComponents() {
+        titleLabel.setText("<html><div style='text-align: left;'>" + loader.getTitle() + "</div></html>");
+//        headerPanel.add(titleLabel, BorderLayout.LINE_START);
+        strategyGuide.setToolTipText("Guide on choosing tags to add to events");
+        help.setToolTipText("CTAGGER manual");
+        try {
+//            System.out.println(TaggerView.class.getResourceAsStream("/img/undo_scaled.png"));
+            undo = new HistoryButton(new ImageIcon(ImageIO.read(TaggerView.class.getResourceAsStream("/img/undo_scaled.png"))), true);
+        }
+        catch (Exception ex) {
+            System.err.println("Exception: " + ex.getMessage());
+            System.err.println(ex.getStackTrace());
+        }
+    }
+
     private void setColors() {
         this.setOpaque(true);
         this.setBackground(FontsAndColors.APP_BG);
         this.hedTitle.setForeground(FontsAndColors.BLUE_DARK);
+//        this.headerPanel.setBackground(FontsAndColors.BLUE_MEDIUM);
         this.cancel.setHoverForeground(FontsAndColors.BLUE_DARK);
         this.ok.setHoverForeground(FontsAndColors.BLUE_DARK);
         this.topPane.setBackground((FontsAndColors.BLUE_MEDIUM));
-        this.warningPanel.setBackground((FontsAndColors.BLUE_MEDIUM));
         this.btnPanel.setBackground((FontsAndColors.BLUE_MEDIUM));
         this.eventsPanel.setOpaque(true);
         this.eventsPanel.setBackground(FontsAndColors.BLUE_2);
@@ -549,9 +571,8 @@ public class TaggerView extends ConstraintContainer {
         this.setLayout(new ConstraintLayout());
         this.addOptionComponents();
 
-        this.topPane.add(warningPanel);
-        titleLabel.setText("<html><div style='text-align: center;'>" + loader.getTitle() + "</div></html>");
-        this.topPane.add(titleLabel);
+//        this.topPane.add(warningPanel);
+//        this.topPane.add(titleLabel, BorderLayout.LINE_START);
 
         this.searchResults.setLayout(new ListLayout(0, 0, 0, 0));
         this.searchResultsScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -584,7 +605,7 @@ public class TaggerView extends ConstraintContainer {
         this.splitPaneRight.add(this.collapseAll, new Constraint("top:57 height:30 right:250 width:100"));
         this.splitPaneRight.add(this.tagsScrollPane, new Constraint("top:90 bottom:0 left:5 right:0"));
 
-        // top pane
+        // button pane
         undo.setToolTipText("Undo");
         btnPanel.add(undo, new Constraint("top:0 height:33 left:0 width:33"));
         redo.setToolTipText("Redo");
@@ -600,8 +621,9 @@ public class TaggerView extends ConstraintContainer {
         toFMap.setToolTipText("Export tags to FieldMap MATLAB structure");
         btnPanel.add(toFMap, new Constraint("top:0 left:208 height:33 width:33"));
         showSchema.setToolTipText("Show HED Schema");
-        btnPanel.add(showSchema, new Constraint("top:0 left:242 height:33 width:40"));
+        btnPanel.add(showSchema, new Constraint("top:0 left:242 height:33 width:50"));
 
+//        this.add(this.titleLabel, new Constraint("top:0 height:50 left:5 right:0"));
         this.add(this.notification, new Constraint("top:10 height:30 left:305 right:245"));
         this.setLayer(this.notification, 1);
         this.notification.setVisible(false);
@@ -613,10 +635,12 @@ public class TaggerView extends ConstraintContainer {
         this.add(this.shield);
         this.setLayer(this.shield, 2);
         this.shield.setVisible(false);
-        this.add(this.hedTitle, new Constraint("top:30 height:26 right:10 width:150"));
+        this.add(this.hedTitle, new Constraint("top:0 height:26 right:10 width:150"));
+//        this.add(headerPanel, new Constraint("top:0 height:33 left:10 right:0"));
         this.add(btnPanel, new Constraint("top:0 height:33 left:10 right:0"));
+        this.add(incompatibleTagWarning, new Constraint("top:33 height:33 left:10 right:0"));
 //        this.add(this.splitContainer, new Constraint("top:55 bottom:50 left:10 right:10"));
-        this.add(this.splitPaneLeft, new Constraint("top:55 bottom:50 left:10 right:10"));
+        this.add(this.splitPaneLeft, new Constraint("top:68 bottom:50 left:10 right:10"));
 //        int splitterPos = this.frame.getWidth() / 2;
 //        VerticalSplitLayout splitLayout = new VerticalSplitLayout(this.splitContainer, this.splitPaneLeft, this.splitPaneRight, splitterPos);
 //        this.splitContainer.setLayout(splitLayout);
@@ -682,13 +706,14 @@ public class TaggerView extends ConstraintContainer {
         if (hasMissingTag > 0) {
             if (hasMissingTag == 1)
                 incompatibleTagWarning.setText("<html><div style='text-align: left;'>" + "Red tag violate HED schema!" + "</div></html>");
-            if (incompatibleTagWarning.getParent() != warningPanel) {
-                warningPanel.add(incompatibleTagWarning, BorderLayout.LINE_START);
-            }
+//            if (incompatibleTagWarning.getParent() != warningPanel) {
+//                warningPanel.add(incompatibleTagWarning, BorderLayout.LINE_START);
+//            }
         }
         else {
-            if (incompatibleTagWarning.getParent() == warningPanel)
-                warningPanel.remove(incompatibleTagWarning);
+            this.remove(incompatibleTagWarning);
+//            if (incompatibleTagWarning.getParent() == warningPanel)
+//                warningPanel.remove(incompatibleTagWarning);
         }
         validate();
         repaint();
@@ -1536,8 +1561,8 @@ public class TaggerView extends ConstraintContainer {
         } else {
             this.add(this.cancel, new Constraint("bottom:10 height:30 right:100 width:80"));
             this.add(this.ok, new Constraint("bottom:10 height:30 right:10 width:80"));
-            this.add(this.help, new Constraint("bottom:10 height:30 left:10 width:110"));
-            this.add(this.strategyGuide, new Constraint("bottom:10 height:30 left:120 width:120"));
+            this.add(this.help, new Constraint("bottom:10 height:30 left:10 width:150"));
+            this.add(this.strategyGuide, new Constraint("bottom:10 height:30 left:160 width:160"));
         }
     }
 
