@@ -1478,6 +1478,11 @@ public class TaggerView extends ConstraintContainer {
         this.notification.setVisible(false);
     }
 
+    /**
+     * OK button event handler
+     * Check for missing required tags and exit CTAGGER
+     * @param e Mouse event
+     */
     private void proceed(MouseEvent e) {
         XButton button = (XButton) e.getSource();
         if (button.isEnabled()) {

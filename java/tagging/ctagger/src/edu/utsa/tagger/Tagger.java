@@ -8,8 +8,11 @@ package edu.utsa.tagger;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import edu.utsa.tagger.TagXmlModel.PredicateType;
 import edu.utsa.tagger.TaggerHistory.Type;
 import edu.utsa.tagger.gui.GuiEventModel;
@@ -387,49 +390,74 @@ public class Tagger {
         return affectedGroups;
     }
 
+    /**
+     * Build data model to pass to json writer
+     */
     private Set<EventJsonModel> buildEventJsonModels() {
         Set<EventJsonModel> result = new LinkedHashSet();
-        Iterator var3 = this.eventList.iterator();
 
-        while(var3.hasNext()) {
-            TaggedEvent event = (TaggedEvent)var3.next();
+        for (TaggedEvent event : eventList) {
             EventJsonModel jsonEvent = new EventJsonModel();
             jsonEvent.setCode(event.getEventModel().getCode());
             List<List<String>> tags = new ArrayList();
-            Iterator var7 = event.getTagGroups().entrySet().iterator();
 
-            while(true) {
-                while(var7.hasNext()) {
-                    Entry<Integer, TaggerSet<AbstractTagModel>> entry = (Entry)var7.next();
-                    if ((Integer)entry.getKey() == event.getEventLevelId()) {
-                        Iterator var13 = ((TaggerSet)entry.getValue()).iterator();
-
-                        while(var13.hasNext()) {
-                            AbstractTagModel tag = (AbstractTagModel)var13.next();
-                            ArrayList<String> eventTags = new ArrayList();
-                            eventTags.add(tag.getPath());
-                            tags.add(eventTags);
-                        }
-                    } else {
-                        ArrayList<String> groupTags = new ArrayList();
-                        Iterator var10 = ((TaggerSet)entry.getValue()).iterator();
-
-                        while(var10.hasNext()) {
-                            AbstractTagModel tag = (AbstractTagModel)var10.next();
-                            groupTags.add(tag.getPath());
-                        }
-
-                        tags.add(groupTags);
+            for (Entry<Integer, TaggerSet<AbstractTagModel>> entry : event.getTagGroups().entrySet()) {
+                if ((Integer)entry.getKey() == event.getEventLevelId()) { // If top-level ID
+                    for (AbstractTagModel tag : entry.getValue()) {
+                        ArrayList<String> eventTags = new ArrayList();
+                        eventTags.add(tag.getPath());
+                        tags.add(eventTags); // eventTags only has one tag
                     }
+                } else {
+                    ArrayList<String> groupTags = new ArrayList();
+                    for (AbstractTagModel tag : entry.getValue()) {
+                        groupTags.add(tag.getPath());
+                    }
+                    tags.add(groupTags); // groupTags has multiple tags
                 }
-
-                jsonEvent.setTags(tags);
-                result.add(jsonEvent);
-                break;
             }
+            jsonEvent.setTags(tags);
+            result.add(jsonEvent);
         }
 
         return result;
+    }
+
+    /**
+     * Build data model to pass to json writer
+     */
+    private JsonNode buildEventJsonNode() {
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode root = mapper.createArrayNode();
+
+        for (TaggedEvent event : eventList) {
+//            EventJsonModel jsonEvent = new EventJsonModel();
+            JsonNode eventNode = mapper.createObjectNode();
+            ((ObjectNode)eventNode).put("code",event.getEventModel().getCode());
+//            ((ArrayNode)root).add(event.getEventModel().getCode());
+            List<List<String>> tags = new ArrayList();
+
+            for (Entry<Integer, TaggerSet<AbstractTagModel>> entry : event.getTagGroups().entrySet()) {
+                if ((Integer)entry.getKey() == event.getEventLevelId()) { // If top-level ID
+                    for (AbstractTagModel tag : entry.getValue()) {
+                        ArrayList<String> eventTags = new ArrayList();
+                        eventTags.add(tag.getPath());
+                        tags.add(eventTags); // eventTags only has one tag
+                    }
+                } else {
+                    ArrayList<String> groupTags = new ArrayList();
+                    for (AbstractTagModel tag : entry.getValue()) {
+                        groupTags.add(tag.getPath());
+                    }
+                    tags.add(groupTags); // groupTags has multiple tags
+                }
+            }
+            ((ObjectNode)eventNode).put("tags", tags);
+//            jsonEvent.setTags(tags);
+            ((ArrayNode)root).add(eventNode);
+        }
+
+        return root;
     }
 
     private TaggerDataXmlModel buildSavedDataModel() {
