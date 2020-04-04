@@ -468,8 +468,19 @@ public class Tagger {
         TaggerSet<AbstractTagModel> tagSet = tagGroups.get(node.getGroupId());
         ArrayNode jsonNode = mapper.createArrayNode();
         for (AbstractTagModel tag : tagSet) {
-            jsonNode.add(tag.getPath());
-            //TODO add Attribute tags
+            ArrayList<AbstractTagModel> attributes = ((GuiTagModel)tag).getAttributes();
+            if (attributes == null)
+                jsonNode.add(tag.getPath());
+            else {
+                ObjectNode tagAttributeNode = mapper.createObjectNode();
+                tagAttributeNode.put("mainTag", tag.getPath());
+                ArrayNode attributeNode = mapper.createArrayNode();
+                for (AbstractTagModel attr : attributes) {
+                    attributeNode.add(attr.getPath());
+                }
+                tagAttributeNode.put("attributes", attributeNode);
+                jsonNode.add(tagAttributeNode);
+            }
         }
         for (GroupTree.GroupNode child : node.getChildren()) {
             ArrayNode childJsonNode = addGroupNode(child, tagGroups, mapper);

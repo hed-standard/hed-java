@@ -3,10 +3,12 @@ package edu.utsa.tagger.app;
 import edu.utsa.tagger.*;
 import edu.utsa.tagger.gui.GuiEventModel;
 import edu.utsa.tagger.gui.GuiModelFactory;
+import edu.utsa.tagger.gui.GuiTagModel;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.TreeMap;
 
 public class TestNestedGroup {
@@ -36,15 +38,17 @@ public class TestNestedGroup {
         tagAncestor.setPath("/a/b/c");
         tagAncestor2 = factory.createAbstractTagModel(testTagger);
         tagAncestor2.setPath("/a");
-        tag = factory.createAbstractTagModel(testTagger);
+        tag = (GuiTagModel) factory.createAbstractTagModel(testTagger);
         tag.setPath("/a/b/c/d");
         tagDescendant = factory.createAbstractTagModel(testTagger);
         tagDescendant.setPath("/a/b/c/d/e/f");
+        ArrayList<AbstractTagModel> attributes = new ArrayList<>();
+        attributes.add(tagDescendant);
+        attributes.add(tagAncestor2);
+        ((GuiTagModel)tag).setAttributes(attributes);
         TaggerSet<AbstractTagModel> set1 = new TaggerSet<>();
         set1.add(tag);
         set1.add(tagAncestor);
-        set1.add(tagAncestor2);
-        set1.add(tagDescendant);
         TaggerSet<AbstractTagModel> set2 = (TaggerSet<AbstractTagModel>)set1.clone();
         TaggerSet<AbstractTagModel> set3 = (TaggerSet<AbstractTagModel>)set1.clone();
         TaggerSet<AbstractTagModel> set4 = (TaggerSet<AbstractTagModel>)set1.clone();
