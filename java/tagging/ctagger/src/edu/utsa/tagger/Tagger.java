@@ -432,32 +432,51 @@ public class Tagger {
 
         for (TaggedEvent event : eventList) {
 //            EventJsonModel jsonEvent = new EventJsonModel();
-            JsonNode eventNode = mapper.createObjectNode();
-            ((ObjectNode)eventNode).put("code",event.getEventModel().getCode());
+            JsonNode eventJsonNode = mapper.createObjectNode();
+            ((ObjectNode)eventJsonNode).put("code",event.getEventModel().getCode());
 //            ((ArrayNode)root).add(event.getEventModel().getCode());
-            List<List<String>> tags = new ArrayList();
+            TreeMap<Integer, TaggerSet<AbstractTagModel>> tagGroups = event.getTagGroups();
+            GroupTree.GroupNode eventRootNode = event.getEventNode();
+            ((ObjectNode)eventJsonNode).put("tags",addGroupNode(eventRootNode, tagGroups, mapper));
+            ((ArrayNode)root).add(eventJsonNode);
 
-            for (Entry<Integer, TaggerSet<AbstractTagModel>> entry : event.getTagGroups().entrySet()) {
-                if ((Integer)entry.getKey() == event.getEventLevelId()) { // If top-level ID
-                    for (AbstractTagModel tag : entry.getValue()) {
-                        ArrayList<String> eventTags = new ArrayList();
-                        eventTags.add(tag.getPath());
-                        tags.add(eventTags); // eventTags only has one tag
-                    }
-                } else {
-                    ArrayList<String> groupTags = new ArrayList();
-                    for (AbstractTagModel tag : entry.getValue()) {
-                        groupTags.add(tag.getPath());
-                    }
-                    tags.add(groupTags); // groupTags has multiple tags
-                }
-            }
-            ((ObjectNode)eventNode).put("tags", tags);
-//            jsonEvent.setTags(tags);
-            ((ArrayNode)root).add(eventNode);
+
+//            for (GroupTree.GroupNode groupNode : event.)
+//            for (Entry<Integer, TaggerSet<AbstractTagModel>> entry : event.getTagGroups().entrySet()) {
+//                if ((Integer)entry.getKey() == event.getEventLevelId()) { // If top-level ID
+//                    for (AbstractTagModel tag : entry.getValue()) {
+//                        ArrayList<String> eventTags = new ArrayList();
+//                        eventTags.add(tag.getPath());
+//                        tags.add(eventTags); // eventTags only has one tag
+//                    }
+//                } else {
+//                    ArrayList<String> groupTags = new ArrayList();
+//                    for (AbstractTagModel tag : entry.getValue()) {
+//                        groupTags.add(tag.getPath());
+//                    }
+//                    tags.add(groupTags); // groupTags has multiple tags
+//                }
+//            }
+//            ((ObjectNode)eventNode).put("tags", tags);
+////            jsonEvent.setTags(tags);
+//            ((ArrayNode)root).add(eventNode);
         }
 
         return root;
+    }
+    private ArrayNode addGroupNode(GroupTree.GroupNode node, TreeMap<Integer, TaggerSet<AbstractTagModel>> tagGroups, ObjectMapper mapper) {
+        TaggerSet<AbstractTagModel> tagSet = tagGroups.get(node.getGroupId());
+        ArrayNode jsonNode = mapper.createArrayNode();
+        for (AbstractTagModel tag : tagSet) {
+            jsonNode.add(tag.getPath());
+            //TODO add Attribute tags
+        }
+        for (GroupTree.GroupNode child : node.getChildren()) {
+            ArrayNode childJsonNode = addGroupNode(child, tagGroups, mapper);
+            if (childJsonNode != null)
+                jsonNode.add(childJsonNode);
+        }
+        return jsonNode;
     }
 
     private TaggerDataXmlModel buildSavedDataModel() {
@@ -1137,7 +1156,8 @@ public class Tagger {
     }
 
     public String getJSONString() {
-        Set<EventJsonModel> eventJsonModels = this.buildEventJsonModels();
+//        Set<EventJsonModel> eventJsonModels = this.buildEventJsonModels();
+        JsonNode eventJsonModels = this.buildEventJsonNode();
         StringWriter sw = new StringWriter();
         ObjectMapper mapper = new ObjectMapper();
         ObjectWriter writer = mapper.writerWithDefaultPrettyPrinter();
@@ -1867,7 +1887,8 @@ public class Tagger {
 
     public boolean save(File egtFile, File hedFile, boolean json) {
         if (json) {
-            Set<EventJsonModel> eventJsonModels = this.buildEventJsonModels();
+//            Set<EventJsonModel> eventJsonModels = this.buildEventJsonModels();
+            JsonNode eventJsonModels = this.buildEventJsonNode();
             ObjectMapper mapper = new ObjectMapper();
             ObjectWriter writer = mapper.writerWithDefaultPrettyPrinter();
 

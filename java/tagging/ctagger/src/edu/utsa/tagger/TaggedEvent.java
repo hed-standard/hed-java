@@ -21,6 +21,7 @@ public class TaggedEvent implements Comparable<TaggedEvent> {
     private static TaggerView appView;
     private GuiEventModel guiEventModel;
     private TreeMap<Integer, TaggerSet<AbstractTagModel>> tagGroups;
+    private GroupTree tagGroupHierarchy;
     private int eventLevelId;
     private EventView eventView;
     private HashMap<Integer, GroupView> groupViews;
@@ -339,9 +340,18 @@ public class TaggedEvent implements Comparable<TaggedEvent> {
     public TreeMap<Integer, TaggerSet<AbstractTagModel>> getTagGroups() {
         return this.tagGroups;
     }
+    public GroupTree getTagGroupHierarchy() {
+        return tagGroupHierarchy;
+    }
+    public GroupTree.GroupNode getEventNode() {
+        return tagGroupHierarchy.getRoot();
+    }
 
     public void setTagGroups(TreeMap<Integer, TaggerSet<AbstractTagModel>> tGroup) {
         tagGroups = tGroup;
+    }
+    public void setTagGroupHierarchy(GroupTree tree) {
+        tagGroupHierarchy = tree;
     }
 
 //    public EventEnterTagView getEventEnterTagView() {return eventEnterTagView;}
