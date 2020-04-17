@@ -7,6 +7,7 @@ package edu.utsa.tagger;
 
 import edu.utsa.tagger.gui.*;
 
+import java.security.acl.Group;
 import java.util.*;
 
 /**
@@ -37,9 +38,9 @@ public class TaggedEvent implements Comparable<TaggedEvent> {
         this.groupViews = new HashMap();
         this.tagEgtViews = new HashMap();
         this.rrTagViews = new HashMap();
+        this.tagGroupHierarchy = new GroupTree();
 //        this.eventEnterTagView = new EventEnterTagView(tagger, this);
     }
-
     /**
      * Adds an empty group with the given ID to the event.
      *
@@ -52,6 +53,27 @@ public class TaggedEvent implements Comparable<TaggedEvent> {
         if (tags == null) {
             tags = new TaggerSet();
             this.tagGroups.put(groupId, tags);
+            if (eventLevelId != groupId) // avoid duplicate root node
+                this.tagGroupHierarchy.add(eventLevelId, groupId);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Adds an empty group with the given ID to the event.
+     *
+     * @param newGroupId
+     * @return True if the group was added successfully, false if the group ID
+     *         already existed for this event.
+     */
+    public boolean addGroup(int selected, int newGroupId) {
+        TaggerSet<AbstractTagModel> tags = (TaggerSet)this.tagGroups.get(newGroupId);
+        if (tags == null) {
+            tags = new TaggerSet();
+            this.tagGroups.put(newGroupId, tags);
+            this.tagGroupHierarchy.add(selected, newGroupId);
             return true;
         } else {
             return false;
@@ -427,6 +449,7 @@ public class TaggedEvent implements Comparable<TaggedEvent> {
     public void setEventLevelId(int groupId) {
         this.eventLevelId = groupId;
         this.addGroup(groupId);
+        this.tagGroupHierarchy.setRootId(groupId);
     }
 
     public void setEventModel(GuiEventModel eventModel) {

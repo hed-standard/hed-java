@@ -78,8 +78,8 @@ public class TestNestedGroup {
 
     @Test
     public void testSearch() {
-        System.out.println(groups.search(4));
-        System.out.println(groups.search(8));
+        System.out.println(groups.find(4));
+        System.out.println(groups.find(8));
     }
 
     @Test

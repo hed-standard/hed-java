@@ -5,15 +5,20 @@ import java.util.List;
 
 public class GroupTree {
     GroupNode root;
+    public GroupTree() {
+        root = new GroupNode();
+    }
     public GroupTree(int eventId) {
         root = new GroupNode(eventId);
     }
-
+    public void setRootId(int id) {
+        root.setGroupId(id);
+    }
     public GroupNode getRoot() {
         return root;
     }
     public boolean add(int parent, int children) {
-        GroupNode nodeToAdd = search(parent);
+        GroupNode nodeToAdd = find(parent);
         if (nodeToAdd == null) {
             return false;
         }
@@ -23,8 +28,8 @@ public class GroupTree {
         }
     }
 
-    public GroupNode search(int groupId) {
-        return root.search(groupId);
+    public GroupNode find(int groupId) {
+        return root.find(groupId);
     }
 
     @Override
@@ -35,6 +40,9 @@ public class GroupTree {
     public class GroupNode implements Comparable{
         int groupId;
         List<GroupNode> children;
+        public GroupNode() {
+            children = new ArrayList<>();
+        }
         public GroupNode(int id) {
             groupId = id;
             children = new ArrayList<>();
@@ -42,20 +50,22 @@ public class GroupTree {
         public int getGroupId() {
             return groupId;
         }
+        public void setGroupId(int id) {
+            groupId = id;
+        }
         public List<GroupNode> getChildren() {
             return children;
         }
-
         public boolean hasChildren() {
             return !children.isEmpty();
         }
-        public GroupNode search(int target) {
+        public GroupNode find(int target) {
             if (groupId == target) {
                 return this;
             }
             else {
                 for (GroupNode child : children) {
-                    GroupNode found = child.search(target);
+                    GroupNode found = child.find(target);
                     if (found != null)
                         return found;
                 }

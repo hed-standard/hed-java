@@ -203,7 +203,7 @@ public class Tagger {
 
     public int addNewGroup(TaggedEvent taggedEvent) {
         int groupId = groupIdCounter++;
-        if (taggedEvent.addGroup(groupId)) {
+        if (taggedEvent.addGroup(taggedEvent.getEventLevelId(), groupId)) {
             HistoryItem historyItem = new HistoryItem();
             historyItem.type = Type.GROUP_ADDED;
             historyItem.event = taggedEvent;
@@ -215,26 +215,42 @@ public class Tagger {
         return groupId;
     }
 
-    public Set<Integer> addNewGroups(Set<Integer> eventIds) {
-        TaggerSet<Integer> newEventGroupIds = new TaggerSet();
-        TaggerSet<TaggedEvent> selectedEvents = new TaggerSet();
+    /**
+     * Add new group(s) to selected events identified by eventIds
+     * @param selectedIds list of selected events IDs
+     * @return list of ids of new groups
+     */
+    public Set<Integer> addNewGroups(Set<Integer> selectedIds) {
+        TaggerSet<Integer> newEventGroupIds = new TaggerSet(); // id(s) of new group(s)
+        TaggerSet<TaggedEvent> selectedEvents = new TaggerSet(); // list of selected TaggedEvent. TaggedEvent equivalent of eventIds
         TaggerSet<AbstractTagModel> tags = new TaggerSet();
         boolean eventSelected = false;
-        Iterator var7 = eventIds.iterator();
+//        Iterator var7 = eventIds.iterator();
 
-        while(var7.hasNext()) {
-            Integer eventId = (Integer)var7.next();
-            Iterator var9 = this.eventList.iterator();
+//        while(var7.hasNext()) {
+//            Integer eventId = (Integer)var7.next();
+//            Iterator var9 = this.eventList.iterator();
+            for (TaggedEvent event : eventList) {
+                for (int id : selectedIds) {
+                    if (event.containsGroup(id)) {
+                        selectedEvents.add(event);
+                        ++groupIdCounter;
+                        event.addGroup(id, groupIdCounter);
+                        newEventGroupIds.add(groupIdCounter);
+                        eventSelected = true;
+                    }
 
-            while(var9.hasNext()) {
-                TaggedEvent event = (TaggedEvent)var9.next();
-                if (eventId == event.getEventLevelId()) {
-                    selectedEvents.add(event);
-                    ++groupIdCounter;
-                    event.addGroup(groupIdCounter);
-                    newEventGroupIds.add(groupIdCounter);
-                    eventSelected = true;
-                }
+//            while(var9.hasNext()) {
+//                TaggedEvent event = (TaggedEvent)var9.next();
+                // if the TaggedEvent event is the selected event
+
+//                if (eventId == event.getEventLevelId()) {
+//                    selectedEvents.add(event);
+//                    ++groupIdCounter;
+//                    event.addGroup(groupIdCounter);
+//                    newEventGroupIds.add(groupIdCounter);
+//                    eventSelected = true;
+//                }
             }
         }
 
