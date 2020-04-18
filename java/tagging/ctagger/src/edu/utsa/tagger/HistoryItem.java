@@ -29,6 +29,7 @@ public class HistoryItem {
 	public TaggedEvent event;
 	public TaggerSet<TaggedEvent> events;
 	public Integer groupId;
+	public Integer parentGroupId;
 	public TaggerSet<Integer> groupIds;
 	public TaggerSet<AbstractTagModel> tags;
 	public HashMap<TaggedEvent, TreeMap<Integer, TaggerSet<AbstractTagModel>>> tagMap;

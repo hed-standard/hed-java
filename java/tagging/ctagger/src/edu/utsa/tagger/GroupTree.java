@@ -27,11 +27,11 @@ public class GroupTree {
             return true;
         }
     }
-    public boolean remove(int groupId) {
+    public int remove(int groupId) {
         GroupNode removed = find(groupId);
         GroupNode parentNode = findParent(groupId, root, null);
-        boolean result = parentNode.getChildren().remove(removed);
-        return result;
+        boolean success = parentNode.getChildren().remove(removed);
+        return success ? parentNode.getGroupId() : -1;
     }
 
     public GroupNode findParent(int target, GroupNode curNode, GroupNode parent) {

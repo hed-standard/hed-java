@@ -416,7 +416,11 @@ public class TaggerHistory {
     }
 
     private void undoRemoveGroup(HistoryItem item) {
-        if (item.groupId != null && item.tags != null && item.event != null && tagger.addGroupBase(item.event, item.groupId, item.tags)) {
+        if (item.groupId != null && item.tags != null && item.event != null) {
+            if (item.parentGroupId != null && item.parentGroupId != item.event.getEventLevelId())
+                tagger.addNestedGroupWithTags(item.event, item.parentGroupId, item.groupId, item.tags);
+            else
+                tagger.addGroupBase(item.event, item.groupId, item.tags);
             this.addToRedo(item);
         }
 

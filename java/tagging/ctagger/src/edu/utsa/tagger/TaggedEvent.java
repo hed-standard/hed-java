@@ -395,11 +395,16 @@ public class TaggedEvent implements Comparable<TaggedEvent> {
         return this.guiEventModel.isInFirstEdit();
     }
 
-    public TaggerSet<AbstractTagModel> removeGroup(int groupId) {
+    public TreeMap<Integer,TaggerSet<AbstractTagModel>> removeGroup(int groupId) {
         TaggerSet<AbstractTagModel> tags = (TaggerSet)this.tagGroups.get(groupId);
         this.tagGroups.remove(groupId);
-        tagGroupHierarchy.remove(groupId);
-        return tags;
+        int parentId = tagGroupHierarchy.remove(groupId);
+        TreeMap<Integer, TaggerSet<AbstractTagModel>> result = null;
+        if (parentId > -1 && tags != null) {
+            result = new TreeMap<>();
+            result.put(parentId, tags);
+        }
+        return result;
     }
 
     public boolean removeTagFromGroup(int groupId, AbstractTagModel tagModel) {

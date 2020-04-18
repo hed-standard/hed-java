@@ -179,6 +179,20 @@ public class Tagger {
         }
     }
 
+    public boolean addNestedGroupWithTags(TaggedEvent taggedEvent, Integer parentGroupId, Integer groupId, TaggerSet<AbstractTagModel> tags) {
+        if (!taggedEvent.addGroup(parentGroupId,groupId)) {
+            return false;
+        } else {
+            Iterator var5 = tags.iterator();
+
+            while(var5.hasNext()) {
+                AbstractTagModel tag = (AbstractTagModel)var5.next();
+                taggedEvent.addTagToGroup(groupId, tag);
+            }
+
+            return true;
+        }
+    }
     public TaggedEvent addNewEvent(String code, String label) {
         GuiEventModel eventModel = (GuiEventModel)this.factory.createAbstractEventModel(this);
         eventModel.setCode(code);
@@ -225,32 +239,15 @@ public class Tagger {
         TaggerSet<TaggedEvent> selectedEvents = new TaggerSet(); // list of selected TaggedEvent. TaggedEvent equivalent of eventIds
         TaggerSet<AbstractTagModel> tags = new TaggerSet();
         boolean eventSelected = false;
-//        Iterator var7 = eventIds.iterator();
-
-//        while(var7.hasNext()) {
-//            Integer eventId = (Integer)var7.next();
-//            Iterator var9 = this.eventList.iterator();
-            for (TaggedEvent event : eventList) {
-                for (int id : selectedIds) {
-                    if (event.containsGroup(id)) {
-                        selectedEvents.add(event);
-                        ++groupIdCounter;
-                        event.addGroup(id, groupIdCounter);
-                        newEventGroupIds.add(groupIdCounter);
-                        eventSelected = true;
-                    }
-
-//            while(var9.hasNext()) {
-//                TaggedEvent event = (TaggedEvent)var9.next();
-                // if the TaggedEvent event is the selected event
-
-//                if (eventId == event.getEventLevelId()) {
-//                    selectedEvents.add(event);
-//                    ++groupIdCounter;
-//                    event.addGroup(groupIdCounter);
-//                    newEventGroupIds.add(groupIdCounter);
-//                    eventSelected = true;
-//                }
+        for (TaggedEvent event : eventList) {
+            for (int id : selectedIds) {
+                if (event.containsGroup(id)) {
+                    selectedEvents.add(event);
+                    ++groupIdCounter;
+                    event.addGroup(id, groupIdCounter);
+                    newEventGroupIds.add(groupIdCounter);
+                    eventSelected = true;
+                }
             }
         }
 
@@ -1886,19 +1883,20 @@ public class Tagger {
 
     public void removeGroup(int groupId) {
         TaggedEvent taggedEvent = this.getTaggedEventFromGroupId(groupId);
-        TaggerSet<AbstractTagModel> tagsRemoved = this.removeGroupBase(taggedEvent, groupId);
-        if (tagsRemoved != null) {
+        TreeMap<Integer,TaggerSet<AbstractTagModel>> removed = this.removeGroupBase(taggedEvent, groupId);
+        if (removed != null) {
             HistoryItem historyItem = new HistoryItem();
             historyItem.type = Type.GROUP_REMOVED;
             historyItem.event = taggedEvent;
             historyItem.groupId = groupId;
-            historyItem.tags = tagsRemoved;
+            historyItem.parentGroupId = removed.firstKey();
+            historyItem.tags = removed.get(removed.firstKey());
             this.history.add(historyItem);
         }
 
     }
 
-    public TaggerSet<AbstractTagModel> removeGroupBase(TaggedEvent event, Integer groupId) {
+    public TreeMap<Integer,TaggerSet<AbstractTagModel>> removeGroupBase(TaggedEvent event, Integer groupId) {
         return event.removeGroup(groupId);
     }
 
