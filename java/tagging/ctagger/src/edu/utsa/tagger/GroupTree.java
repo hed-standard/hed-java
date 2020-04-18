@@ -27,6 +27,26 @@ public class GroupTree {
             return true;
         }
     }
+    public boolean remove(int groupId) {
+        GroupNode removed = find(groupId);
+        GroupNode parentNode = findParent(groupId, root, null);
+        boolean result = parentNode.getChildren().remove(removed);
+        return result;
+    }
+
+    public GroupNode findParent(int target, GroupNode curNode, GroupNode parent) {
+        if (target != root.getGroupId() && parent != null && curNode.getGroupId() == target) {
+            return parent;
+        }
+        else {
+            for (GroupNode child : curNode.getChildren()) {
+                GroupNode found = findParent(target, child, curNode);
+                if (found != null)
+                    return found;
+            }
+            return null;
+        }
+    }
 
     public GroupNode find(int groupId) {
         return root.find(groupId);

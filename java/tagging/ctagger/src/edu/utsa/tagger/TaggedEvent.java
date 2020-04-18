@@ -398,6 +398,7 @@ public class TaggedEvent implements Comparable<TaggedEvent> {
     public TaggerSet<AbstractTagModel> removeGroup(int groupId) {
         TaggerSet<AbstractTagModel> tags = (TaggerSet)this.tagGroups.get(groupId);
         this.tagGroups.remove(groupId);
+        tagGroupHierarchy.remove(groupId);
         return tags;
     }
 
