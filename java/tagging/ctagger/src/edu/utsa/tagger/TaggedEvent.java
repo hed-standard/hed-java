@@ -6,6 +6,7 @@
 package edu.utsa.tagger;
 
 import edu.utsa.tagger.gui.*;
+import edu.utsa.tagger.GroupTree.GroupNode;
 
 import java.security.acl.Group;
 import java.util.*;
@@ -62,9 +63,10 @@ public class TaggedEvent implements Comparable<TaggedEvent> {
     }
 
     /**
-     * Adds an empty group with the given ID to the event.
+     * Adds an empty group with the given ID to the event under selected group.
      *
-     * @param newGroupId
+     * @param selected  id of the group under which newGroupId will be added
+     * @param newGroupId id of the new group
      * @return True if the group was added successfully, false if the group ID
      *         already existed for this event.
      */
@@ -395,16 +397,30 @@ public class TaggedEvent implements Comparable<TaggedEvent> {
         return this.guiEventModel.isInFirstEdit();
     }
 
-    public TreeMap<Integer,TaggerSet<AbstractTagModel>> removeGroup(int groupId) {
-        TaggerSet<AbstractTagModel> tags = (TaggerSet)this.tagGroups.get(groupId);
-        this.tagGroups.remove(groupId);
-        int parentId = tagGroupHierarchy.remove(groupId);
-        TreeMap<Integer, TaggerSet<AbstractTagModel>> result = null;
-        if (parentId > -1 && tags != null) {
-            result = new TreeMap<>();
-            result.put(parentId, tags);
+    /**
+     * Remove group (identified by groupId) from the taggedEvent
+     * Group might contain nested children groups, each might contain tags
+     * @param groupId id of group to be removed
+     * @return GroupNode of the removed group
+     *          GroupNode contains information of nested groups and their associated tags
+     */
+    public GroupNode removeGroup(int groupId) {
+        GroupNode removedGroup = tagGroupHierarchy.remove(groupId);
+        // Save tags of removed group(s). For history item purpose
+        if (removedGroup != null) {
+            ArrayList<GroupNode> stack = new ArrayList<>();
+            stack.add(removedGroup);
+            while (!stack.isEmpty()) {
+                GroupNode node = stack.remove(0);
+                TaggerSet<AbstractTagModel> tags = (TaggerSet) this.tagGroups.get(node.getGroupId());
+                node.setTags(tags);
+                this.tagGroups.remove(node.getGroupId());
+                if (node.hasChildren()) {
+                    stack.addAll(node.getChildren());
+                }
+            }
         }
-        return result;
+        return removedGroup;
     }
 
     public boolean removeTagFromGroup(int groupId, AbstractTagModel tagModel) {
