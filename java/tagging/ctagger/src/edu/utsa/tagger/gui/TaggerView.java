@@ -642,6 +642,9 @@ public class TaggerView extends ConstraintContainer {
         this.searchResultsScrollPane.setVisible(false);
         this.tagsPanel.removeAll();
         String lastVisibleTagPath = null;
+        /* addValueTag contains tag that is in addValueView in the TagsPanel
+           this implementation is to merge the legacy AddValueView with TagValueInputDialog */
+        GuiTagModel addValueTag = null;
 
         Iterator var3 = this.tagger.getTagSet().iterator();
         while (true) {
@@ -652,6 +655,11 @@ public class TaggerView extends ConstraintContainer {
                     this.autoCollapse = false;
                     this.schemaFrame.getContentPane().validate();
                     this.schemaFrame.getContentPane().repaint();
+                    /* When end of add tag (GUI update finished), show TagValueInputDialog
+                       to allow tag value entry */
+                    if (addValueTag != null) {
+                        new TagValueInputDialog(addValueTag);
+                    }
 //                    validate();
 //                    repaint();
                     return;
@@ -675,9 +683,11 @@ public class TaggerView extends ConstraintContainer {
             }
 
             if (guiTagModel.isInAddValue()) {
-                this.tagsPanel.add(guiTagModel.getAddValueView());
+                addValueTag = guiTagModel;
+//                this.tagsPanel.add(guiTagModel.getAddValueView());  // legacy AddValueView implementation (add a new view to the TagPanel for value input)
             }
         }
+
     }
 
     public void updateEventsPanel() {

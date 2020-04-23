@@ -27,6 +27,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -60,7 +61,8 @@ public class Tagger {
     private final String[] tsvHeader = new String[]{"Event code", "Event category", "Event label", "Event long name", "Event description", "Other tags"};
     private TaggerSet<AbstractTagModel> uniqueTags = new TaggerSet();
     public HashMap<String, String> unitClassDefaults = new HashMap();
-    public HashMap<String, String> unitClasses = new HashMap();
+    public HashMap<String, List<UnitXmlModel>> unitClasses = new HashMap();
+    public HashMap<String, ArrayList<String>> unitModifiers = new HashMap();
     private String hedVersion = "";
 
     public static String[] concat(String[] s1, String[] s2) {
@@ -270,12 +272,14 @@ public class Tagger {
         TaggerSet<TaggedEvent> selectedEvents = new TaggerSet(); // list of selected TaggedEvent. TaggedEvent equivalent of eventIds
         TaggerSet<AbstractTagModel> tags = new TaggerSet();
         boolean eventSelected = false;
+        TreeMap<Integer, Integer> parentChildrenMap = new TreeMap<>(); // map that keeps track of which groupId add to which parent groupId
         for (TaggedEvent event : eventList) {
             for (int id : selectedIds) {
                 if (event.containsGroup(id)) {
                     selectedEvents.add(event);
                     ++groupIdCounter;
                     event.addGroup(id, groupIdCounter);
+                    parentChildrenMap.put(id, groupIdCounter);
                     newEventGroupIds.add(groupIdCounter);
                     eventSelected = true;
                 }
@@ -287,6 +291,7 @@ public class Tagger {
             historyItem.type = Type.GROUPS_ADDED;
             historyItem.events = selectedEvents;
             historyItem.groupIds = newEventGroupIds;
+            historyItem.parentChildrenGroupIds = parentChildrenMap;
             historyItem.tags = tags;
             this.history.add(historyItem);
         }
@@ -693,7 +698,27 @@ public class Tagger {
             this.unitClasses.put(unitClassXmlModel.getName(), unitClassXmlModel.getUnits());
             this.unitClassDefaults.put(unitClassXmlModel.getName(), unitClassXmlModel.getDefault());
         }
+    }
 
+    /**
+     * generate a hashmap of unit modifiers.
+     * @param unitModifiersXmlModel HashMap of unit modifiers. Contains 2 key-value paris:
+     *                                  symbolModifier key is associated with list of unit modifiers for SI unit SYMBOL
+     *                                  unitModifier key is associated with list of unit modifiers for full-letter SI units
+     */
+    private void createUnitModifierHashMapFromXml(UnitModifiersXmlModel unitModifiersXmlModel) {
+        unitModifiers.put("symbol", new ArrayList<String>());
+        unitModifiers.put("unit", new ArrayList<String>());
+        for (UnitModifierXmlModel mod : unitModifiersXmlModel.getUnitModifiers()) {
+            if (mod.isSIUnitSymbolModifier()) {
+                ArrayList<String> units = (ArrayList<String>)unitModifiers.get("symbol");
+                units.add(mod.getName());
+            }
+            else {
+                ArrayList<String> units = (ArrayList<String>) unitModifiers.get("unit");
+                units.add(mod.getName());
+            }
+        }
     }
 
     public void deleteTag(AbstractTagModel tag) {
@@ -1842,6 +1867,7 @@ public class Tagger {
         }
 
         this.createUnitClassHashMapFromXml(hedXmlModel.getUnitClasses());
+        this.createUnitModifierHashMapFromXml(hedXmlModel.getUnitModifiers());
         this.createTagSets(hedXmlModel.getTags());
     }
 
@@ -2396,7 +2422,7 @@ public class Tagger {
             String key = (String)unitClassKeys.next();
             UnitClassXmlModel unitClassXml = new UnitClassXmlModel();
             unitClassXml.setName(key);
-            unitClassXml.setUnits((String)this.unitClasses.get(key));
+            unitClassXml.setUnits((UnitsXmlModel) this.unitClasses.get(key));
             unitClassXml.setDefault((String)this.unitClassDefaults.get(key));
             unitClassesXml.addUnitClass(unitClassXml);
         }
