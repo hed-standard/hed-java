@@ -11,12 +11,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.List;
 
 import javax.swing.*;
 
 import edu.utsa.tagger.AbstractTagModel;
 import edu.utsa.tagger.TaggedEvent;
 import edu.utsa.tagger.Tagger;
+import edu.utsa.tagger.UnitXmlModel;
 import edu.utsa.tagger.guisupport.ConstraintLayout;
 import edu.utsa.tagger.guisupport.FontsAndColors;
 import edu.utsa.tagger.guisupport.MessageConstants;
@@ -32,28 +34,48 @@ public class TagValueInputDialog extends JDialog implements ActionListener,
     private JOptionPane bgPanel = new JOptionPane();
     private JTextField textField;
     private JComboBox unitComboBox = new JComboBox(new String[] {});
+    private JComboBox unitModifierComboBox = new JComboBox(new String[] {});
     String btnString1 = "Save"; // used to communicate between input and optionpane
     String btnString2 = "Cancel";
     JPanel panelUseFieldValue = new JPanel();
     JCheckBox ckBoxUseFieldValue = new JCheckBox();
-    JButton useFieldValueBtn = new JButton("Use event field value");
+//    JButton useFieldValueBtn = new JButton("Use event field value");
     String typedText = null;
     GuiTagModel guiTagModel;
+    boolean isSchemaTag = false; // flag to tell whether the dialog was called by a tag in the Schema
     Tagger tagger;
-    EventEnterTagView eventEnterTagView;
+    TaggerView taggerView;
     TagEnterSearchView tagEnterSearchView;
 
     public TagValueInputDialog(EventEnterTagView eventEnterTagView, TagEnterSearchView enteredTag) {
-        super(eventEnterTagView.getAppView().getFrame(),true);
+        super(eventEnterTagView.getAppView().getFrame(), true);
         guiTagModel = enteredTag.getModel();
         this.tagger = eventEnterTagView.getTagger();
-        this.eventEnterTagView = eventEnterTagView;
+        this.taggerView = eventEnterTagView.getAppView();
         this.tagEnterSearchView = enteredTag;
+        setUp();
+    }
+    public TagValueInputDialog(GuiTagModel enteredTag) {
+        super(enteredTag.getAppView().getFrame(), true);
+        guiTagModel = enteredTag;
+        this.tagger = enteredTag.getTagger();
+        this.taggerView = enteredTag.getAppView();
+        isSchemaTag = true;
+        setUp();
+    }
 
+    /**
+     * Setup components of the dialog GUI
+     */
+    public void setUp() {
         bgPanel.setLayout(new ConstraintLayout());
         bgPanel.setPreferredSize(new Dimension(400, 200));
-        // message display
-        populateUnitsComboBox();
+        unitComboBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                populateUnitModifierComboBox();
+            }
+        });
         textField = new JTextField(20);
         ckBoxUseFieldValue.addActionListener(new ActionListener() {
             @Override
@@ -68,11 +90,13 @@ public class TagValueInputDialog extends JDialog implements ActionListener,
         panelUseFieldValue.add(ckBoxUseFieldValue);
         panelUseFieldValue.add(new JLabel("Use event field value"));
         String unitMessage = "Unit:";
+        String unitModifierMessage = "Unit modifier:";
         String tagMessage = "Value:";
         Object[] array = null;
         if (guiTagModel.isNumeric()) {
-            array = new Object[5];
-            array[0] = unitMessage; array[1] = unitComboBox; array[2] = tagMessage; array[3] = panelUseFieldValue; array[4] = textField;
+            populateUnitsComboBox();
+            array = new Object[7];
+            array[0] = unitMessage; array[1] = unitComboBox; array[2] = unitModifierMessage; array[3] = unitModifierComboBox; array[4] = tagMessage; array[5] = panelUseFieldValue; array[6] = textField;
         }
         else {
             array = new Object[3];
@@ -93,7 +117,7 @@ public class TagValueInputDialog extends JDialog implements ActionListener,
         getContentPane().setForeground(FontsAndColors.BLUE_DARK);
 
         pack();
-        setLocationRelativeTo(eventEnterTagView.getAppView().getFrame());
+        setLocationRelativeTo(taggerView.getFrame());
 
         //Ensure the text field always gets the first focus.
         addComponentListener(new ComponentAdapter() {
@@ -107,10 +131,11 @@ public class TagValueInputDialog extends JDialog implements ActionListener,
 
         //Register an event handler that reacts to option pane state changes.
         bgPanel.addPropertyChangeListener(this); // cuz implement Property Change Listener
+
+        setVisible(true);
     }
 
     private void setComponentsColor(Container c){
-
         Component[] m = c.getComponents();
 
         for(int i = 0; i < m.length; i++){
@@ -154,7 +179,7 @@ public class TagValueInputDialog extends JDialog implements ActionListener,
 
             if (btnString1.equals(value) && !textField.getText().isEmpty()) { // user supposedly enter a value and hit ok
                 typedText = textField.getText();
-                TaggerView appView = eventEnterTagView.getAppView();
+                TaggerView appView = taggerView;
                 if (typedText.contains(",")) {
                     inputFailed();
                     appView.showTaggerMessageDialog(
@@ -175,9 +200,12 @@ public class TagValueInputDialog extends JDialog implements ActionListener,
         }
     }
 
+    /**
+     * Event listener for user input when selecting "using fieldValue"
+     */
     public void useFieldValue() {
-        TaggerView appView = eventEnterTagView.getAppView();
-        Tagger tagger = eventEnterTagView.getTagger();
+        TaggerView appView = taggerView;
+        Tagger tagger = this.tagger;
         Set<Integer> selectedEvents = appView.getSelected();
         ArrayList<Integer> selectedEventsList = new ArrayList<>(selectedEvents.size());
         selectedEventsList.addAll(selectedEvents);
@@ -195,10 +223,7 @@ public class TagValueInputDialog extends JDialog implements ActionListener,
 
        /* Validate numeric tag */
        if (guiTagModel.isNumeric()) {
-           String unitString = new String();
-           if (unitComboBox.getSelectedItem() != null) {
-               unitString = unitComboBox.getSelectedItem().toString();
-           }
+           String unitString = getUnitString();
            for (int i=0; i < tagValues.length; i++) {
                String validatedText = validateNumericValue(tagValues[i].trim(), unitString);
                if (validatedText == null) {
@@ -224,13 +249,13 @@ public class TagValueInputDialog extends JDialog implements ActionListener,
        }
     }
 
+    /**
+     * Event listener for user input when not selecting "using fieldValue"
+     */
     public void noFieldValue() {
-        TaggerView appView = eventEnterTagView.getAppView();
+        TaggerView appView = taggerView;
         if (guiTagModel.isNumeric()) {
-            String unitString = new String();
-            if (unitComboBox.getSelectedItem() != null) {
-                unitString = unitComboBox.getSelectedItem().toString();
-            }
+            String unitString = getUnitString();
             typedText = validateNumericValue(typedText.trim(), unitString);
             if (typedText == null) {
                 inputFailed();
@@ -247,11 +272,36 @@ public class TagValueInputDialog extends JDialog implements ActionListener,
 
     }
 
+    /**
+     * Get unit string by combining unit selection with unit modifier selection
+     * @return final unit string
+     */
+    public String getUnitString() {
+        String unitString = new String();
+        if (unitComboBox.getSelectedItem() != null && !unitComboBox.getSelectedItem().equals("None")) {
+            String unitModifier = "";
+            if (unitModifierComboBox.getSelectedItem() != null && !unitModifierComboBox.getSelectedItem().equals("None"))
+                unitModifier += unitModifierComboBox.getSelectedItem();
+            unitString = unitModifier + unitComboBox.getSelectedItem();
+        }
+        return unitString;
+    }
+
     /** This method clears the dialog and hides it. */
     public void inputSuccess(GuiTagModel tagModel, Set<Integer> eventIDs) {
         setVisible(false);
         dispose();
-        tagEnterSearchView.addTagToEvent(tagModel, eventIDs);
+        // if called by schema tag
+        if (tagEnterSearchView == null && isSchemaTag) {
+		    guiTagModel.setInAddValue(false);
+            tagModel.setAppView(this.taggerView);
+            tagModel.requestToggleTag(eventIDs);
+            taggerView.updateTagsPanel();
+            taggerView.updateEventsPanel();
+            taggerView.scrollToEventTag(tagModel);
+        }
+        else
+            tagEnterSearchView.addTagToEvent(tagModel, eventIDs);
     }
 
     /** This method clears the dialog and hides it. */
@@ -288,17 +338,70 @@ public class TagValueInputDialog extends JDialog implements ActionListener,
                 .getUnitClass().split(","));
         String[] unitsArray = {};
         for (int i = 0; i < unitClassArray.length; i++) {
-            if (tagger.unitClasses.get(unitClassArray[i]) != null) {
-                String[] units = Tagger.trimStringArray(tagger.unitClasses.get(
-                        unitClassArray[i]).split(","));
-                unitsArray = Tagger.concat(unitsArray, units);
+            if (!unitClassArray[i].isEmpty() && tagger.unitClasses.get(unitClassArray[i]) != null) {
+                List<UnitXmlModel> units = tagger.unitClasses.get(unitClassArray[i]);
+                String[] unitStrings = new String[units.size()];
+                int j = 0;
+                for (UnitXmlModel unit : units) {
+                    unitStrings[j++] = unit.getName();
+//                    unitTagger.trimStringArray(tagger.unitClasses.get(
+//                            unitClassArray[i]).split(","));
+                }
+                unitsArray = Tagger.concat(unitsArray, unitStrings);
             }
         }
-        Arrays.sort(unitsArray);
-        unitComboBox.setModel(new DefaultComboBoxModel(unitsArray));
-        setDefaultUnit();
+//        Arrays.sort(unitsArray);
+        if (unitsArray.length > 0) {
+            unitComboBox.setModel(new DefaultComboBoxModel(unitsArray));
+            setDefaultUnit();
+        }
+        else {
+            String[] unit = {"None"};
+            unitComboBox.setModel(new DefaultComboBoxModel(unit));
+        }
+        populateUnitModifierComboBox();
     }
 
+    private void populateUnitModifierComboBox() {
+        String selectedUnit = unitComboBox.getSelectedItem().toString();
+        if (!selectedUnit.equals("None")) {
+            /* Find the UnitXmlModel of the selected unit */
+            // the tag can have multiple unitClasses. Each unitClass has multiple units
+            UnitXmlModel unitModel = null;
+            String[] unitClassArray = Tagger.trimStringArray(guiTagModel
+                    .getUnitClass().split(","));
+            for (int i = 0; i < unitClassArray.length && unitModel == null; i++) {
+                ArrayList<UnitXmlModel> units = (ArrayList) tagger.unitClasses.get(unitClassArray[i]);
+                if (tagger.unitClasses.get(unitClassArray[i]) != null) {
+                    for (UnitXmlModel unit : units) {
+                        if (unit.getName().equals(selectedUnit)) {
+                            unitModel = unit;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            /* Get unit modifiers based on attribute of unitXmlModel */
+            if (unitModel.isSIUnit()) {
+                ArrayList<String> modifiers = null;
+                if (unitModel.isUnitSymbol())
+                    modifiers = (ArrayList) tagger.unitModifiers.get("symbol").clone();
+                else
+                    modifiers = (ArrayList) tagger.unitModifiers.get("unit").clone();
+                modifiers.add(0, "None");
+                unitModifierComboBox.setModel(new DefaultComboBoxModel(modifiers.toArray()));
+            } else {
+                String[] modifiers = {"None"};
+                unitModifierComboBox.setModel(new DefaultComboBoxModel(modifiers));
+            }
+
+        }
+        else {
+            String[] modifiers = {"None"};
+            unitModifierComboBox.setModel(new DefaultComboBoxModel(modifiers));
+        }
+    }
     /**
      * Set the units combo box to the default unit.
      */
