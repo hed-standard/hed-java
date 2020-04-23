@@ -601,11 +601,6 @@ public class TaggerView extends ConstraintContainer {
         this.splitPaneRight.add(this.collapseAll, new Constraint("top:57 height:30 right:250 width:100"));
         this.splitPaneRight.add(this.tagsScrollPane, new Constraint("top:90 bottom:0 left:5 right:0"));
 
-        // button pane
-        undo.setToolTipText("Undo");
-        btnPanel.add(undo, new Constraint("top:0 height:33 left:0 width:33"));
-        redo.setToolTipText("Redo");
-        btnPanel.add(redo, new Constraint("top:0 left:34 height:33 width:33"));
         addGroup.setToolTipText("Add tag group to selected event(s)");
         btnPanel.add(addGroup, new Constraint("top:0 left:72 height:33 width:33"));
         copyTo.setToolTipText("Copy tags of selected event to others");
@@ -618,8 +613,6 @@ public class TaggerView extends ConstraintContainer {
         btnPanel.add(toFMap, new Constraint("top:0 left:208 height:33 width:33"));
         showSchema.setToolTipText("Show HED Schema");
         btnPanel.add(showSchema, new Constraint("top:0 left:242 height:33 width:50"));
-
-//        this.add(this.titleLabel, new Constraint("top:0 height:50 left:5 right:0"));
         this.add(this.notification, new Constraint("top:10 height:30 left:305 right:245"));
         this.setLayer(this.notification, 1);
         this.notification.setVisible(false);

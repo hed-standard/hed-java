@@ -7,8 +7,10 @@ package edu.utsa.tagger;
 
 import edu.utsa.tagger.gui.GuiTagModel;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import edu.utsa.tagger.GroupTree.GroupNode;
 
 public class TaggerHistory {
     private static Tagger tagger;
@@ -169,20 +171,28 @@ public class TaggerHistory {
 
     }
 
+    /**
+     * Add group back
+     * @param item
+     */
     private void redoAddGroup(HistoryItem item) {
-        if (item.groupId != null && item.tags != null && item.event != null && tagger.addGroupBase(item.event, item.groupId, item.tags)) {
+        if (item.groupId != null && item.groupNode != null && item.event != null) {
+            tagger.addGroupBase(item.event, item.groupNode);
             this.addToUndo(item);
         }
-
     }
 
+    /**
+     * Add groups back to their original parents
+     * @param item
+     */
     private void redoAddGroups(HistoryItem item) {
-        if (item.groupIds != null && item.tags != null && item.events != null) {
+        if (item.events != null && item.eventGroupNodeHashMap != null) {
             TaggedEvent[] events = (TaggedEvent[])item.events.toArray(new TaggedEvent[item.events.size()]);
-            Integer[] groupIds = (Integer[])item.groupIds.toArray(new Integer[item.groupIds.size()]);
 
             for(int i = 0; i < events.length; ++i) {
-                tagger.addGroupBase(events[i], groupIds[i], item.tags);
+                GroupNode node = item.eventGroupNodeHashMap.get(events[i]);
+                tagger.addGroupBase(events[i], node);
             }
 
             this.addToUndo(item);
@@ -236,7 +246,7 @@ public class TaggerHistory {
     }
 
     private void redoRemoveGroup(HistoryItem item) {
-        if (item.groupId != null && item.tags != null && item.event != null && tagger.removeGroupBase(item.event, item.groupId) != null) {
+        if (item.groupId != null && item.event != null && tagger.removeGroupBase(item.event, item.groupId) != null) {
             this.addToUndo(item);
         }
 
@@ -353,15 +363,20 @@ public class TaggerHistory {
 
     }
 
+    /**
+     * Remove groups
+     * @param item
+     */
     private void undoAddGroups(HistoryItem item) {
         if (item.groupIds != null && item.events != null) {
             TaggedEvent[] events = (TaggedEvent[])item.events.toArray(new TaggedEvent[item.events.size()]);
             Integer[] groupIds = (Integer[])item.groupIds.toArray(new Integer[item.groupIds.size()]);
-
+            HashMap<TaggedEvent, GroupNode> eventGroupNodeHashMap = new HashMap<>();
             for(int i = 0; i < events.length; ++i) {
-                tagger.removeGroupBase(events[i], groupIds[i]);
+                GroupNode removed = tagger.removeGroupBase(events[i], groupIds[i]);
+                eventGroupNodeHashMap.put(events[i], removed);
             }
-
+            item.eventGroupNodeHashMap = eventGroupNodeHashMap;
             this.addToRedo(item);
         }
 
@@ -415,15 +430,15 @@ public class TaggerHistory {
 
     }
 
+    /**
+     * Add group back
+     * @param item
+     */
     private void undoRemoveGroup(HistoryItem item) {
-        if (item.groupId != null && item.tags != null && item.event != null) {
-            if (item.parentGroupId != null && item.parentGroupId != item.event.getEventLevelId())
-                tagger.addNestedGroupWithTags(item.event, item.parentGroupId, item.groupId, item.tags);
-            else
-                tagger.addGroupBase(item.event, item.groupId, item.tags);
+        if (item.groupId != null && item.groupNode != null && item.event != null) {
+            tagger.addGroupBase(item.event, item.groupNode);
             this.addToRedo(item);
         }
-
     }
 
     private void undoRemoveTag(HistoryItem item) {

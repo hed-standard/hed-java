@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import edu.utsa.tagger.TagXmlModel.PredicateType;
 import edu.utsa.tagger.TaggerHistory.Type;
+import edu.utsa.tagger.GroupTree.GroupNode;
 import edu.utsa.tagger.gui.GuiEventModel;
 import edu.utsa.tagger.gui.GuiTagModel;
 import edu.utsa.tagger.gui.GuiTagModel.Highlight;
@@ -166,22 +167,52 @@ public class Tagger {
         return this.eventList.add(event);
     }
 
-//    public boolean addGroupBase(TaggedEvent taggedEvent, Integer groupId, TaggerSet<AbstractTagModel> tags) {
-//        if (!taggedEvent.addGroup(groupId)) {
-//            return false;
-//        } else {
-//            Iterator var5 = tags.iterator();
-//
-//            while(var5.hasNext()) {
-//                AbstractTagModel tag = (AbstractTagModel)var5.next();
-//                taggedEvent.addTagToGroup(groupId, tag);
-//            }
-//
-//            return true;
-//        }
-//    }
+    /**
+     * Add a new group to the taggedEvent and also add tags to that group
+     * @param taggedEvent the event in which the new group and tags will be added
+     * @param groupId id of the new group
+     * @param tags tags to be added to the new group identified by groupId
+     * @return true if new group and tags were successfully added. false otherwise
+     */
+    public boolean addGroupBase(TaggedEvent taggedEvent, Integer groupId, TaggerSet<AbstractTagModel> tags) {
+        if (!taggedEvent.addGroup(groupId)) {
+            return false;
+        } else {
+            Iterator var5 = tags.iterator();
 
-    public boolean addGroupBase(TaggedEvent taggedEvent, Integer parentGroupId, Integer groupId, TaggerSet<AbstractTagModel> tags) {
+            while(var5.hasNext()) {
+                AbstractTagModel tag = (AbstractTagModel)var5.next();
+                taggedEvent.addTagToGroup(groupId, tag);
+            }
+
+            return true;
+        }
+    }
+
+    /**
+     * Add a new group to the taggedEvent also nested groups (if has) and their tags to that group
+     * @param taggedEvent the event in which the new group and tags will be added
+     * @param groupNode groupNode containing group to be added to the taggedEvent
+     * @return true if new group and tags were successfully added. false otherwise
+     */
+    public boolean addGroupBase(TaggedEvent taggedEvent, GroupNode groupNode) {
+        ArrayList<GroupNode> stack = new ArrayList<>();
+        stack.add(groupNode);
+        while (!stack.isEmpty()) {
+            GroupNode node = stack.remove(0);
+            if (!taggedEvent.addGroup(node.getParentId(), node.getGroupId())) {
+                return false;
+            } else {
+                for (AbstractTagModel tag : node.getTags()) {
+                    taggedEvent.addTagToGroup(node.getGroupId(), tag);
+                }
+            }
+            if (node.hasChildren())
+                stack.addAll(node.getChildren());
+        }
+        return true;
+    }
+    public boolean addNestedGroupWithTags(TaggedEvent taggedEvent, Integer parentGroupId, Integer groupId, TaggerSet<AbstractTagModel> tags) {
         if (!taggedEvent.addGroup(parentGroupId,groupId)) {
             return false;
         } else {
@@ -1909,20 +1940,19 @@ public class Tagger {
 
     public void removeGroup(int groupId) {
         TaggedEvent taggedEvent = this.getTaggedEventFromGroupId(groupId);
-        TreeMap<Integer,TaggerSet<AbstractTagModel>> removed = this.removeGroupBase(taggedEvent, groupId);
+        GroupNode removed = this.removeGroupBase(taggedEvent, groupId);
         if (removed != null) {
             HistoryItem historyItem = new HistoryItem();
             historyItem.type = Type.GROUP_REMOVED;
             historyItem.event = taggedEvent;
             historyItem.groupId = groupId;
-            historyItem.parentGroupId = removed.firstKey();
-            historyItem.tags = removed.get(removed.firstKey());
+            historyItem.groupNode = removed;
             this.history.add(historyItem);
         }
 
     }
 
-    public TreeMap<Integer,TaggerSet<AbstractTagModel>> removeGroupBase(TaggedEvent event, Integer groupId) {
+    public GroupNode removeGroupBase(TaggedEvent event, Integer groupId) {
         return event.removeGroup(groupId);
     }
 

@@ -9,7 +9,7 @@ public class GroupTree {
         root = new GroupNode();
     }
     public GroupTree(int eventId) {
-        root = new GroupNode(eventId);
+        root = new GroupNode(-1, eventId);
     }
     public void setRootId(int id) {
         root.setGroupId(id);
@@ -17,6 +17,13 @@ public class GroupTree {
     public GroupNode getRoot() {
         return root;
     }
+
+    /**
+     * Add new children node to current parent
+     * @param parent id of the parent group
+     * @param children id of the child group
+     * @return
+     */
     public boolean add(int parent, int children) {
         GroupNode nodeToAdd = find(parent);
         if (nodeToAdd == null) {
@@ -27,27 +34,38 @@ public class GroupTree {
             return true;
         }
     }
-    public int remove(int groupId) {
+
+    /**
+     * Remove GroupNode identified by groupId from GroupTree
+     * @param groupId id of group node to be removed
+     * @return removed groupNode
+     */
+    public GroupNode remove(int groupId) {
         GroupNode removed = find(groupId);
-        GroupNode parentNode = findParent(groupId, root, null);
+        GroupNode parentNode = find(removed.getParentId());
         boolean success = parentNode.getChildren().remove(removed);
-        return success ? parentNode.getGroupId() : -1;
+        return success ? removed : null;
     }
 
-    public GroupNode findParent(int target, GroupNode curNode, GroupNode parent) {
-        if (target != root.getGroupId() && parent != null && curNode.getGroupId() == target) {
-            return parent;
-        }
-        else {
-            for (GroupNode child : curNode.getChildren()) {
-                GroupNode found = findParent(target, child, curNode);
-                if (found != null)
-                    return found;
-            }
-            return null;
-        }
-    }
+//    public GroupNode findParent(int target, GroupNode curNode, GroupNode parent) {
+//        if (target != root.getGroupId() && parent != null && curNode.getGroupId() == target) {
+//            return parent;
+//        }
+//        else {
+//            for (GroupNode child : curNode.getChildren()) {
+//                GroupNode found = findParent(target, child, curNode);
+//                if (found != null)
+//                    return found;
+//            }
+//            return null;
+//        }
+//    }
 
+    /**
+     * Find group node identified by groupId in this groupTree
+     * @param groupId target-node's id
+     * @return target node
+     */
     public GroupNode find(int groupId) {
         return root.find(groupId);
     }
@@ -59,13 +77,20 @@ public class GroupTree {
 
     public class GroupNode implements Comparable{
         int groupId;
+        int parentId;
         List<GroupNode> children;
+        TaggerSet<AbstractTagModel> tags;
         public GroupNode() {
+            parentId = -1;
             children = new ArrayList<>();
         }
-        public GroupNode(int id) {
+        public GroupNode(int parent, int id) {
+            parentId = parent;
             groupId = id;
             children = new ArrayList<>();
+        }
+        public int getParentId() {
+            return parentId;
         }
         public int getGroupId() {
             return groupId;
@@ -76,8 +101,15 @@ public class GroupTree {
         public List<GroupNode> getChildren() {
             return children;
         }
+
         public boolean hasChildren() {
             return !children.isEmpty();
+        }
+
+        public TaggerSet<AbstractTagModel> getTags() {return tags;}
+
+        public void setTags(TaggerSet<AbstractTagModel> tags) {
+            this.tags = tags;
         }
         public GroupNode find(int target) {
             if (groupId == target) {
@@ -94,7 +126,7 @@ public class GroupTree {
         }
 
         public void add(int childId) {
-            GroupNode childNode = new GroupNode(childId);
+            GroupNode childNode = new GroupNode(groupId, childId);
             children.add(childNode);
         }
 
