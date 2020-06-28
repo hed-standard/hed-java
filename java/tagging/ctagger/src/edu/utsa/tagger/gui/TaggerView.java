@@ -251,7 +251,6 @@ public class TaggerView extends ConstraintContainer {
     }
 
     private void createFrame() {
-        System.out.println("test");
         JMenuBar menuBar = this.createMenuBar();
         this.frame = new JFrame();
         this.frame.setSize(1024, 800);
@@ -268,7 +267,6 @@ public class TaggerView extends ConstraintContainer {
         strategyGuide.setToolTipText("Guide on choosing tags to add to events");
         help.setToolTipText("CTAGGER manual");
         try {
-//            System.out.println(TaggerView.class.getResourceAsStream("/img/undo_scaled.png"));
             undo = new HistoryButton(new ImageIcon(ImageIO.read(TaggerView.class.getResourceAsStream("/img/undo_scaled.png"))), true);
         }
         catch (Exception ex) {
@@ -2183,7 +2181,6 @@ public class TaggerView extends ConstraintContainer {
             return;
         }
         HashMap<String, ArrayList<String>> report = tagger.extractTags(selectedEvents);
-        System.out.println(report);
         HashMap<String, ArrayList<String>> fullEventNameUniqueTags = new HashMap<>();
         Set<String> eventIDs = report.keySet();
         for (TaggedEvent event : tagger.getEventSet()) {
