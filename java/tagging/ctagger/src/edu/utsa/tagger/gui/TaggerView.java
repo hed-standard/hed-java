@@ -255,7 +255,6 @@ public class TaggerView extends ConstraintContainer {
     }
 
     private void createFrame() {
-        System.out.println("test");
         JMenuBar menuBar = this.createMenuBar();
         this.frame = new JFrame();
         this.frame.setSize(1024, 800);
