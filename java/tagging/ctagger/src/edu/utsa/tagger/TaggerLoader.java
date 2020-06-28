@@ -32,8 +32,8 @@ public class TaggerLoader {
     private String tags;
     private String title;
 
-    public static void load(int flags, String frameTitle, int initialDepth, IFactory factory) {
-        new TaggerLoader(flags, frameTitle, initialDepth, factory);
+    public static TaggerLoader load(int flags, String frameTitle, int initialDepth, IFactory factory) {
+        return new TaggerLoader(flags, frameTitle, initialDepth, factory);
     }
 
     public static String load(String xmlData, int flags, String frameTitle, int initialDepth) {
