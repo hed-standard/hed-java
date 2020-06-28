@@ -142,7 +142,6 @@ public class TaggerView extends ConstraintContainer {
     private ConstraintContainer splitPaneLeft = new ConstraintContainer();
     private ConstraintContainer splitPaneRight = new ConstraintContainer();
     private Tagger tagger;
-    private JFrame schemaFrame;
     private JPanel tagsPanel = new JPanel();
     private JLayeredPane eventsPanel = new JLayeredPane();
     //private boolean startOver;
@@ -186,12 +185,6 @@ public class TaggerView extends ConstraintContainer {
         @Override
         public Font getFont() {
             return FontsAndColors.buttonFont;
-        }
-    };
-    private JButton showSchema = new JButton("HED") {
-        @Override
-        public Font getFont() {
-            return FontsAndColors.buttonFont.deriveFont(Font.BOLD);
         }
     };
     private XButton tagSummary = new XButton(new ImageIcon(getClass().getResource("/img/report_scaled.png"))) {
@@ -261,19 +254,12 @@ public class TaggerView extends ConstraintContainer {
         System.out.println("test");
         JMenuBar menuBar = this.createMenuBar();
         this.frame = new JFrame();
-        this.frame.setSize(685, 800);
+        this.frame.setSize(1024, 800);
         this.frame.setVisible(true);
         this.frame.setDefaultCloseOperation(0);
         this.frame.setTitle("CTAGGER - " + loader.getTitle());
         this.frame.setJMenuBar(menuBar);
         this.frame.getContentPane().add(this);
-
-        // schema Frame
-        this.schemaFrame = new JFrame();
-        this.schemaFrame.setSize(512,768);
-        this.schemaFrame.setVisible(false);
-        this.schemaFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-        this.schemaFrame.setTitle("HED Schema");
     }
 
     private void setupComponents() {
@@ -341,8 +327,6 @@ public class TaggerView extends ConstraintContainer {
         this.incompatibleTagWarning.setBackground(FontsAndColors.TRANSPARENT);
         this.titleLabel.setForeground(FontsAndColors.BLUE_DARK);
         this.titleLabel.setBackground(FontsAndColors.TRANSPARENT);
-
-        schemaFrame.getContentPane().setBackground(FontsAndColors.APP_BG);
     }
 
     private void setListeners() {
@@ -514,11 +498,6 @@ public class TaggerView extends ConstraintContainer {
                 copyTag();
             }
         });
-        this.showSchema.addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent e) {
-                schemaFrame.setVisible(true);
-            }
-        });
         this.tagSummary.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 TaggerView.this.getTagSummaryOfSelected();
@@ -616,8 +595,6 @@ public class TaggerView extends ConstraintContainer {
         btnPanel.add(tagSummary, new Constraint("top:0 left:174 height:33 width:33"));
         toFMap.setToolTipText("Export tags to FieldMap MATLAB structure");
         btnPanel.add(toFMap, new Constraint("top:0 left:208 height:33 width:33"));
-        showSchema.setToolTipText("Show HED Schema");
-        btnPanel.add(showSchema, new Constraint("top:0 left:242 height:33 width:50"));
 
 //        this.add(this.titleLabel, new Constraint("top:0 height:50 left:5 right:0"));
         this.add(this.notification, new Constraint("top:10 height:30 left:305 right:245"));
@@ -635,13 +612,11 @@ public class TaggerView extends ConstraintContainer {
 //        this.add(headerPanel, new Constraint("top:0 height:33 left:10 right:0"));
         this.add(btnPanel, new Constraint("top:0 height:33 left:10 right:0"));
         this.add(incompatibleTagWarning, new Constraint("top:33 height:33 left:10 right:0"));
-//        this.add(this.splitContainer, new Constraint("top:55 bottom:50 left:10 right:10"));
+        this.add(this.splitContainer, new Constraint("top:55 bottom:50 left:10 right:10"));
         this.add(this.splitPaneLeft, new Constraint("top:68 bottom:50 left:10 right:10"));
-//        int splitterPos = this.frame.getWidth() / 2;
-//        VerticalSplitLayout splitLayout = new VerticalSplitLayout(this.splitContainer, this.splitPaneLeft, this.splitPaneRight, splitterPos);
-//        this.splitContainer.setLayout(splitLayout);
-
-        schemaFrame.getContentPane().add(this.splitPaneRight);
+        int splitterPos = this.frame.getWidth() / 2;
+        VerticalSplitLayout splitLayout = new VerticalSplitLayout(this.splitContainer, this.splitPaneLeft, this.splitPaneRight, splitterPos);
+        this.splitContainer.setLayout(splitLayout);
     }
 
     public void updateTagsPanel() {
@@ -657,8 +632,6 @@ public class TaggerView extends ConstraintContainer {
             do {
                 if (!var3.hasNext()) {
                     this.autoCollapse = false;
-                    this.schemaFrame.getContentPane().validate();
-                    this.schemaFrame.getContentPane().repaint();
 //                    validate();
 //                    repaint();
                     return;
