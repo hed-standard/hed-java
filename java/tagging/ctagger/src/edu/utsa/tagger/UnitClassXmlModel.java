@@ -1,10 +1,12 @@
 package edu.utsa.tagger;
 
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlType;
 
 /**
  * This class is an XML model corresponding to a tag in the HED hierarchy.
@@ -15,15 +17,16 @@ import javax.xml.bind.annotation.*;
 @XmlType(name = "unitClass")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class UnitClassXmlModel {
-	@XmlAttribute(name = "defaultUnits")
+	@XmlAttribute(name = "default")
 	private String defaultUnit = "";
-	private String name = ""; // name of the unit class, e.g. Time, PhysicalLength...
-	private UnitsXmlModel units;
+	private String name = "";
+	private String units = "";
+	private Set<UnitClassXmlModel> unitClass = new LinkedHashSet<UnitClassXmlModel>();
 
-//	public void addChild(UnitClassXmlModel child) {
-//		unitClass.add(child);
-//	}
-//
+	public void addChild(UnitClassXmlModel child) {
+		unitClass.add(child);
+	}
+
 	public String getDefault() {
 		return defaultUnit;
 	}
@@ -40,11 +43,12 @@ public class UnitClassXmlModel {
 		this.name = name;
 	}
 
-	public List<UnitXmlModel> getUnits() {
-		return units.getUnits();
+	public String getUnits() {
+		return units;
 	}
 
-	public void setUnits(UnitsXmlModel units) {
+	public void setUnits(String units) {
 		this.units = units;
 	}
+
 }

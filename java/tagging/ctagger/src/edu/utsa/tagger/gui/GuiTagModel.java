@@ -144,10 +144,6 @@ public class GuiTagModel extends AbstractTagModel {
 		return tagView;
 	}
 
-	public TaggerView getAppView() {return appView;}
-
-	public Tagger getTagger() {return tagger;}
-
 	public ArrayList<AbstractTagModel> getAttributes() {
 		return attributes;
 	}
