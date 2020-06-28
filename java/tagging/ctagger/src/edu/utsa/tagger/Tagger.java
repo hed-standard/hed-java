@@ -166,28 +166,6 @@ public class Tagger {
     }
 
     /**
-     * Add a new group to the taggedEvent and also add tags to that group
-     * @param taggedEvent the event in which the new group and tags will be added
-     * @param groupId id of the new group
-     * @param tags tags to be added to the new group identified by groupId
-     * @return true if new group and tags were successfully added. false otherwise
-     */
-    public boolean addGroupBase(TaggedEvent taggedEvent, Integer groupId, TaggerSet<AbstractTagModel> tags) {
-        if (!taggedEvent.addGroup(groupId)) {
-            return false;
-        } else {
-            Iterator var5 = tags.iterator();
-
-            while(var5.hasNext()) {
-                AbstractTagModel tag = (AbstractTagModel)var5.next();
-                taggedEvent.addTagToGroup(groupId, tag);
-            }
-
-            return true;
-        }
-    }
-
-    /**
      * Add a new group to the taggedEvent also nested groups (if has) and their tags to that group
      * @param taggedEvent the event in which the new group and tags will be added
      * @param groupNode groupNode containing group to be added to the taggedEvent
@@ -209,20 +187,6 @@ public class Tagger {
                 stack.addAll(node.getChildren());
         }
         return true;
-    }
-    public boolean addNestedGroupWithTags(TaggedEvent taggedEvent, Integer parentGroupId, Integer groupId, TaggerSet<AbstractTagModel> tags) {
-        if (!taggedEvent.addGroup(parentGroupId,groupId)) {
-            return false;
-        } else {
-            Iterator var5 = tags.iterator();
-
-            while(var5.hasNext()) {
-                AbstractTagModel tag = (AbstractTagModel)var5.next();
-                taggedEvent.addTagToGroup(groupId, tag);
-            }
-
-            return true;
-        }
     }
     public TaggedEvent addNewEvent(String code, String label) {
         GuiEventModel eventModel = (GuiEventModel)this.factory.createAbstractEventModel(this);
