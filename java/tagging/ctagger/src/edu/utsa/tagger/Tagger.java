@@ -291,7 +291,6 @@ public class Tagger {
             historyItem.type = Type.GROUPS_ADDED;
             historyItem.events = selectedEvents;
             historyItem.groupIds = newEventGroupIds;
-            historyItem.parentChildrenGroupIds = parentChildrenMap;
             historyItem.tags = tags;
             this.history.add(historyItem);
         }
