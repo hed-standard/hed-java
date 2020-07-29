@@ -234,6 +234,9 @@ public class TagValueInputDialog extends JDialog implements ActionListener,
                            message, "Ok", null, null);
                    return;
                }
+               else {
+                   tagValues[i] = validatedText;
+               }
            }
        }
 
