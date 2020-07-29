@@ -1,5 +1,6 @@
 package edu.utsa.tagger;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 import edu.utsa.tagger.TagXmlModel.PredicateType;

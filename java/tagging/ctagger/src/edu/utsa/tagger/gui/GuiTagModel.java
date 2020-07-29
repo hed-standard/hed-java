@@ -1,5 +1,6 @@
 package edu.utsa.tagger.gui;
 
+import java.util.ArrayList;
 import java.util.Set;
 
 import edu.utsa.tagger.AbstractTagModel;
@@ -43,6 +44,7 @@ public class GuiTagModel extends AbstractTagModel {
 	public static final int SELECTION_STATE_NONE = 0;
 	public static final int SELECTION_STATE_MIXED = 1;
 	public static final int SELECTION_STATE_ALL = 2;
+	private ArrayList<AbstractTagModel> attributes;
 
 	public GuiTagModel(final Tagger tagger) {
 		this.tagger = tagger;
@@ -142,6 +144,14 @@ public class GuiTagModel extends AbstractTagModel {
 		return tagView;
 	}
 
+	public TaggerView getAppView() {return appView;}
+
+	public Tagger getTagger() {return tagger;}
+
+	public ArrayList<AbstractTagModel> getAttributes() {
+		return attributes;
+	}
+
 	public boolean isCollapsable() {
 		return collapsable;
 	}
@@ -239,6 +249,10 @@ public class GuiTagModel extends AbstractTagModel {
 
 	public void setMissing(boolean missing) {
 		this.missing = missing;
+	}
+
+	public void setAttributes(ArrayList<AbstractTagModel> list) {
+		attributes = list;
 	}
 
 	/**
