@@ -93,7 +93,7 @@ public class TagValueInputDialog extends JDialog implements ActionListener,
         String unitModifierMessage = "Unit modifier:";
         String tagMessage = "Value:";
         Object[] array = null;
-        if (guiTagModel.isNumeric()) {
+        if (guiTagModel.hasUnit()) {
             populateUnitsComboBox();
             array = new Object[7];
             array[0] = unitMessage; array[1] = unitComboBox; array[2] = unitModifierMessage; array[3] = unitModifierComboBox; array[4] = tagMessage; array[5] = panelUseFieldValue; array[6] = textField;
@@ -221,22 +221,19 @@ public class TagValueInputDialog extends JDialog implements ActionListener,
             tagValues[i] = enterTextWithValue;
         }
 
-       /* Validate numeric tag */
-       if (guiTagModel.isNumeric()) {
-           String unitString = getUnitString();
-           for (int i=0; i < tagValues.length; i++) {
-               String validatedText = validateNumericValue(tagValues[i].trim(), unitString);
-               if (validatedText == null) {
-                   inputFailed();
-                   TaggedEvent incompatibleEvent = tagger.getTaggedEventFromGroupId(selectedEventsList.get(i));
-                   String message = "Problem with event " + incompatibleEvent.getEventModel().getCode() + ": " + MessageConstants.TAG_UNIT_ERROR;
-                   appView.showTaggerMessageDialog(
-                           message, "Ok", null, null);
-                   return;
-               }
-               else {
-                   tagValues[i] = validatedText;
-               }
+       /* Validate input */
+       for (int i=0; i < tagValues.length; i++) {
+           String validatedText = guiTagModel.validateInput(tagValues[i].trim(), getUnitString());
+           if (validatedText == null) {
+               inputFailed();
+               TaggedEvent incompatibleEvent = tagger.getTaggedEventFromGroupId(selectedEventsList.get(i));
+               String message = "Problem with event " + incompatibleEvent.getEventModel().getCode() + ": " + MessageConstants.TAG_UNIT_ERROR;
+               appView.showTaggerMessageDialog(
+                       message, "Ok", null, null);
+               return;
+           }
+           else {
+               tagValues[i] = validatedText;
            }
        }
 
@@ -257,22 +254,19 @@ public class TagValueInputDialog extends JDialog implements ActionListener,
      */
     public void noFieldValue() {
         TaggerView appView = taggerView;
-        if (guiTagModel.isNumeric()) {
-            String unitString = getUnitString();
-            typedText = validateNumericValue(typedText.trim(), unitString);
-            if (typedText == null) {
-                inputFailed();
-                appView.showTaggerMessageDialog(
-                        MessageConstants.TAG_UNIT_ERROR, "Ok", null, null);
-                return;
-            }
+        // validate input
+        typedText = guiTagModel.validateInput(typedText, getUnitString());
+        if (typedText == null) {
+            inputFailed();
+            appView.showTaggerMessageDialog(
+                    MessageConstants.TAG_UNIT_ERROR, "Ok", null, null);
+            return;
         }
         AbstractTagModel newTag = tagger.createTransientTagModel(guiTagModel,
                 typedText);
         GuiTagModel gtm = (GuiTagModel) newTag;
         gtm.setAppView(appView);
         inputSuccess(gtm, appView.getSelected());
-
     }
 
     /**
@@ -311,23 +305,6 @@ public class TagValueInputDialog extends JDialog implements ActionListener,
     public void inputFailed() {
         setVisible(false);
         dispose();
-    }
-
-    /**
-     * Validates numerical value
-     *
-     * @param numericValue
-     *            A numerical value
-     * @param unit
-     *            Unit The unit associated with numerical value
-     * @return Null if invalid, numerical value with unit appended if valid
-     */
-    private String validateNumericValue(String numericValue, String unit) {
-        if (numericValue.matches("^-?[0-9]+(\\.[0-9]+)?$") || numericValue.matches("^-\\.[0-9]+$"))
-            numericValue = numericValue + " " + unit;
-        else
-            numericValue = null;
-        return numericValue;
     }
 
     /**

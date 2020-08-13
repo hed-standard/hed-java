@@ -207,4 +207,6 @@ public abstract class AbstractTagModel implements Comparable<AbstractTagModel> {
 	public boolean isNumeric() {
 		return isNumeric;
 	}
+
+	public boolean hasUnit() { return !unitClass.isEmpty(); };
 }

@@ -285,5 +285,40 @@ public class GuiTagModel extends AbstractTagModel {
         this.tagger.updateMissing(this);
     }
 
+    public String validateInput(String typedText, String unitString) {
+		if (isNumeric()) {
+			typedText = validateNumericValue(typedText.trim(), unitString);
+		} else if (hasUnit() && getUnitClass().equals("clockTime")) {
+			boolean valid = false;
+			if (unitString.equals("hour:min")) {
+				valid = typedText.matches("^(2[0-3]|[01]?[0-9]):([0-5]?[0-9])$");
+			}
+			else if (unitString.equals("hour:min:sec"))
+				valid = typedText.matches("^(2[0-3]|[01]?[0-9]):([0-5]?[0-9]):([0-5]?[0-9])$");
+			if (!valid)
+				typedText = null;
+			else
+				typedText = typedText + " " + unitString;
+		}
+		return typedText;
+	}
+
+	/**
+	 * Validates numerical value
+	 *
+	 * @param numericValue
+	 *            A numerical value
+	 * @param unit
+	 *            Unit The unit associated with numerical value
+	 * @return Null if invalid, numerical value with unit appended if valid
+	 */
+	private String validateNumericValue(String numericValue, String unit) {
+		if (numericValue.matches("^-?[0-9]+(\\.[0-9]+)?$") || numericValue.matches("^-\\.[0-9]+$"))
+			numericValue = numericValue + " " + unit;
+		else
+			numericValue = null;
+		return numericValue;
+	}
+
 
 }
