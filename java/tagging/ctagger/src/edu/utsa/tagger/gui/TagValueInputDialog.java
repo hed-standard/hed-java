@@ -331,28 +331,14 @@ public class TagValueInputDialog extends JDialog implements ActionListener,
     }
 
     /**
-     * Populates the combo box that contains the units of the unit classes.
+     * Populates the combo box that contains the units associated with the tag.
      *
-     * @return The units combo box.
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private void populateUnitsComboBox() {
-        String[] unitClassArray = Tagger.trimStringArray(guiTagModel
-                .getUnitClass().split(","));
-        String[] unitsArray = {};
-        for (int i = 0; i < unitClassArray.length; i++) {
-            if (!unitClassArray[i].isEmpty() && tagger.unitClasses.get(unitClassArray[i]) != null) {
-                List<UnitXmlModel> units = tagger.unitClasses.get(unitClassArray[i]);
-                String[] unitStrings = new String[units.size()];
-                int j = 0;
-                for (UnitXmlModel unit : units) {
-                    unitStrings[j++] = unit.getName();
-//                    unitTagger.trimStringArray(tagger.unitClasses.get(
-//                            unitClassArray[i]).split(","));
-                }
-                unitsArray = Tagger.concat(unitsArray, unitStrings);
-            }
-        }
+        // Retrieve units of each unit classes and put them into unitsArray
+        // content of unitComboBox will be populated using unitsArray
+        String[] unitsArray = guiTagModel.getUnits();
 //        Arrays.sort(unitsArray);
         if (unitsArray.length > 0) {
             unitComboBox.setModel(new DefaultComboBoxModel(unitsArray));
@@ -362,9 +348,15 @@ public class TagValueInputDialog extends JDialog implements ActionListener,
             String[] unit = {"None"};
             unitComboBox.setModel(new DefaultComboBoxModel(unit));
         }
+        // populate the unitModifierComboBox
         populateUnitModifierComboBox();
     }
 
+    /**
+     * Populates unitModifierComboBox based on current unit selection.
+     * If the selected unit is SIUnit, populates unitModifierComboBox with SI unit modifiers
+     * Otherwise, put None
+     */
     private void populateUnitModifierComboBox() {
         String selectedUnit = unitComboBox.getSelectedItem().toString();
         if (!selectedUnit.equals("None")) {
@@ -385,8 +377,8 @@ public class TagValueInputDialog extends JDialog implements ActionListener,
                 }
             }
 
-            /* Get unit modifiers based on attribute of unitXmlModel */
             if (unitModel.isSIUnit()) {
+                /* Get SI unit modifiers */
                 ArrayList<String> modifiers = null;
                 if (unitModel.isUnitSymbol())
                     modifiers = (ArrayList) tagger.unitModifiers.get("symbol").clone();

@@ -1,12 +1,10 @@
 package edu.utsa.tagger.gui;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
-import edu.utsa.tagger.AbstractTagModel;
-import edu.utsa.tagger.TaggedEvent;
-import edu.utsa.tagger.Tagger;
-import edu.utsa.tagger.ToggleTagMessage;
+import edu.utsa.tagger.*;
 import edu.utsa.tagger.guisupport.ITagDisplay;
 import edu.utsa.tagger.guisupport.MessageConstants;
 
@@ -150,6 +148,31 @@ public class GuiTagModel extends AbstractTagModel {
 
 	public ArrayList<AbstractTagModel> getAttributes() {
 		return attributes;
+	}
+
+	/**
+	 * Get all units associated with the unit classes of this tag
+	 * @return	an array of all units associated with this tag
+	 */
+	public String[] getUnits() {
+		// Get list of unit classes associated with this tag
+		String[] unitClassArray = Tagger.trimStringArray(getUnitClass().split(","));
+		String[] unitsArray = {}; // all units from all unit classes applied to the tag
+		// Retrieve units of each unit classes and put them into unitsArray
+		// content of unitComboBox will be populated using unitsArray
+		for (int i = 0; i < unitClassArray.length; i++) {
+			if (!unitClassArray[i].isEmpty() && tagger.unitClasses.get(unitClassArray[i]) != null) {
+				// get units of the class and put them into a String array (unitStrings) of unit names
+				List<UnitXmlModel> units = tagger.unitClasses.get(unitClassArray[i]);
+				String[] unitStrings = new String[units.size()];
+				int j = 0;
+				for (UnitXmlModel unit : units) {
+					unitStrings[j++] = unit.getName();
+				}
+				unitsArray = Tagger.concat(unitsArray, unitStrings);
+			}
+		}
+		return unitsArray;
 	}
 
 	public boolean isCollapsable() {
