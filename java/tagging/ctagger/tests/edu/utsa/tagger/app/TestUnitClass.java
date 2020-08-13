@@ -21,16 +21,17 @@ import static org.junit.Assert.*;
  */
 public class TestUnitClass {
     private TestSetup setup;
+    private Tagger tagger;
     private String[] possibleUnits = {"cm","m"};
     @Before
     public void setUp() {
         setup = new TestSetup();
+        tagger = setup.getTestTagger();
+        tagger.loadHED(setup.getHedXML()); // Tagger.createUnitModifierHashMapFromXml is called
     }
 
     @Test
     public void testGetUnitModifiers() {
-        Tagger tagger = setup.getTestTagger();
-        tagger.loadHED(setup.getHedXML()); // Tagger.createUnitModifierHashMapFromXml is called
         // modifiers as of HED7.1.1
         String[] unitModifiers = {"deca", "hecto", "kilo", "mega", "giga", "tera", "peta", "exa", "zetta", "yotta", "deci", "centi", "milli", "micro", "nano", "pico", "femto","atto","zepto","yocto"};
         String[] unitSymbolModifiers = {"da", "h", "k", "M", "G", "T", "P", "E", "Z", "Y", "d", "c", "m", "u", "n", "p", "f","a","z","y"};
@@ -40,8 +41,6 @@ public class TestUnitClass {
 
     @Test
     public void testGetUnitClasses() {
-        Tagger tagger = setup.getTestTagger();
-        tagger.loadHED(setup.getHedXML()); // Tagger.createUnitModifierHashMapFromXml is called
         // Event/Duration --> time unitClass
         GuiTagModel durationTag = (GuiTagModel) tagger.getTagModel("Event/Duration/#");
         assertEquals("time", durationTag.getUnitClass());
@@ -74,21 +73,43 @@ public class TestUnitClass {
     }
 
     @Test
-    public void testValidateNumericValue() {
-        int max = 100000, min = -100000;
-        String randNum = "" + ((Math.random() * ((max - min) + 1)) + min);
-        String[] possibleValues = {randNum,"abcd","a1b","2a4"};
+    public void testInputValidation() {
+        // Test GuiTagModel.validateInput()
+        // Event/Duration --> time unitClass
+        GuiTagModel durationTag = (GuiTagModel) tagger.getTagModel("Event/Duration/#");
+        assertEquals(durationTag.validateInput("12", "ms"), "12 ms");
+        assertNull(durationTag.validateInput("word", "s"));
+
+        // Item/2D shape/Clock face/# --> time unitClass
+        GuiTagModel clockFaceTag = (GuiTagModel) tagger.getTagModel("Item/2D shape/Clock face/#");
+        assertNull(clockFaceTag.validateInput("24:54","hour:min"));
+        assertNull(clockFaceTag.validateInput("word","hour:min"));
+        assertNull(clockFaceTag.validateInput("30:04", "hour:min"));
+        assertEquals(clockFaceTag.validateInput("23:54", "hour:min"), "23:54 hour:min");
+        assertEquals(clockFaceTag.validateInput("03:54", "hour:min"), "03:54 hour:min");
+
+        assertNull(clockFaceTag.validateInput("24:54","hour:min:sec"));
+        assertNull(clockFaceTag.validateInput("word","hour:min:sec"));
+        assertNull(clockFaceTag.validateInput("30:04", "hour:min:sec"));
+        assertNull(clockFaceTag.validateInput("03:04:60", "hour:min:sec"));
+        assertEquals(clockFaceTag.validateInput("23:54:04", "hour:min:sec"), "23:54:04 hour:min:sec");
+        assertEquals(clockFaceTag.validateInput("03:54:59", "hour:min:sec"), "03:54:59 hour:min:sec");
     }
     /* Test all events */
     @Test
-    public void testOKButton() {
-        /*
-        What do we want when an Ok button is pressed in AddValue View?
-        1. Validate input depending on the attribute of the tag
-            - If isNumeric tag, validate unit
-            -
-        2. Accept input value and save it to the event
-         */
+    public void testGUI() {
+        // Test that both event tag search view and schema view show unit options correctly
+        // Event/Duration --> time unitClass
+        GuiTagModel durationTag = (GuiTagModel) tagger.getTagModel("Event/Duration/#");
+
+        // Item/2D shape/Clock face/# --> time unitClass
+        GuiTagModel clockFaceTag = (GuiTagModel) tagger.getTagModel("Item/2D shape/Clock face/#");
+
+        // Attribute/Temporal rate/# --> frequency unitClass
+        GuiTagModel temporalRateTag = (GuiTagModel) tagger.getTagModel("Attribute/Temporal rate/#");
+
+        // Attribute/Direction/Bottom/# --> angle unitClass
+        GuiTagModel directionTag = (GuiTagModel) tagger.getTagModel("Attribute/Direction/Bottom/#");
     }
 
     @Test
