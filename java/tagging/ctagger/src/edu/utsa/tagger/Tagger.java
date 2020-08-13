@@ -596,6 +596,9 @@ public class Tagger {
         this.sortRRTags();
     }
 
+    /*
+    Get tags from XML file
+     */
     private int populateTagSets(String path, Set<TagXmlModel> tagXmlModels, int level) {
         this.tagLevel = Math.max(this.tagLevel, level);
         ++level;
@@ -1261,6 +1264,8 @@ public class Tagger {
         return this.recommendedTags;
     }
 
+    public HashMap<String, ArrayList<String>> getUnitModifiers() { return this.unitModifiers; };
+
     public String getRedoMessage() {
         return this.history.getRedoMessage();
     }
@@ -1520,6 +1525,17 @@ public class Tagger {
     public boolean loadHED(File hedFile) {
         try {
             HedXmlModel hedXmlModel = this.readHEDFile(hedFile);
+            this.populateTagList(hedXmlModel);
+            return true;
+        } catch (Exception var3) {
+            System.err.println("Unable to load HED XML:\n" + var3.getMessage());
+            return false;
+        }
+    }
+
+    public boolean loadHED(String hedString) {
+        try {
+            HedXmlModel hedXmlModel = this.readHEDString(hedString);
             this.populateTagList(hedXmlModel);
             return true;
         } catch (Exception var3) {

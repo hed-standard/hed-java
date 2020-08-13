@@ -1545,6 +1545,7 @@ public class TaggerView extends ConstraintContainer {
         }
     }
 
+    /*** support methods for updateEventsPanel. Add (nested) groups and other tags ***/
     private int addOtherTagsByGroupTree(TaggedEvent taggedEvent, int top) {
         JLabel label = new JLabel("Other tags") {
             @Override

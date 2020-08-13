@@ -5,10 +5,9 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
- * This class is an XML model corresponding to a tag in the HED hierarchy.
- * 
- * @author Lauren Jett, Rebecca Strautman, Thomas Rognon, Jeremy Cockfield, Kay
- *         Robbins
+ * This class is an XML model corresponding to a <unit> in the <unitClasses> definition of the HED Schema
+ *
+ * @author Dung Truong
  */
 @XmlType(propOrder = {}, name = "unit")
 @XmlAccessorType(XmlAccessType.FIELD)
