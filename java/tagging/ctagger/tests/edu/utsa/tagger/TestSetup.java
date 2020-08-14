@@ -50,7 +50,7 @@ public class TestSetup {
         eventsOld = TestUtilities.getResourceAsString(TestUtilities.JsonEventsArrays);
         factory = new GuiModelFactory();
         TaggerLoader loader = new TaggerLoader(hedXML, eventsOld, TaggerLoader.USE_JSON, "Tagger Test - JSON Events", 3, factory);
-        testTagger = new Tagger(factory, loader);
+        testTagger = new Tagger(hedXML, eventsOld, factory, loader);
         TaggerSet<TaggedEvent> egtSet = testTagger.getEventSet();
         testEvent1 = egtSet.get(0);
         testEvent2 = egtSet.get(1);
