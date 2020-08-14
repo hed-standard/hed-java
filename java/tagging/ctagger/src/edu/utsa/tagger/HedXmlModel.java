@@ -25,11 +25,14 @@ public class HedXmlModel {
 	private Set<TagXmlModel> node;
 	@XmlElement
 	private UnitClassesXmlModel unitClasses;
+	@XmlElement
+	private UnitModifiersXmlModel unitModifiers;
 
 	public HedXmlModel() {
 		version = new String();
 		node = new LinkedHashSet<TagXmlModel>();
 		unitClasses = new UnitClassesXmlModel();
+		unitModifiers = new UnitModifiersXmlModel();
 	}
 
 	public Set<TagXmlModel> getTags() {
@@ -43,6 +46,8 @@ public class HedXmlModel {
 	public UnitClassesXmlModel getUnitClasses() {
 		return unitClasses;
 	}
+
+	public UnitModifiersXmlModel getUnitModifiers() {return unitModifiers;}
 
 	public void setTags(Set<TagXmlModel> tags) {
 		this.node = tags;

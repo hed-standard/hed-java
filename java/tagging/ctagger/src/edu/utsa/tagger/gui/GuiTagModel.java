@@ -1,11 +1,10 @@
 package edu.utsa.tagger.gui;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
-import edu.utsa.tagger.AbstractTagModel;
-import edu.utsa.tagger.TaggedEvent;
-import edu.utsa.tagger.Tagger;
-import edu.utsa.tagger.ToggleTagMessage;
+import edu.utsa.tagger.*;
 import edu.utsa.tagger.guisupport.ITagDisplay;
 import edu.utsa.tagger.guisupport.MessageConstants;
 
@@ -43,6 +42,7 @@ public class GuiTagModel extends AbstractTagModel {
 	public static final int SELECTION_STATE_NONE = 0;
 	public static final int SELECTION_STATE_MIXED = 1;
 	public static final int SELECTION_STATE_ALL = 2;
+	private ArrayList<AbstractTagModel> attributes;
 
 	public GuiTagModel(final Tagger tagger) {
 		this.tagger = tagger;
@@ -140,6 +140,39 @@ public class GuiTagModel extends AbstractTagModel {
 			tagView = new TagView(tagger, appView, this);
 		}
 		return tagView;
+	}
+
+	public TaggerView getAppView() {return appView;}
+
+	public Tagger getTagger() {return tagger;}
+
+	public ArrayList<AbstractTagModel> getAttributes() {
+		return attributes;
+	}
+
+	/**
+	 * Get all units associated with the unit classes of this tag
+	 * @return	an array of all units associated with this tag
+	 */
+	public String[] getUnits() {
+		// Get list of unit classes associated with this tag
+		String[] unitClassArray = Tagger.trimStringArray(getUnitClass().split(","));
+		String[] unitsArray = {}; // all units from all unit classes applied to the tag
+		// Retrieve units of each unit classes and put them into unitsArray
+		// content of unitComboBox will be populated using unitsArray
+		for (int i = 0; i < unitClassArray.length; i++) {
+			if (!unitClassArray[i].isEmpty() && tagger.unitClasses.get(unitClassArray[i]) != null) {
+				// get units of the class and put them into a String array (unitStrings) of unit names
+				List<UnitXmlModel> units = tagger.unitClasses.get(unitClassArray[i]);
+				String[] unitStrings = new String[units.size()];
+				int j = 0;
+				for (UnitXmlModel unit : units) {
+					unitStrings[j++] = unit.getName();
+				}
+				unitsArray = Tagger.concat(unitsArray, unitStrings);
+			}
+		}
+		return unitsArray;
 	}
 
 	public boolean isCollapsable() {
@@ -241,12 +274,51 @@ public class GuiTagModel extends AbstractTagModel {
 		this.missing = missing;
 	}
 
+	public void setAttributes(ArrayList<AbstractTagModel> list) {
+		attributes = list;
+	}
+
 	/**
 	 * Updates whether the tag is missing from the hierarchy.
 	 */
 	public void updateMissing() {
         this.tagger.updateMissing(this);
     }
+
+    public String validateInput(String typedText, String unitString) {
+		if (isNumeric()) {
+			typedText = validateNumericValue(typedText.trim(), unitString);
+		} else if (hasUnit() && getUnitClass().equals("clockTime")) {
+			boolean valid = false;
+			if (unitString.equals("hour:min")) {
+				valid = typedText.matches("^(2[0-3]|[01]?[0-9]):([0-5]?[0-9])$");
+			}
+			else if (unitString.equals("hour:min:sec"))
+				valid = typedText.matches("^(2[0-3]|[01]?[0-9]):([0-5]?[0-9]):([0-5]?[0-9])$");
+			if (!valid)
+				typedText = null;
+			else
+				typedText = typedText + " " + unitString;
+		}
+		return typedText;
+	}
+
+	/**
+	 * Validates numerical value
+	 *
+	 * @param numericValue
+	 *            A numerical value
+	 * @param unit
+	 *            Unit The unit associated with numerical value
+	 * @return Null if invalid, numerical value with unit appended if valid
+	 */
+	private String validateNumericValue(String numericValue, String unit) {
+		if (numericValue.matches("^-?[0-9]+(\\.[0-9]+)?$") || numericValue.matches("^-\\.[0-9]+$"))
+			numericValue = numericValue + " " + unit;
+		else
+			numericValue = null;
+		return numericValue;
+	}
 
 
 }

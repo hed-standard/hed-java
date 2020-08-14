@@ -14,9 +14,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.font.TextAttribute;
 import java.awt.geom.Rectangle2D;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
@@ -30,6 +28,7 @@ import javax.swing.event.DocumentListener;
 
 import edu.utsa.tagger.AbstractTagModel;
 import edu.utsa.tagger.Tagger;
+import edu.utsa.tagger.UnitXmlModel;
 import edu.utsa.tagger.guisupport.*;
 import org.junit.Test;
 
@@ -180,12 +179,19 @@ public class AddValueView extends ConstraintContainer {
 		String[] unitsArray = {};
 		for (int i = 0; i < unitClassArray.length; i++) {
 			if (tagger.unitClasses.get(unitClassArray[i]) != null) {
-				String[] units = Tagger.trimStringArray(tagger.unitClasses.get(
-						unitClassArray[i]).split(","));
-				unitsArray = Tagger.concat(unitsArray, units);
+				List<UnitXmlModel> units = tagger.unitClasses.get(unitClassArray[i]);
+				String[] unitStrings = new String[units.size()];
+				int j = 0;
+				for (UnitXmlModel unit : units) {
+					unitStrings[j++] = unit.getName();
+				}
+				unitsArray = Tagger.concat(unitsArray, unitStrings);
+//				String[] units = Tagger.trimStringArray(tagger.unitClasses.get(
+//						unitClassArray[i]).split(","));
+//				unitsArray = Tagger.concat(unitsArray, units);
 			}
 		}
-		Arrays.sort(unitsArray);
+//		Arrays.sort(unitsArray);
 		units.setModel(new DefaultComboBoxModel(unitsArray));
 		setDefaultUnit();
 	}
@@ -375,7 +381,7 @@ public class AddValueView extends ConstraintContainer {
 	}
 
 	private void handleCancel() {
-        this.tagModel.setInAddValue(false);
+//        this.tagModel.setInAddValue(false);
         if (this.tagger.isHEDVersionTag(this.tagModel)) {
             this.appView.updateTagsPanel();
             this.appView.scrollToPreviousTag();
@@ -403,7 +409,7 @@ public class AddValueView extends ConstraintContainer {
 		}
 
 		AbstractTagModel transientTag = this.tagger.createTransientTagModel(this.tagModel, valueStr);
-		this.tagModel.setInAddValue(false);
+//		this.tagModel.setInAddValue(false);
 		if (this.tagger.isHEDVersionTag(this.tagModel)) {
 			this.handleHEDTag(transientTag);
 			return;

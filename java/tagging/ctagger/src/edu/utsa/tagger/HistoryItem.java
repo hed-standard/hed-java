@@ -7,6 +7,7 @@ import java.util.TreeMap;
 
 import edu.utsa.tagger.TaggerHistory.Type;
 import edu.utsa.tagger.gui.GuiTagModel;
+import edu.utsa.tagger.GroupTree.GroupNode;
 
 /**
  * This class represents an action performed in the Tagger that can be undone.
@@ -29,6 +30,8 @@ public class HistoryItem {
 	public TaggedEvent event;
 	public TaggerSet<TaggedEvent> events;
 	public Integer groupId;
+	public GroupNode groupNode;
+	public HashMap<TaggedEvent, GroupNode> eventGroupNodeHashMap;
 	public TaggerSet<Integer> groupIds;
 	public TaggerSet<AbstractTagModel> tags;
 	public HashMap<TaggedEvent, TreeMap<Integer, TaggerSet<AbstractTagModel>>> tagMap;

@@ -8,10 +8,14 @@ package edu.utsa.tagger;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import edu.utsa.tagger.TagXmlModel.PredicateType;
 import edu.utsa.tagger.TaggerHistory.Type;
+import edu.utsa.tagger.GroupTree.GroupNode;
 import edu.utsa.tagger.gui.GuiEventModel;
 import edu.utsa.tagger.gui.GuiTagModel;
 import edu.utsa.tagger.gui.GuiTagModel.Highlight;
@@ -23,6 +27,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -56,7 +61,8 @@ public class Tagger {
     private final String[] tsvHeader = new String[]{"Event code", "Event category", "Event label", "Event long name", "Event description", "Other tags"};
     private TaggerSet<AbstractTagModel> uniqueTags = new TaggerSet();
     public HashMap<String, String> unitClassDefaults = new HashMap();
-    public HashMap<String, String> unitClasses = new HashMap();
+    public HashMap<String, List<UnitXmlModel>> unitClasses = new HashMap();
+    public HashMap<String, ArrayList<String>> unitModifiers = new HashMap();
     private String hedVersion = "";
 
     public static String[] concat(String[] s1, String[] s2) {
@@ -161,6 +167,13 @@ public class Tagger {
         return this.eventList.add(event);
     }
 
+    /**
+     * Add a new group to the taggedEvent and also add tags to that group
+     * @param taggedEvent the event in which the new group and tags will be added
+     * @param groupId id of the new group
+     * @param tags tags to be added to the new group identified by groupId
+     * @return true if new group and tags were successfully added. false otherwise
+     */
     public boolean addGroupBase(TaggedEvent taggedEvent, Integer groupId, TaggerSet<AbstractTagModel> tags) {
         if (!taggedEvent.addGroup(groupId)) {
             return false;
@@ -176,6 +189,43 @@ public class Tagger {
         }
     }
 
+    /**
+     * Add a new group to the taggedEvent also nested groups (if has) and their tags to that group
+     * @param taggedEvent the event in which the new group and tags will be added
+     * @param groupNode groupNode containing group to be added to the taggedEvent
+     * @return true if new group and tags were successfully added. false otherwise
+     */
+    public boolean addGroupBase(TaggedEvent taggedEvent, GroupNode groupNode) {
+        ArrayList<GroupNode> stack = new ArrayList<>();
+        stack.add(groupNode);
+        while (!stack.isEmpty()) {
+            GroupNode node = stack.remove(0);
+            if (!taggedEvent.addGroup(node.getParentId(), node.getGroupId())) {
+                return false;
+            } else {
+                for (AbstractTagModel tag : node.getTags()) {
+                    taggedEvent.addTagToGroup(node.getGroupId(), tag);
+                }
+            }
+            if (node.hasChildren())
+                stack.addAll(node.getChildren());
+        }
+        return true;
+    }
+    public boolean addNestedGroupWithTags(TaggedEvent taggedEvent, Integer parentGroupId, Integer groupId, TaggerSet<AbstractTagModel> tags) {
+        if (!taggedEvent.addGroup(parentGroupId,groupId)) {
+            return false;
+        } else {
+            Iterator var5 = tags.iterator();
+
+            while(var5.hasNext()) {
+                AbstractTagModel tag = (AbstractTagModel)var5.next();
+                taggedEvent.addTagToGroup(groupId, tag);
+            }
+
+            return true;
+        }
+    }
     public TaggedEvent addNewEvent(String code, String label) {
         GuiEventModel eventModel = (GuiEventModel)this.factory.createAbstractEventModel(this);
         eventModel.setCode(code);
@@ -200,7 +250,7 @@ public class Tagger {
 
     public int addNewGroup(TaggedEvent taggedEvent) {
         int groupId = groupIdCounter++;
-        if (taggedEvent.addGroup(groupId)) {
+        if (taggedEvent.addGroup(taggedEvent.getEventLevelId(), groupId)) {
             HistoryItem historyItem = new HistoryItem();
             historyItem.type = Type.GROUP_ADDED;
             historyItem.event = taggedEvent;
@@ -212,23 +262,24 @@ public class Tagger {
         return groupId;
     }
 
-    public Set<Integer> addNewGroups(Set<Integer> eventIds) {
-        TaggerSet<Integer> newEventGroupIds = new TaggerSet();
-        TaggerSet<TaggedEvent> selectedEvents = new TaggerSet();
+    /**
+     * Add new group(s) to selected events identified by eventIds
+     * @param selectedIds list of selected events IDs
+     * @return list of ids of new groups
+     */
+    public Set<Integer> addNewGroups(Set<Integer> selectedIds) {
+        TaggerSet<Integer> newEventGroupIds = new TaggerSet(); // id(s) of new group(s)
+        TaggerSet<TaggedEvent> selectedEvents = new TaggerSet(); // list of selected TaggedEvent. TaggedEvent equivalent of eventIds
         TaggerSet<AbstractTagModel> tags = new TaggerSet();
         boolean eventSelected = false;
-        Iterator var7 = eventIds.iterator();
-
-        while(var7.hasNext()) {
-            Integer eventId = (Integer)var7.next();
-            Iterator var9 = this.eventList.iterator();
-
-            while(var9.hasNext()) {
-                TaggedEvent event = (TaggedEvent)var9.next();
-                if (eventId == event.getEventLevelId()) {
+        TreeMap<Integer, Integer> parentChildrenMap = new TreeMap<>(); // map that keeps track of which groupId add to which parent groupId
+        for (TaggedEvent event : eventList) {
+            for (int id : selectedIds) {
+                if (event.containsGroup(id)) {
                     selectedEvents.add(event);
                     ++groupIdCounter;
-                    event.addGroup(groupIdCounter);
+                    event.addGroup(id, groupIdCounter);
+                    parentChildrenMap.put(id, groupIdCounter);
                     newEventGroupIds.add(groupIdCounter);
                     eventSelected = true;
                 }
@@ -387,49 +438,104 @@ public class Tagger {
         return affectedGroups;
     }
 
+    /**
+     * Build data model to pass to json writer
+     */
     private Set<EventJsonModel> buildEventJsonModels() {
         Set<EventJsonModel> result = new LinkedHashSet();
-        Iterator var3 = this.eventList.iterator();
 
-        while(var3.hasNext()) {
-            TaggedEvent event = (TaggedEvent)var3.next();
+        for (TaggedEvent event : eventList) {
             EventJsonModel jsonEvent = new EventJsonModel();
             jsonEvent.setCode(event.getEventModel().getCode());
             List<List<String>> tags = new ArrayList();
-            Iterator var7 = event.getTagGroups().entrySet().iterator();
 
-            while(true) {
-                while(var7.hasNext()) {
-                    Entry<Integer, TaggerSet<AbstractTagModel>> entry = (Entry)var7.next();
-                    if ((Integer)entry.getKey() == event.getEventLevelId()) {
-                        Iterator var13 = ((TaggerSet)entry.getValue()).iterator();
-
-                        while(var13.hasNext()) {
-                            AbstractTagModel tag = (AbstractTagModel)var13.next();
-                            ArrayList<String> eventTags = new ArrayList();
-                            eventTags.add(tag.getPath());
-                            tags.add(eventTags);
-                        }
-                    } else {
-                        ArrayList<String> groupTags = new ArrayList();
-                        Iterator var10 = ((TaggerSet)entry.getValue()).iterator();
-
-                        while(var10.hasNext()) {
-                            AbstractTagModel tag = (AbstractTagModel)var10.next();
-                            groupTags.add(tag.getPath());
-                        }
-
-                        tags.add(groupTags);
+            for (Entry<Integer, TaggerSet<AbstractTagModel>> entry : event.getTagGroups().entrySet()) {
+                if ((Integer)entry.getKey() == event.getEventLevelId()) { // If top-level ID
+                    for (AbstractTagModel tag : entry.getValue()) {
+                        ArrayList<String> eventTags = new ArrayList();
+                        eventTags.add(tag.getPath());
+                        tags.add(eventTags); // eventTags only has one tag
                     }
+                } else {
+                    ArrayList<String> groupTags = new ArrayList();
+                    for (AbstractTagModel tag : entry.getValue()) {
+                        groupTags.add(tag.getPath());
+                    }
+                    tags.add(groupTags); // groupTags has multiple tags
                 }
-
-                jsonEvent.setTags(tags);
-                result.add(jsonEvent);
-                break;
             }
+            jsonEvent.setTags(tags);
+            result.add(jsonEvent);
         }
 
         return result;
+    }
+
+    /**
+     * Build data model to pass to json writer
+     */
+    private JsonNode buildEventJsonNode() {
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode root = mapper.createArrayNode();
+
+        for (TaggedEvent event : eventList) {
+//            EventJsonModel jsonEvent = new EventJsonModel();
+            JsonNode eventJsonNode = mapper.createObjectNode();
+            ((ObjectNode)eventJsonNode).put("code",event.getEventModel().getCode());
+//            ((ArrayNode)root).add(event.getEventModel().getCode());
+            TreeMap<Integer, TaggerSet<AbstractTagModel>> tagGroups = event.getTagGroups();
+            GroupTree.GroupNode eventRootNode = event.getEventNode();
+            ((ObjectNode)eventJsonNode).put("tags",addGroupNode(eventRootNode, tagGroups, mapper));
+            ((ArrayNode)root).add(eventJsonNode);
+
+
+//            for (GroupTree.GroupNode groupNode : event.)
+//            for (Entry<Integer, TaggerSet<AbstractTagModel>> entry : event.getTagGroups().entrySet()) {
+//                if ((Integer)entry.getKey() == event.getEventLevelId()) { // If top-level ID
+//                    for (AbstractTagModel tag : entry.getValue()) {
+//                        ArrayList<String> eventTags = new ArrayList();
+//                        eventTags.add(tag.getPath());
+//                        tags.add(eventTags); // eventTags only has one tag
+//                    }
+//                } else {
+//                    ArrayList<String> groupTags = new ArrayList();
+//                    for (AbstractTagModel tag : entry.getValue()) {
+//                        groupTags.add(tag.getPath());
+//                    }
+//                    tags.add(groupTags); // groupTags has multiple tags
+//                }
+//            }
+//            ((ObjectNode)eventNode).put("tags", tags);
+////            jsonEvent.setTags(tags);
+//            ((ArrayNode)root).add(eventNode);
+        }
+
+        return root;
+    }
+    private ArrayNode addGroupNode(GroupTree.GroupNode node, TreeMap<Integer, TaggerSet<AbstractTagModel>> tagGroups, ObjectMapper mapper) {
+        TaggerSet<AbstractTagModel> tagSet = tagGroups.get(node.getGroupId());
+        ArrayNode jsonNode = mapper.createArrayNode();
+        for (AbstractTagModel tag : tagSet) {
+            ArrayList<AbstractTagModel> attributes = ((GuiTagModel)tag).getAttributes();
+            if (attributes == null)
+                jsonNode.add(tag.getPath());
+            else {
+                ObjectNode tagAttributeNode = mapper.createObjectNode();
+                tagAttributeNode.put("mainTag", tag.getPath());
+                ArrayNode attributeNode = mapper.createArrayNode();
+                for (AbstractTagModel attr : attributes) {
+                    attributeNode.add(attr.getPath());
+                }
+                tagAttributeNode.put("attributes", attributeNode);
+                jsonNode.add(tagAttributeNode);
+            }
+        }
+        for (GroupTree.GroupNode child : node.getChildren()) {
+            ArrayNode childJsonNode = addGroupNode(child, tagGroups, mapper);
+            if (childJsonNode != null)
+                jsonNode.add(childJsonNode);
+        }
+        return jsonNode;
     }
 
     private TaggerDataXmlModel buildSavedDataModel() {
@@ -490,6 +596,9 @@ public class Tagger {
         this.sortRRTags();
     }
 
+    /*
+    Get tags from XML file
+     */
     private int populateTagSets(String path, Set<TagXmlModel> tagXmlModels, int level) {
         this.tagLevel = Math.max(this.tagLevel, level);
         ++level;
@@ -591,7 +700,27 @@ public class Tagger {
             this.unitClasses.put(unitClassXmlModel.getName(), unitClassXmlModel.getUnits());
             this.unitClassDefaults.put(unitClassXmlModel.getName(), unitClassXmlModel.getDefault());
         }
+    }
 
+    /**
+     * generate a hashmap of unit modifiers.
+     * @param unitModifiersXmlModel HashMap of unit modifiers. Contains 2 key-value paris:
+     *                                  symbolModifier key is associated with list of unit modifiers for SI unit SYMBOL
+     *                                  unitModifier key is associated with list of unit modifiers for full-letter SI units
+     */
+    private void createUnitModifierHashMapFromXml(UnitModifiersXmlModel unitModifiersXmlModel) {
+        unitModifiers.put("symbol", new ArrayList<String>());
+        unitModifiers.put("unit", new ArrayList<String>());
+        for (UnitModifierXmlModel mod : unitModifiersXmlModel.getUnitModifiers()) {
+            if (mod.isSIUnitSymbolModifier()) {
+                ArrayList<String> units = (ArrayList<String>)unitModifiers.get("symbol");
+                units.add(mod.getName());
+            }
+            else {
+                ArrayList<String> units = (ArrayList<String>) unitModifiers.get("unit");
+                units.add(mod.getName());
+            }
+        }
     }
 
     public void deleteTag(AbstractTagModel tag) {
@@ -1109,7 +1238,8 @@ public class Tagger {
     }
 
     public String getJSONString() {
-        Set<EventJsonModel> eventJsonModels = this.buildEventJsonModels();
+//        Set<EventJsonModel> eventJsonModels = this.buildEventJsonModels();
+        JsonNode eventJsonModels = this.buildEventJsonNode();
         StringWriter sw = new StringWriter();
         ObjectMapper mapper = new ObjectMapper();
         ObjectWriter writer = mapper.writerWithDefaultPrettyPrinter();
@@ -1133,6 +1263,8 @@ public class Tagger {
     public TaggerSet<AbstractTagModel> getRecommendedTags() {
         return this.recommendedTags;
     }
+
+    public HashMap<String, ArrayList<String>> getUnitModifiers() { return this.unitModifiers; };
 
     public String getRedoMessage() {
         return this.history.getRedoMessage();
@@ -1393,6 +1525,17 @@ public class Tagger {
     public boolean loadHED(File hedFile) {
         try {
             HedXmlModel hedXmlModel = this.readHEDFile(hedFile);
+            this.populateTagList(hedXmlModel);
+            return true;
+        } catch (Exception var3) {
+            System.err.println("Unable to load HED XML:\n" + var3.getMessage());
+            return false;
+        }
+    }
+
+    public boolean loadHED(String hedString) {
+        try {
+            HedXmlModel hedXmlModel = this.readHEDString(hedString);
             this.populateTagList(hedXmlModel);
             return true;
         } catch (Exception var3) {
@@ -1739,6 +1882,7 @@ public class Tagger {
         }
 
         this.createUnitClassHashMapFromXml(hedXmlModel.getUnitClasses());
+        this.createUnitModifierHashMapFromXml(hedXmlModel.getUnitModifiers());
         this.createTagSets(hedXmlModel.getTags());
     }
 
@@ -1811,19 +1955,19 @@ public class Tagger {
 
     public void removeGroup(int groupId) {
         TaggedEvent taggedEvent = this.getTaggedEventFromGroupId(groupId);
-        TaggerSet<AbstractTagModel> tagsRemoved = this.removeGroupBase(taggedEvent, groupId);
-        if (tagsRemoved != null) {
+        GroupNode removed = this.removeGroupBase(taggedEvent, groupId);
+        if (removed != null) {
             HistoryItem historyItem = new HistoryItem();
             historyItem.type = Type.GROUP_REMOVED;
             historyItem.event = taggedEvent;
             historyItem.groupId = groupId;
-            historyItem.tags = tagsRemoved;
+            historyItem.groupNode = removed;
             this.history.add(historyItem);
         }
 
     }
 
-    public TaggerSet<AbstractTagModel> removeGroupBase(TaggedEvent event, Integer groupId) {
+    public GroupNode removeGroupBase(TaggedEvent event, Integer groupId) {
         return event.removeGroup(groupId);
     }
 
@@ -1839,7 +1983,8 @@ public class Tagger {
 
     public boolean save(File egtFile, File hedFile, boolean json) {
         if (json) {
-            Set<EventJsonModel> eventJsonModels = this.buildEventJsonModels();
+//            Set<EventJsonModel> eventJsonModels = this.buildEventJsonModels();
+            JsonNode eventJsonModels = this.buildEventJsonNode();
             ObjectMapper mapper = new ObjectMapper();
             ObjectWriter writer = mapper.writerWithDefaultPrettyPrinter();
 
@@ -2292,7 +2437,7 @@ public class Tagger {
             String key = (String)unitClassKeys.next();
             UnitClassXmlModel unitClassXml = new UnitClassXmlModel();
             unitClassXml.setName(key);
-            unitClassXml.setUnits((String)this.unitClasses.get(key));
+            unitClassXml.setUnits((UnitsXmlModel) this.unitClasses.get(key));
             unitClassXml.setDefault((String)this.unitClassDefaults.get(key));
             unitClassesXml.addUnitClass(unitClassXml);
         }

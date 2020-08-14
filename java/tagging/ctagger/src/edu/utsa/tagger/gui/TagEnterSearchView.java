@@ -23,7 +23,7 @@ public class TagEnterSearchView extends TagSearchView {
     public void mouseClickedEvent(Tagger tagger, TaggerView appView) {
         if (getModel().takesValue()){
             TagValueInputDialog dialog = new TagValueInputDialog(eventEnterTagView, this);
-            dialog.setVisible(true);
+//            dialog.setVisible(true);
         }
         else
             addTagToEvent();
