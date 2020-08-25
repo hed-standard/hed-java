@@ -54,7 +54,7 @@ public class TaggerView extends ConstraintContainer {
 //            return FontsAndColors.buttonFont;
 //        }
 //    };
-    private boolean autoCollapse = false;
+    private boolean autoCollapse = true;
     private int autoCollapseDepth;
     //private XButton exit = createMenuButton("go exit");
     private XButton cancel = createMenuButton("Cancel");
@@ -622,28 +622,23 @@ public class TaggerView extends ConstraintContainer {
         this.searchResultsScrollPane.setVisible(false);
         this.tagsPanel.removeAll();
         String lastVisibleTagPath = null;
+        /* addValueTag contains tag that is in addValueView in the TagsPanel
+           this implementation is to merge the legacy AddValueView with TagValueInputDialog */
+        GuiTagModel addValueTag = null;
 
-        Iterator var3 = this.tagger.getTagSet().iterator();
-        while (true) {
-            AbstractTagModel tagModel;
-            GuiTagModel guiTagModel;
-            do {
-                if (!var3.hasNext()) {
-                    this.autoCollapse = false;
-//                    validate();
-//                    repaint();
-                    return;
-                }
-
-                tagModel = (AbstractTagModel) var3.next();
-                guiTagModel = (GuiTagModel) tagModel;
+        for (AbstractTagModel tagModel : tagger.getTagSet()) {
+            GuiTagModel guiTagModel = (GuiTagModel) tagModel;
                 guiTagModel.setAppView(this);
                 guiTagModel.setCollapsable(this.tagger.hasChildTags(guiTagModel));
+            // if collapse button/option was used
                 if (guiTagModel.isCollapsable() && this.autoCollapse) {
-                    guiTagModel.setCollapsed(guiTagModel.getDepth() > this.autoCollapseDepth);
+                guiTagModel.setCollapsed(guiTagModel.getDepth() > this.autoCollapseDepth); // depth defined by the Level in GUI
                 }
-            } while (lastVisibleTagPath != null && tagModel.getPath().startsWith(lastVisibleTagPath));
-
+            // skip tags until the next tag with new parent
+            if (lastVisibleTagPath != null && tagModel.getPath().startsWith(lastVisibleTagPath)) {
+                continue;
+            }
+            // either a new collapsed tag or null
             lastVisibleTagPath = guiTagModel.isCollapsed() ? guiTagModel.getPath() : null;
             guiTagModel.getTagView().update();
             this.tagsPanel.add(guiTagModel.getTagView());
@@ -653,9 +648,14 @@ public class TaggerView extends ConstraintContainer {
             }
 
             if (guiTagModel.isInAddValue()) {
-                this.tagsPanel.add(guiTagModel.getAddValueView());
+                addValueTag = guiTagModel;
+//                this.tagsPanel.add(guiTagModel.getAddValueView());  // legacy AddValueView implementation (add a new view to the TagPanel for value input)
             }
         }
+
+        autoCollapse = false;
+        validate();
+        repaint();
     }
 
     public void updateEventsPanel() {
@@ -1539,6 +1539,7 @@ public class TaggerView extends ConstraintContainer {
         }
     }
 
+    /*** support methods for updateEventsPanel. Add (nested) groups and other tags ***/
     private int addOtherTagsByGroupTree(TaggedEvent taggedEvent, int top) {
         JLabel label = new JLabel("Other tags") {
             @Override
@@ -2181,6 +2182,7 @@ public class TaggerView extends ConstraintContainer {
             return;
         }
         HashMap<String, ArrayList<String>> report = tagger.extractTags(selectedEvents);
+        System.out.println(report);
         HashMap<String, ArrayList<String>> fullEventNameUniqueTags = new HashMap<>();
         Set<String> eventIDs = report.keySet();
         for (TaggedEvent event : tagger.getEventSet()) {
