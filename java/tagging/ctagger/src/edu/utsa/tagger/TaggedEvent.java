@@ -6,7 +6,9 @@
 package edu.utsa.tagger;
 
 import edu.utsa.tagger.gui.*;
+import edu.utsa.tagger.GroupTree.GroupNode;
 
+import java.security.acl.Group;
 import java.util.*;
 
 /**
@@ -21,6 +23,7 @@ public class TaggedEvent implements Comparable<TaggedEvent> {
     private static TaggerView appView;
     private GuiEventModel guiEventModel;
     private TreeMap<Integer, TaggerSet<AbstractTagModel>> tagGroups;
+    private GroupTree tagGroupHierarchy;
     private int eventLevelId;
     private EventView eventView;
     private HashMap<Integer, GroupView> groupViews;
@@ -36,9 +39,9 @@ public class TaggedEvent implements Comparable<TaggedEvent> {
         this.groupViews = new HashMap();
         this.tagEgtViews = new HashMap();
         this.rrTagViews = new HashMap();
+        this.tagGroupHierarchy = new GroupTree();
 //        this.eventEnterTagView = new EventEnterTagView(tagger, this);
     }
-
     /**
      * Adds an empty group with the given ID to the event.
      *
@@ -51,6 +54,28 @@ public class TaggedEvent implements Comparable<TaggedEvent> {
         if (tags == null) {
             tags = new TaggerSet();
             this.tagGroups.put(groupId, tags);
+            if (eventLevelId != groupId) // avoid duplicate root node
+                this.tagGroupHierarchy.add(eventLevelId, groupId);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Adds an empty group with the given ID to the event under selected group.
+     *
+     * @param selected  id of the group under which newGroupId will be added
+     * @param newGroupId id of the new group
+     * @return True if the group was added successfully, false if the group ID
+     *         already existed for this event.
+     */
+    public boolean addGroup(int selected, int newGroupId) {
+        TaggerSet<AbstractTagModel> tags = (TaggerSet)this.tagGroups.get(newGroupId);
+        if (tags == null) {
+            tags = new TaggerSet();
+            this.tagGroups.put(newGroupId, tags);
+            this.tagGroupHierarchy.add(selected, newGroupId);
             return true;
         } else {
             return false;
@@ -339,9 +364,18 @@ public class TaggedEvent implements Comparable<TaggedEvent> {
     public TreeMap<Integer, TaggerSet<AbstractTagModel>> getTagGroups() {
         return this.tagGroups;
     }
+    public GroupTree getTagGroupHierarchy() {
+        return tagGroupHierarchy;
+    }
+    public GroupTree.GroupNode getEventNode() {
+        return tagGroupHierarchy.getRoot();
+    }
 
     public void setTagGroups(TreeMap<Integer, TaggerSet<AbstractTagModel>> tGroup) {
         tagGroups = tGroup;
+    }
+    public void setTagGroupHierarchy(GroupTree tree) {
+        tagGroupHierarchy = tree;
     }
 
 //    public EventEnterTagView getEventEnterTagView() {return eventEnterTagView;}
@@ -363,10 +397,30 @@ public class TaggedEvent implements Comparable<TaggedEvent> {
         return this.guiEventModel.isInFirstEdit();
     }
 
-    public TaggerSet<AbstractTagModel> removeGroup(int groupId) {
-        TaggerSet<AbstractTagModel> tags = (TaggerSet)this.tagGroups.get(groupId);
-        this.tagGroups.remove(groupId);
-        return tags;
+    /**
+     * Remove group (identified by groupId) from the taggedEvent
+     * Group might contain nested children groups, each might contain tags
+     * @param groupId id of group to be removed
+     * @return GroupNode of the removed group
+     *          GroupNode contains information of nested groups and their associated tags
+     */
+    public GroupNode removeGroup(int groupId) {
+        GroupNode removedGroup = tagGroupHierarchy.remove(groupId);
+        // Save tags of removed group(s). For history item purpose
+        if (removedGroup != null) {
+            ArrayList<GroupNode> stack = new ArrayList<>();
+            stack.add(removedGroup);
+            while (!stack.isEmpty()) {
+                GroupNode node = stack.remove(0);
+                TaggerSet<AbstractTagModel> tags = (TaggerSet) this.tagGroups.get(node.getGroupId());
+                node.setTags(tags);
+                this.tagGroups.remove(node.getGroupId());
+                if (node.hasChildren()) {
+                    stack.addAll(node.getChildren());
+                }
+            }
+        }
+        return removedGroup;
     }
 
     public boolean removeTagFromGroup(int groupId, AbstractTagModel tagModel) {
@@ -417,6 +471,7 @@ public class TaggedEvent implements Comparable<TaggedEvent> {
     public void setEventLevelId(int groupId) {
         this.eventLevelId = groupId;
         this.addGroup(groupId);
+        this.tagGroupHierarchy.setRootId(groupId);
     }
 
     public void setEventModel(GuiEventModel eventModel) {

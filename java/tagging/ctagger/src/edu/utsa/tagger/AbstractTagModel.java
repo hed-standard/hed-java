@@ -1,5 +1,6 @@
 package edu.utsa.tagger;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 import edu.utsa.tagger.TagXmlModel.PredicateType;
@@ -206,4 +207,6 @@ public abstract class AbstractTagModel implements Comparable<AbstractTagModel> {
 	public boolean isNumeric() {
 		return isNumeric;
 	}
+
+	public boolean hasUnit() { return !unitClass.isEmpty(); };
 }

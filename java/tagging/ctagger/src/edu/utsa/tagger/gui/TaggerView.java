@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.security.acl.Group;
 import java.util.*;
 import java.util.List;
 
@@ -21,16 +22,11 @@ import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import edu.utsa.tagger.AbstractTagModel;
-import edu.utsa.tagger.EventModel;
-import edu.utsa.tagger.HistoryItem;
-import edu.utsa.tagger.TaggedEvent;
-import edu.utsa.tagger.Tagger;
-import edu.utsa.tagger.TaggerLoader;
-import edu.utsa.tagger.TaggerSet;
-import edu.utsa.tagger.ToggleTagMessage;
+import edu.utsa.tagger.*;
 import edu.utsa.tagger.gui.ContextMenu.ContextMenuAction;
 import edu.utsa.tagger.guisupport.*;
+import edu.utsa.tagger.GroupTree.GroupNode;
+import edu.utsa.tagger.GroupTree;
 
 /**
  * This class represents the main Tagger GUI view.
@@ -626,6 +622,9 @@ public class TaggerView extends ConstraintContainer {
         this.searchResultsScrollPane.setVisible(false);
         this.tagsPanel.removeAll();
         String lastVisibleTagPath = null;
+        /* addValueTag contains tag that is in addValueView in the TagsPanel
+           this implementation is to merge the legacy AddValueView with TagValueInputDialog */
+        GuiTagModel addValueTag = null;
 
         for (AbstractTagModel tagModel : tagger.getTagSet()) {
             GuiTagModel guiTagModel = (GuiTagModel) tagModel;
@@ -649,7 +648,8 @@ public class TaggerView extends ConstraintContainer {
             }
 
             if (guiTagModel.isInAddValue()) {
-                this.tagsPanel.add(guiTagModel.getAddValueView());
+                addValueTag = guiTagModel;
+//                this.tagsPanel.add(guiTagModel.getAddValueView());  // legacy AddValueView implementation (add a new view to the TagPanel for value input)
             }
         }
 
@@ -667,7 +667,8 @@ public class TaggerView extends ConstraintContainer {
         for (TaggedEvent taggedEvent : tagger.getEventSet()) {
             top = addEvents(taggedEvent, top);
             top = addRRTags(taggedEvent, top);
-            top = addOtherTags(taggedEvent, top);
+//            top = addOtherTags(taggedEvent, top);
+            top = addOtherTagsByGroupTree(taggedEvent, top);
         }
         // add warning to tagger view if there exists tag(s) that are not compatible with schema
         if (hasMissingTag > 0) {
@@ -1538,6 +1539,19 @@ public class TaggerView extends ConstraintContainer {
         }
     }
 
+    /*** support methods for updateEventsPanel. Add (nested) groups and other tags ***/
+    private int addOtherTagsByGroupTree(TaggedEvent taggedEvent, int top) {
+        JLabel label = new JLabel("Other tags") {
+            @Override
+            public Font getFont() {
+                return FontsAndColors.contentFont.deriveFont(Font.BOLD);
+            }
+        };
+        label.setForeground(FontsAndColors.BLUE_DARK);
+        eventsPanel.add(label, new Constraint("top:" + top + " height:20 left:5 right:105"));
+        top += 23;
+        return addGroupTree(taggedEvent, taggedEvent.getEventNode(), 0, top);
+    }
     /*** support methods for updateEventsPanel. Add groups and other tags ***/
     private int addOtherTags(TaggedEvent taggedEvent, int top) {
         JLabel label = new JLabel("Other tags") {
@@ -1587,7 +1601,52 @@ public class TaggerView extends ConstraintContainer {
 
         return top;
     }
+    private int addGroupTree(TaggedEvent taggedEvent, GroupNode node, int left, int top) {
+        top = createGroupSpace(taggedEvent, node.getGroupId(),left, top);
+        top = addTagsToGroup(taggedEvent, node, left+30, top);
+        for (GroupNode child : node.getChildren()) {
+            top = addGroupTree(taggedEvent, child, left+30, top);
+        }
+        return top;
+    }
+    private int addTagsToGroup(TaggedEvent taggedEvent, GroupNode node, int left, int top) {
+        TaggerSet<AbstractTagModel> tags = taggedEvent.getTagGroups().get(node.getGroupId());
+        if (!tags.isEmpty()) {
+            for (AbstractTagModel tag : (TaggerSet<AbstractTagModel>) taggedEvent.getTagGroups().get(node.getGroupId())) {
+                if (!(node.getGroupId() == taggedEvent.getEventLevelId() && this.tagger.isRRValue(tag) && this.tagger.isPrimary())) {
+                    GuiTagModel guiTagModel = (GuiTagModel) tag;
+                    guiTagModel.setAppView(this);
+                    guiTagModel.updateMissing();
+                    TagEventView tagEgtView = guiTagModel.getTagEventView(node.getGroupId());
+                    GroupView groupView = taggedEvent.getGroupViewByKey(node.getGroupId());
+                    if (groupView == null) {
+                        taggedEvent.addTagEgtView(tag, tagEgtView);
+                    } else {
+                        groupView.addTagEgtView(tag, tagEgtView);
+                    }
 
+                    this.eventsPanel.add(tagEgtView, new Constraint("top:" + top + " height:26 left:" + left + " right:40")); // show on GUI
+                    if (guiTagModel.isMissing()) {
+                        hasMissingTag++;
+                        this.eventsPanel.add(tagEgtView.getMaskForMissingTag(), new Constraint("top:" + top + " height:26 left:" + left + " right:40")); // add mask of correct part of the missing tag
+                        this.eventsPanel.setLayer(tagEgtView.getMaskForMissingTag(), 1);
+                    }
+                    this.eventsPanel.add(tagEgtView.getDelete(), new Constraint("top:" + top + " height:26 width:30 right:0")); //add delete 'X' button associated with this tag
+                    this.eventsPanel.setLayer(tagEgtView.getDelete(), 1);
+                    top += 27;
+                    if (guiTagModel.isInEdit()) {
+                        TagEventEditView teev = guiTagModel.getTagEventEditView(taggedEvent);
+                        teev.setAppView(this);
+                        teev.update();
+                        this.eventsPanel.add(teev, new Constraint("top:" + top + " height:" + 85 + " left:" + left + " right:0"));
+                        top += 85;
+                    }
+                }
+
+            }
+        }
+        return top;
+    }
     private int addEvents(TaggedEvent taggedEvent, int top) {
         taggedEvent.setAppView(this);
         EventView ev = taggedEvent.getEventView();
@@ -1633,6 +1692,50 @@ public class TaggerView extends ConstraintContainer {
 //        return top;
 //    }
 
+    /**
+     * Add placeholder of the tag group identified by groupId to eventsPanel at taggedEvent
+     * @param taggedEvent
+     * @param groupId
+     * @param top
+     * @return the
+     */
+    private int createGroupSpace(TaggedEvent taggedEvent, int groupId, int left, int top) {
+        if (groupId != taggedEvent.getEventLevelId()) {
+            GroupView groupView = new GroupView(this.tagger, this, groupId);
+            taggedEvent.addGroupView(groupView);
+            if (this.selected.contains(groupId)) {
+                groupView.setSelected(true);
+            }
+            boolean hasContent = false;
+            ArrayList<GroupNode> stack = new ArrayList<>();
+            GroupNode groupNode = taggedEvent.getTagGroupHierarchy().find(groupId);
+            stack.add(groupNode);
+            int height = 0;
+            while (!stack.isEmpty()) {
+                GroupNode curNode = stack.remove(0);
+                int numTagsInGroup = taggedEvent.getNumTagsInGroup(curNode.getGroupId());
+                if (numTagsInGroup > 0) {
+                    height += 27 * numTagsInGroup;
+                    hasContent = true;
+                }
+                else
+                    height += 27;
+                if (curNode.hasChildren()) {
+                    stack.addAll(curNode.getChildren());
+                    hasContent = true;
+                }
+            }
+            this.eventsPanel.add(groupView, new Constraint("top:" + top + " height:" + height + " left:" + left + " width:30"));
+
+            // if this tag group has no tag but has nested group, move top down to account for the tag placeholder
+            if (taggedEvent.getNumTagsInGroup(groupId) == 0 && groupNode.hasChildren())
+                top += 27;
+            return hasContent ? top : (top+height);
+        }
+
+        return top;
+    }
+
     private int createGroupSpace(TaggedEvent taggedEvent, Map.Entry<Integer, TaggerSet<AbstractTagModel>> tagGroup, int top) {
         if ((Integer) tagGroup.getKey() != taggedEvent.getEventLevelId()) {
             Integer groupId = (Integer) tagGroup.getKey();
@@ -1642,7 +1745,7 @@ public class TaggerView extends ConstraintContainer {
                 groupView.setSelected(true);
             }
 
-            Integer numTagsInGroup = taggedEvent.getNumTagsInGroup(groupId);
+            double numTagsInGroup = taggedEvent.getNumTagsInGroup(groupId);
             if (numTagsInGroup == 0) {
                 this.eventsPanel.add(groupView, new Constraint("top:" + top + " height:27 left:0 width:30"));
                 top += 27;
