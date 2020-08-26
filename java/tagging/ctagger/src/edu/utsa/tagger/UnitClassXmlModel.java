@@ -7,7 +7,7 @@ import java.util.Set;
 import javax.xml.bind.annotation.*;
 
 /**
- * This class is an XML model corresponding to a tag in the HED hierarchy.
+ * This class is an XML model corresponding to a unit tag in the HED hierarchy.
  * 
  * @author Lauren Jett, Rebecca Strautman, Thomas Rognon, Jeremy Cockfield, Kay
  *         Robbins
