@@ -10,11 +10,12 @@ import org.junit.Test;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.TreeMap;
+import static org.junit.Assert.*;
 
 public class TestNestedGroup {
     private Tagger testTagger;
+    private TaggerLoader loader;
     private String hedXML;
-    private String hedRR;
     private String eventsOld;
     private IFactory factory;
 
@@ -29,10 +30,8 @@ public class TestNestedGroup {
     @Before
     public void setUp() {
         hedXML = TestUtilities.getResourceAsString(TestUtilities.HedFileName);
-        hedRR = TestUtilities.getResourceAsString(TestUtilities.HedFileName);
-        eventsOld = TestUtilities.getResourceAsString(TestUtilities.JsonEventsArrays);
         factory = new GuiModelFactory();
-        TaggerLoader loader = new TaggerLoader(hedXML, eventsOld, TaggerLoader.USE_JSON, "Test Nested Group", 3, factory);
+        loader = new TaggerLoader(hedXML, "[{\"code\" : \"1\", \"tags\" : []}]", TaggerLoader.USE_JSON, "Test Nested Group", 3, factory);
         testTagger = new Tagger(factory, loader);
         tagAncestor = factory.createAbstractTagModel(testTagger);
         tagAncestor.setPath("/a/b/c");
@@ -42,40 +41,106 @@ public class TestNestedGroup {
         tag.setPath("/a/b/c/d");
         tagDescendant = factory.createAbstractTagModel(testTagger);
         tagDescendant.setPath("/a/b/c/d/e/f");
-        ArrayList<AbstractTagModel> attributes = new ArrayList<>();
-        attributes.add(tagDescendant);
-        attributes.add(tagAncestor2);
-        ((GuiTagModel)tag).setAttributes(attributes);
-        TaggerSet<AbstractTagModel> set1 = new TaggerSet<>();
-        set1.add(tag);
-        set1.add(tagAncestor);
-        TaggerSet<AbstractTagModel> set2 = (TaggerSet<AbstractTagModel>)set1.clone();
-        TaggerSet<AbstractTagModel> set3 = (TaggerSet<AbstractTagModel>)set1.clone();
-        TaggerSet<AbstractTagModel> set4 = (TaggerSet<AbstractTagModel>)set1.clone();
-        tagGroups = new TreeMap<>();
-        tagGroups.put(1, set1);
-        tagGroups.put(2, set2);
-        tagGroups.put(3, set3);
-        tagGroups.put(4, set4);
-        tagGroups.put(5, set4);
-        tagGroups.put(6, set4);
-        tagGroups.put(7, set4);
-        groups = new GroupTree(1);
-        groups.add(1, 2);
-        groups.add(1, 3);
-        groups.add(2, 4);
-        groups.add(2, 5);
-        groups.add(4,6);
-        groups.add(3,7);
-        System.out.println(groups);
         GuiEventModel eventModel = new GuiEventModel(testTagger);
         eventModel.setCode("test");
         taggedEvent = new TaggedEvent(eventModel,testTagger);
-        taggedEvent.setTagGroups(tagGroups);
-        taggedEvent.setTagGroupHierarchy(groups);
+        taggedEvent.setEventLevelId(0); // add eventLevelID to taggedEvent group list
         testTagger.addEventBase(taggedEvent);
+        loader.setTagger(testTagger);
     }
 
+    @Test
+    public void testEventLevel() {
+        // group hierarchy should contain eventLevelID as root
+        assertEquals(taggedEvent.getTagGroupHierarchy().getRoot().getGroupId(), taggedEvent.getEventLevelId());
+
+        taggedEvent.addTag(tagAncestor);
+        // there should be only one groupID which is the eventLevelID
+        assertEquals(taggedEvent.getEventLevelId(), (int) taggedEvent.getTagGroups().firstKey());
+        // there should be one tag which is tagAncestor
+        assertEquals(1, taggedEvent.getTagGroups().get(taggedEvent.getEventLevelId()).size());
+        assertTrue(taggedEvent.getTagGroups().containsValue(tagAncestor));
+
+        taggedEvent.addTag(tagAncestor2);
+        // there should be 2 tags
+        assertEquals(2, taggedEvent.getTagGroups().get(taggedEvent.getEventLevelId()).size());
+        assertTrue(taggedEvent.getTagGroups().containsValue(tagAncestor2));
+
+    }
+
+    @Test
+    public void testGroupLevel() {
+        int eventLevelID = taggedEvent.getEventLevelId();
+        GroupTree groupHierarchy = taggedEvent.getTagGroupHierarchy();
+
+        // group hierarchy should contain eventLevelID as root
+        assertEquals(taggedEvent.getTagGroupHierarchy().getRoot().getGroupId(), taggedEvent.getEventLevelId());
+
+        // eventLevel
+        //  - groupOneID -> tagAncestor
+        int groupOneID = testTagger.addNewGroup(taggedEvent);
+        // groupHierarchy root now has children which is groupOneID and eventLevelID should be parent of groupOneID
+        assertTrue(taggedEvent.getTagGroupHierarchy().find(taggedEvent.getEventLevelId()).hasChildren());
+        assertFalse(taggedEvent.getTagGroupHierarchy().find(groupOneID).hasChildren());
+        assertEquals(taggedEvent.getTagGroupHierarchy().find(taggedEvent.getEventLevelId()).getChildren().get(0).getGroupId(), groupOneID);
+        assertEquals(taggedEvent.getTagGroupHierarchy().find(groupOneID).getParentId(), taggedEvent.getEventLevelId());
+
+        taggedEvent.addTagToGroup(groupOneID, tagAncestor);
+        // there should be one tag which is tagAncestor under groupOneID not eventLevelID
+        assertEquals(0, taggedEvent.getTagGroups().get(taggedEvent.getEventLevelId()).size());
+        assertEquals(1, taggedEvent.getTagGroups().get(groupOneID).size());
+//        assertTrue(taggedEvent.getTagGroups().containsValue(tagAncestor));
+        assertTrue(taggedEvent.getTagGroups().get(groupOneID).contains(tagAncestor));
+        assertFalse(taggedEvent.getTagGroups().get(eventLevelID).contains(tagAncestor));
+
+
+        // eventLevel
+        //  - groupOneID -> tagAncestor
+        //      - groupTwoID -> tagAncestor2
+        int groupTwoID = groupOneID + 1;
+        taggedEvent.addGroup(groupOneID, groupTwoID);
+        // groupHierarchy root now has children which are groupOneID and groupTwoID. groupOneID should be parent of groupTwoID
+        assertTrue(groupHierarchy.find(groupOneID).hasChildren());
+        assertEquals(taggedEvent.getTagGroupHierarchy().find(eventLevelID).getChildren().get(0).getGroupId(), groupOneID);
+        assertTrue(groupHierarchy.find(eventLevelID).getChildren().size()==1);
+        assertTrue(groupHierarchy.find(groupOneID).getChildren().size()==1);
+        assertEquals(groupHierarchy.find(groupOneID).getChildren().get(0).getGroupId(), groupTwoID);
+        assertNotEquals(taggedEvent.getTagGroupHierarchy().find(eventLevelID).getChildren().get(0).getGroupId(), groupTwoID);
+        assertEquals(groupHierarchy.find(groupOneID).getParentId(), eventLevelID);
+        assertEquals(groupHierarchy.find(groupTwoID).getParentId(), groupOneID);
+
+        taggedEvent.addTagToGroup(groupTwoID, tagAncestor2);
+        // there should be one tag which is tagAncestor2 under groupTwoID
+        assertEquals(1, taggedEvent.getTagGroups().get(groupOneID).size());
+        assertEquals(1, taggedEvent.getTagGroups().get(groupTwoID).size());
+        assertTrue(taggedEvent.getTagGroups().get(groupTwoID).contains(tagAncestor2));
+        assertFalse(taggedEvent.getTagGroups().get(groupOneID).contains(tagAncestor2));
+
+        // eventLevel -> tag
+        //  - groupOneID -> tagAncestor
+        //      - groupTwoID -> tagAncestor2
+        taggedEvent.addTagToGroup(eventLevelID, tag);
+        // there should be one tag which is tagAncestor2 under groupTwoID
+        assertEquals(1, taggedEvent.getTagGroups().get(eventLevelID).size());
+        assertTrue(taggedEvent.getTagGroups().get(eventLevelID).contains(tag));
+
+        // eventLevel -> tag
+        //  - groupOneID -> tagAncestor
+        //      - groupTwoID -> tagAncestor2
+        //  - groupThreeID ->tagDescendant
+        int groupThreeID = groupTwoID + 1;
+        taggedEvent.addGroup(groupThreeID);
+        taggedEvent.addTagToGroup(groupThreeID, tagDescendant);
+        try {
+            String[] result = loader.getXMLAndEvents();
+            String json = result[1];
+            System.out.println(json); // should be similar to [ { "code" : "test", "tags" : [ "/a/b/c/d", [ "/a/b/c", [ "/a" ] ], [ "/a/b/c/d/e/f" ] ] } ]
+        }
+        catch(Exception e) {
+            System.err.println(e.getMessage());
+            System.err.println(e.getStackTrace());
+        }
+    }
     @Test
     public void testSearch() {
         System.out.println(groups.find(4));

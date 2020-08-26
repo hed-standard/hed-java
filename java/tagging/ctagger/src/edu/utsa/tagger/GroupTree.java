@@ -47,20 +47,6 @@ public class GroupTree {
         return success ? removed : null;
     }
 
-//    public GroupNode findParent(int target, GroupNode curNode, GroupNode parent) {
-//        if (target != root.getGroupId() && parent != null && curNode.getGroupId() == target) {
-//            return parent;
-//        }
-//        else {
-//            for (GroupNode child : curNode.getChildren()) {
-//                GroupNode found = findParent(target, child, curNode);
-//                if (found != null)
-//                    return found;
-//            }
-//            return null;
-//        }
-//    }
-
     /**
      * Find group node identified by groupId in this groupTree
      * @param groupId target-node's id
