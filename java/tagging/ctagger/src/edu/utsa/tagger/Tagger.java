@@ -2401,7 +2401,9 @@ public class Tagger {
             String key = (String)unitClassKeys.next();
             UnitClassXmlModel unitClassXml = new UnitClassXmlModel();
             unitClassXml.setName(key);
-            unitClassXml.setUnits((UnitsXmlModel) this.unitClasses.get(key));
+            UnitsXmlModel unitsXmlModel = new UnitsXmlModel();
+            unitsXmlModel.setUnits(this.unitClasses.get(key));
+            unitClassXml.setUnits((UnitsXmlModel) unitsXmlModel);
             unitClassXml.setDefault((String)this.unitClassDefaults.get(key));
             unitClassesXml.addUnitClass(unitClassXml);
         }
