@@ -609,9 +609,8 @@ public class TaggerView extends ConstraintContainer {
         this.add(this.hedTitle, new Constraint("top:0 height:26 right:10 width:150"));
 //        this.add(headerPanel, new Constraint("top:0 height:33 left:10 right:0"));
         this.add(btnPanel, new Constraint("top:0 height:33 left:10 right:0"));
-        this.add(incompatibleTagWarning, new Constraint("top:33 height:33 left:10 right:0"));
-        this.add(this.splitContainer, new Constraint("top:55 bottom:50 left:10 right:10"));
-        this.add(this.splitPaneLeft, new Constraint("top:68 bottom:50 left:10 right:10"));
+        this.add(incompatibleTagWarning, new Constraint("top:30 height:33 left:10 right:0"));
+        this.add(this.splitContainer, new Constraint("top:57 bottom:50 left:10 right:10"));
         int splitterPos = this.frame.getWidth() / 2;
         VerticalSplitLayout splitLayout = new VerticalSplitLayout(this.splitContainer, this.splitPaneLeft, this.splitPaneRight, splitterPos);
         this.splitContainer.setLayout(splitLayout);
