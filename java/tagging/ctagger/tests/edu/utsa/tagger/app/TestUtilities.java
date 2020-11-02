@@ -42,4 +42,17 @@ public abstract class TestUtilities {
 		}
 		return result;
 	}
+	public static String getResourceAsString(InputStream inputStream) {
+		Scanner s = new Scanner(inputStream, "UTF-8");
+		Scanner s2 = s.useDelimiter("\\A");
+		String result = s2.hasNext() ? s2.next() : "";
+		s.close();
+		s2.close();
+		try {
+			inputStream.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
 }
